@@ -120,7 +120,7 @@
     </div>
 
     <!-- 底部导航 -->
-    <van-tabbar v-model="active" active-color="#1989fa" inactive-color="#7d7e80">
+    <van-tabbar v-model="active" active-color="#5B8FF9" inactive-color="#7d7e80">
       <van-tabbar-item icon="home-o" to="/home">首页</van-tabbar-item>
       <van-tabbar-item icon="bag-o" to="/products">商品</van-tabbar-item>
       <van-tabbar-item icon="shopping-cart-o" to="/sales">销售</van-tabbar-item>

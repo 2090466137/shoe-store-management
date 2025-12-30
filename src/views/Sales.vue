@@ -13,7 +13,7 @@
 
     <!-- 今日数据概览 -->
     <div class="content-wrapper">
-      <div class="card">
+      <div class="card" v-if="userStore.hasPermission(PERMISSIONS.STATS_PROFIT)">
         <div class="section-title">📊 今日数据</div>
         <div class="today-stats">
           <div class="today-stat-item">
@@ -111,7 +111,7 @@
     </div>
 
     <!-- 底部导航 -->
-    <van-tabbar v-model="active" active-color="#1989fa" inactive-color="#7d7e80">
+    <van-tabbar v-model="active" active-color="#5B8FF9" inactive-color="#7d7e80">
       <van-tabbar-item icon="home-o" to="/home">首页</van-tabbar-item>
       <van-tabbar-item icon="bag-o" to="/products">商品</van-tabbar-item>
       <van-tabbar-item icon="shopping-cart-o" to="/sales">销售</van-tabbar-item>
@@ -207,11 +207,11 @@ const deleteSale = (sale) => {
 }
 
 .today-stat-value.primary {
-  color: #1989fa;
+  color: #5B8FF9;
 }
 
 .today-stat-value.success {
-  color: #07c160;
+  color: #5AD8A6;
 }
 
 .today-stat-label {
@@ -271,7 +271,7 @@ const deleteSale = (sale) => {
 }
 
 .sale-profit {
-  color: #07c160;
+  color: #5AD8A6;
 }
 
 .profit-label {
