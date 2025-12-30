@@ -2,7 +2,7 @@
 
 [build]
   # 构建命令
-  command = "npm install --legacy-peer-deps && npm run build"
+  command = "rm -f package-lock.json && npm install --legacy-peer-deps && npm run build"
   # 发布目录
   publish = "dist"
 
@@ -35,4 +35,3 @@
 [build.environment]
   NODE_VERSION = "20"
   NPM_FLAGS = "--legacy-peer-deps"
-
