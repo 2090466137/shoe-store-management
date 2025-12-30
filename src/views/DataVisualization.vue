@@ -133,10 +133,12 @@ const getFilteredSales = computed(() => {
   const days = parseInt(timeRange.value)
   const startDate = new Date()
   startDate.setDate(startDate.getDate() - days)
+  startDate.setHours(0, 0, 0, 0)
+  const startTime = startDate.getTime()
   
   return salesStore.sales.filter(sale => {
-    const saleDate = new Date(sale.createTime)
-    return saleDate >= startDate
+    const saleTime = sale.time || sale.date || sale.createTime
+    return saleTime >= startTime
   })
 })
 
@@ -155,11 +157,12 @@ const salesTrendOption = computed(() => {
   
   // 统计每天的数据
   getFilteredSales.value.forEach(sale => {
-    const dateStr = new Date(sale.createTime).toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' })
+    const saleTime = sale.time || sale.date || sale.createTime
+    const dateStr = new Date(saleTime).toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' })
     if (dateMap.has(dateStr)) {
       const data = dateMap.get(dateStr)
-      data.sales += sale.actualAmount
-      data.profit += sale.profit
+      data.sales += sale.actualAmount || sale.totalAmount || 0
+      data.profit += sale.profit || 0
       data.count += 1
     }
   })
@@ -290,11 +293,12 @@ const salesProfitOption = computed(() => {
   }
   
   getFilteredSales.value.forEach(sale => {
-    const dateStr = new Date(sale.createTime).toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' })
+    const saleTime = sale.time || sale.date || sale.createTime
+    const dateStr = new Date(saleTime).toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' })
     if (dateMap.has(dateStr)) {
       const data = dateMap.get(dateStr)
-      data.sales += sale.actualAmount
-      data.profit += sale.profit
+      data.sales += sale.actualAmount || sale.totalAmount || 0
+      data.profit += sale.profit || 0
     }
   })
   
@@ -401,8 +405,8 @@ const staffPerformanceOption = computed(() => {
       staffStats.set(staff, { sales: 0, profit: 0 })
     }
     const data = staffStats.get(staff)
-    data.sales += sale.actualAmount
-    data.profit += sale.profit
+    data.sales += sale.actualAmount || sale.totalAmount || 0
+    data.profit += sale.profit || 0
   })
   
   const staffNames = Array.from(staffStats.keys())

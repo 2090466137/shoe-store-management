@@ -12,10 +12,23 @@ CREATE TABLE IF NOT EXISTS products (
   purchase_price DECIMAL(10, 2) NOT NULL,
   sale_price DECIMAL(10, 2) NOT NULL,
   stock INTEGER NOT NULL DEFAULT 0,
+  min_stock INTEGER NOT NULL DEFAULT 5,
   image TEXT,
+  -- 扩展字段
+  brand TEXT,
+  category TEXT DEFAULT '其他',
+  color TEXT,
+  supplier TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
+-- 如果表已存在，添加新字段（ALTER TABLE 语句）
+-- ALTER TABLE products ADD COLUMN IF NOT EXISTS min_stock INTEGER DEFAULT 5;
+-- ALTER TABLE products ADD COLUMN IF NOT EXISTS brand TEXT;
+-- ALTER TABLE products ADD COLUMN IF NOT EXISTS category TEXT DEFAULT '其他';
+-- ALTER TABLE products ADD COLUMN IF NOT EXISTS color TEXT;
+-- ALTER TABLE products ADD COLUMN IF NOT EXISTS supplier TEXT;
 
 -- 商品表索引
 CREATE INDEX IF NOT EXISTS idx_products_code ON products(code);

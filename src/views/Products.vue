@@ -7,12 +7,18 @@
       @click-left="router.back()"
     >
       <template #right>
-        <van-icon name="apps-o" size="20" style="margin-right: 16px" @click="showAddMenu = true" />
+        <van-icon 
+          v-if="canAddProduct"
+          name="apps-o" 
+          size="20" 
+          style="margin-right: 16px" 
+          @click="showAddMenu = true" 
+        />
       </template>
     </van-nav-bar>
 
     <!-- 添加菜单 -->
-    <van-action-sheet v-model:show="showAddMenu" :actions="addActions" @select="onSelectAdd" />
+    <van-action-sheet v-if="canAddProduct" v-model:show="showAddMenu" :actions="addActions" @select="onSelectAdd" />
 
     <!-- 搜索栏 -->
     <div class="search-wrapper">
@@ -40,6 +46,7 @@
         <div class="empty-state-icon">📦</div>
         <div class="empty-state-text">暂无商品数据</div>
         <van-button 
+          v-if="canAddProduct"
           type="primary" 
           size="small" 
           style="margin-top: 16px"
@@ -89,6 +96,7 @@
             </div>
             <div class="product-actions">
               <van-button 
+                v-if="canEditProduct"
                 size="small" 
                 type="primary" 
                 plain
@@ -97,6 +105,7 @@
                 编辑
               </van-button>
               <van-button 
+                v-if="canDeleteProduct"
                 size="small" 
                 type="danger" 
                 plain
@@ -124,15 +133,22 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useProductStore } from '@/stores/product'
+import { useUserStore, PERMISSIONS } from '@/stores/user'
 import { showConfirmDialog, showToast } from 'vant'
 import { smartSearch } from '@/utils/search'
 
 const router = useRouter()
 const productStore = useProductStore()
+const userStore = useUserStore()
 const active = ref(1)
 const searchKeyword = ref('')
 const activeTab = ref('all')
 const showAddMenu = ref(false)
+
+// 权限检查
+const canAddProduct = computed(() => userStore.hasPermission(PERMISSIONS.PRODUCT_ADD))
+const canEditProduct = computed(() => userStore.hasPermission(PERMISSIONS.PRODUCT_EDIT))
+const canDeleteProduct = computed(() => userStore.hasPermission(PERMISSIONS.PRODUCT_DELETE))
 
 const addActions = [
   { name: '批量添加（多尺码）', icon: 'apps-o', color: '#1989fa' },
@@ -175,7 +191,10 @@ const onTabChange = () => {
 }
 
 const viewProduct = (product) => {
-  router.push(`/product/edit/${product.id}`)
+  // 如果有编辑权限才跳转到编辑页面，否则只是查看
+  if (canEditProduct.value) {
+    router.push(`/product/edit/${product.id}`)
+  }
 }
 
 const editProduct = (product) => {
@@ -183,6 +202,11 @@ const editProduct = (product) => {
 }
 
 const deleteProduct = (product) => {
+  if (!canDeleteProduct.value) {
+    showToast('您没有删除商品的权限')
+    return
+  }
+  
   showConfirmDialog({
     title: '确认删除',
     message: `确定要删除商品"${product.name}"吗？`,

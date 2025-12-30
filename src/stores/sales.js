@@ -1,146 +1,147 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { useProductStore } from './product'
+import { supabase, TABLES } from '../config/supabase'
 
 export const useSalesStore = defineStore('sales', () => {
   const sales = ref([])
   const purchases = ref([])
+  const loading = ref(false)
 
-  // 初始化示例销售数据
-  const initSales = () => {
-    return [
-      {
-        id: '1',
-        productId: '1',
-        productName: '耐克 Air Max 270',
-        quantity: 2,
-        costPrice: 450,
-        salePrice: 899,
-        totalAmount: 1798,
-        profit: 898,
-        date: new Date('2024-02-20').getTime(),
-        type: 'sale'
-      },
-      {
-        id: '2',
-        productId: '2',
-        productName: '阿迪达斯 Ultraboost',
-        quantity: 1,
-        costPrice: 520,
-        salePrice: 999,
-        totalAmount: 999,
-        profit: 479,
-        date: new Date('2024-02-21').getTime(),
-        type: 'sale'
-      },
-      {
-        id: '3',
-        productId: '4',
-        productName: '匡威 Chuck 70',
-        quantity: 3,
-        costPrice: 180,
-        salePrice: 459,
-        totalAmount: 1377,
-        profit: 837,
-        date: new Date('2024-02-22').getTime(),
-        type: 'sale'
-      }
-    ]
+  // 生成订单号
+  const generateOrderId = () => {
+    const now = new Date()
+    const dateStr = now.toISOString().slice(0, 10).replace(/-/g, '')
+    const timeStr = now.toTimeString().slice(0, 8).replace(/:/g, '')
+    const random = Math.random().toString(36).substr(2, 4).toUpperCase()
+    return `SO${dateStr}${timeStr}${random}`
   }
 
-  // 初始化示例进货数据
-  const initPurchases = () => {
-    return [
-      {
-        id: '1',
-        productId: '1',
-        productName: '耐克 Air Max 270',
-        quantity: 10,
-        costPrice: 450,
-        totalAmount: 4500,
-        supplier: '耐克官方供应商',
-        date: new Date('2024-02-15').getTime(),
-        type: 'purchase'
-      },
-      {
-        id: '2',
-        productId: '2',
-        productName: '阿迪达斯 Ultraboost',
-        quantity: 8,
-        costPrice: 520,
-        totalAmount: 4160,
-        supplier: '阿迪达斯官方',
-        date: new Date('2024-02-16').getTime(),
-        type: 'purchase'
-      }
-    ]
-  }
-
-  // 清理示例数据（通过日期和商品名称判断）
-  const cleanExampleData = (data) => {
-    if (!Array.isArray(data)) return []
-    
-    // 示例数据的特征：
-    // 1. 日期是2024年2月（2024-02-15, 2024-02-16, 2024-02-20等）
-    // 2. 商品名称是示例商品
-    const exampleProducts = [
-      '耐克 Air Max 270',
-      '阿迪达斯 Ultraboost',
-      '匡威 Chuck 70',
-      '新百伦 574',
-      'Vans Old Skool'
-    ]
-    
-    return data.filter(item => {
-      const itemDate = new Date(item.date || item.time || 0)
-      const isExampleDate = itemDate.getFullYear() === 2024 && itemDate.getMonth() === 1 // 2月是索引1
-      const isExampleProduct = item.productName && exampleProducts.some(name => 
-        item.productName.includes(name)
-      )
-      
-      // 如果是2024年2月的示例数据，则删除
-      if (isExampleDate && isExampleProduct) {
-        return false
-      }
-      return true
-    })
-  }
-
-  // 加载数据
-  const loadSales = () => {
-    const storedSales = localStorage.getItem('sales')
-    const storedPurchases = localStorage.getItem('purchases')
-    
-    if (storedSales) {
-      const parsed = JSON.parse(storedSales)
-      // 清理示例数据
-      sales.value = cleanExampleData(parsed)
-      if (sales.value.length !== parsed.length) {
-        // 如果有数据被清理，保存更新后的数据
-        saveSales()
-      }
-    } else {
-      // 不初始化示例数据，从空数组开始
-      sales.value = []
-      saveSales()
-    }
-
-    if (storedPurchases) {
-      const parsed = JSON.parse(storedPurchases)
-      // 清理示例数据
-      purchases.value = cleanExampleData(parsed)
-      if (purchases.value.length !== parsed.length) {
-        // 如果有数据被清理，保存更新后的数据
-        savePurchases()
-      }
-    } else {
-      // 不初始化示例数据，从空数组开始
-      purchases.value = []
-      savePurchases()
+  // 将数据库格式转换为前端格式（销售）
+  const dbToFrontendSale = (dbSale) => {
+    return {
+      id: dbSale.id,
+      orderId: dbSale.order_id,
+      products: dbSale.products || [],
+      totalAmount: parseFloat(dbSale.total_amount) || 0,
+      totalCost: parseFloat(dbSale.total_cost) || 0,
+      profit: parseFloat(dbSale.profit) || 0,
+      discount: parseFloat(dbSale.discount) || 0,
+      actualAmount: parseFloat(dbSale.actual_amount) || 0,
+      salesperson: dbSale.salesperson || '',
+      paymentMethod: dbSale.payment_method || '现金',
+      memberId: dbSale.member_id,
+      time: new Date(dbSale.created_at).getTime(),
+      date: new Date(dbSale.created_at).getTime(), // 兼容旧字段
+      type: 'sale',
+      createTime: new Date(dbSale.created_at).getTime()
     }
   }
 
-  // 保存数据
+  // 将前端格式转换为数据库格式（销售）
+  const frontendToDbSale = (sale) => {
+    return {
+      order_id: sale.orderId || generateOrderId(),
+      products: sale.products,
+      total_amount: parseFloat(sale.totalAmount) || 0,
+      total_cost: parseFloat(sale.totalCost) || 0,
+      profit: parseFloat(sale.profit) || 0,
+      discount: parseFloat(sale.discount) || 0,
+      actual_amount: parseFloat(sale.actualAmount) || 0,
+      salesperson: sale.salesperson || null,
+      payment_method: sale.paymentMethod || '现金',
+      member_id: sale.memberId || null
+    }
+  }
+
+  // 将数据库格式转换为前端格式（进货）
+  const dbToFrontendPurchase = (dbPurchase) => {
+    return {
+      id: dbPurchase.id,
+      productId: dbPurchase.product_id,
+      productName: dbPurchase.product_name,
+      productCode: dbPurchase.product_code,
+      productSize: dbPurchase.product_size,
+      quantity: parseInt(dbPurchase.quantity) || 0,
+      costPrice: parseFloat(dbPurchase.purchase_price) || 0,
+      totalAmount: parseFloat(dbPurchase.total_amount) || 0,
+      supplier: dbPurchase.supplier || '',
+      notes: dbPurchase.notes || '',
+      date: new Date(dbPurchase.created_at).getTime(),
+      time: new Date(dbPurchase.created_at).getTime(),
+      type: 'purchase'
+    }
+  }
+
+  // 将前端格式转换为数据库格式（进货）
+  const frontendToDbPurchase = (purchase, product) => {
+    return {
+      product_id: purchase.productId,
+      product_name: product?.name || purchase.productName || '',
+      product_code: product?.code || purchase.productCode || '',
+      product_size: product?.size || purchase.productSize || '',
+      quantity: parseInt(purchase.quantity) || 0,
+      purchase_price: parseFloat(purchase.costPrice) || 0,
+      total_amount: parseFloat(purchase.costPrice * purchase.quantity) || 0,
+      supplier: purchase.supplier || null,
+      notes: purchase.notes || null
+    }
+  }
+
+  // 从云端加载销售数据
+  const loadSales = async () => {
+    loading.value = true
+    try {
+      // 加载销售数据
+      const { data: salesData, error: salesError } = await supabase
+        .from(TABLES.SALES)
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      if (salesError) {
+        console.error('加载销售数据失败:', salesError)
+        // 降级到 localStorage
+        const stored = localStorage.getItem('sales')
+        if (stored) {
+          sales.value = JSON.parse(stored)
+        }
+      } else {
+        sales.value = salesData.map(dbToFrontendSale)
+        // 同步到 localStorage 作为备份
+        localStorage.setItem('sales', JSON.stringify(sales.value))
+      }
+
+      // 加载进货数据
+      const { data: purchasesData, error: purchasesError } = await supabase
+        .from(TABLES.PURCHASES)
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      if (purchasesError) {
+        console.error('加载进货数据失败:', purchasesError)
+        // 降级到 localStorage
+        const stored = localStorage.getItem('purchases')
+        if (stored) {
+          purchases.value = JSON.parse(stored)
+        }
+      } else {
+        purchases.value = purchasesData.map(dbToFrontendPurchase)
+        // 同步到 localStorage 作为备份
+        localStorage.setItem('purchases', JSON.stringify(purchases.value))
+      }
+    } catch (error) {
+      console.error('加载数据异常:', error)
+      // 降级到 localStorage
+      const storedSales = localStorage.getItem('sales')
+      const storedPurchases = localStorage.getItem('purchases')
+      if (storedSales) sales.value = JSON.parse(storedSales)
+      if (storedPurchases) purchases.value = JSON.parse(storedPurchases)
+    } finally {
+      loading.value = false
+    }
+  }
+
+  // 保存数据到 localStorage（作为备份）
   const saveSales = () => {
     localStorage.setItem('sales', JSON.stringify(sales.value))
   }
@@ -150,7 +151,7 @@ export const useSalesStore = defineStore('sales', () => {
   }
 
   // 添加销售记录（支持单商品和多商品订单）
-  const addSale = (sale) => {
+  const addSale = async (sale) => {
     const productStore = useProductStore()
     
     // 如果是多商品订单（购物车模式）
@@ -165,47 +166,86 @@ export const useSalesStore = defineStore('sales', () => {
 
       // 计算总金额和利润
       let totalAmount = 0
-      let totalProfit = 0
+      let totalCost = 0
       
       const productsWithDetails = sale.products.map(item => {
         const product = productStore.getProductById(item.productId)
         const itemTotal = item.salePrice * item.quantity
-        const itemProfit = (item.salePrice - product.costPrice) * item.quantity
+        const itemCost = (item.costPrice || product.costPrice) * item.quantity
         
         totalAmount += itemTotal
-        totalProfit += itemProfit
+        totalCost += itemCost
         
         return {
-          ...item,
-          costPrice: product.costPrice
+          productId: item.productId,
+          productName: item.productName,
+          size: item.size,
+          salePrice: item.salePrice,
+          costPrice: item.costPrice || product.costPrice,
+          quantity: item.quantity
         }
       })
 
+      const discount = sale.discount || 1
+      const actualAmount = totalAmount * discount
+      const profit = actualAmount - totalCost
+
       const newSale = {
-        id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+        orderId: generateOrderId(),
         products: productsWithDetails,
         totalAmount,
-        profit: totalProfit,
-        time: Date.now(),
-        date: Date.now(), // 兼容旧字段
-        type: 'sale',
+        totalCost,
+        profit,
+        discount: totalAmount - actualAmount,
+        actualAmount,
         salesperson: sale.salesperson || '老板',
-        remark: sale.remark || '',
-        discount: sale.discount || 1,
-        receivedAmount: sale.receivedAmount || totalAmount,
-        changeAmount: sale.changeAmount || 0
+        paymentMethod: sale.paymentMethod || '现金',
+        memberId: sale.memberId || null,
+        remark: sale.remark || ''
       }
 
-      sales.value.unshift(newSale)
-      
-      // 更新所有商品库存
-      productsWithDetails.forEach(item => {
-        productStore.updateStock(item.productId, item.quantity, 'subtract')
-      })
-      
-      saveSales()
-      
-      return { success: true, data: newSale }
+      try {
+        // 保存到云端
+        const dbSale = frontendToDbSale(newSale)
+        const { data, error } = await supabase
+          .from(TABLES.SALES)
+          .insert([dbSale])
+          .select()
+          .single()
+
+        if (error) throw error
+
+        const savedSale = dbToFrontendSale(data)
+        sales.value.unshift(savedSale)
+        
+        // 更新所有商品库存
+        for (const item of productsWithDetails) {
+          await productStore.updateStock(item.productId, item.quantity, 'subtract')
+        }
+        
+        saveSales()
+        
+        return { success: true, data: savedSale }
+      } catch (error) {
+        console.error('保存销售记录失败:', error)
+        // 降级到本地存储
+        const localSale = {
+          ...newSale,
+          id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+          time: Date.now(),
+          date: Date.now(),
+          type: 'sale'
+        }
+        sales.value.unshift(localSale)
+        
+        // 更新库存（本地）
+        productsWithDetails.forEach(item => {
+          productStore.updateStock(item.productId, item.quantity, 'subtract')
+        })
+        
+        saveSales()
+        return { success: true, data: localSale }
+      }
     }
     
     // 单商品模式（兼容旧版本）
@@ -215,44 +255,99 @@ export const useSalesStore = defineStore('sales', () => {
       return { success: false, message: '库存不足' }
     }
 
+    const totalAmount = sale.salePrice * sale.quantity
+    const totalCost = product.costPrice * sale.quantity
+    const profit = totalAmount - totalCost
+
     const newSale = {
-      ...sale,
-      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-      productId: sale.productId,
-      productName: product.name,
-      brand: product.brand,
-      size: product.size,
-      costPrice: product.costPrice,
-      totalAmount: sale.salePrice * sale.quantity,
-      profit: (sale.salePrice - product.costPrice) * sale.quantity,
-      date: Date.now(),
-      time: Date.now(),
-      type: 'sale',
+      orderId: generateOrderId(),
+      products: [{
+        productId: sale.productId,
+        productName: product.name,
+        size: product.size,
+        salePrice: sale.salePrice,
+        costPrice: product.costPrice,
+        quantity: sale.quantity
+      }],
+      totalAmount,
+      totalCost,
+      profit,
+      discount: 0,
+      actualAmount: totalAmount,
       salesperson: sale.salesperson || '老板',
-      remark: sale.remark || '',
-      discount: sale.discount || 1
+      paymentMethod: sale.paymentMethod || '现金',
+      memberId: sale.memberId || null,
+      remark: sale.remark || ''
     }
 
-    sales.value.unshift(newSale)
-    productStore.updateStock(sale.productId, sale.quantity, 'subtract')
-    saveSales()
-    
-    return { success: true, data: newSale }
+    try {
+      const dbSale = frontendToDbSale(newSale)
+      const { data, error } = await supabase
+        .from(TABLES.SALES)
+        .insert([dbSale])
+        .select()
+        .single()
+
+      if (error) throw error
+
+      const savedSale = dbToFrontendSale(data)
+      sales.value.unshift(savedSale)
+      await productStore.updateStock(sale.productId, sale.quantity, 'subtract')
+      saveSales()
+      
+      return { success: true, data: savedSale }
+    } catch (error) {
+      console.error('保存销售记录失败:', error)
+      // 降级处理
+      const localSale = {
+        ...newSale,
+        id: Date.now().toString(),
+        time: Date.now(),
+        date: Date.now(),
+        type: 'sale'
+      }
+      sales.value.unshift(localSale)
+      productStore.updateStock(sale.productId, sale.quantity, 'subtract')
+      saveSales()
+      
+      return { success: true, data: localSale }
+    }
   }
 
   // 删除销售记录
-  const deleteSale = (id) => {
+  const deleteSale = async (id) => {
     const index = sales.value.findIndex(s => s.id === id)
-    if (index !== -1) {
+    if (index === -1) return false
+    
+    const tempSale = sales.value[index]
+    
+    try {
+      // 先从本地删除
       sales.value.splice(index, 1)
       saveSales()
+
+      // 从云端删除
+      const { error } = await supabase
+        .from(TABLES.SALES)
+        .delete()
+        .eq('id', id)
+
+      if (error) {
+        // 恢复本地数据
+        sales.value.splice(index, 0, tempSale)
+        saveSales()
+        throw error
+      }
+
       return true
+    } catch (error) {
+      console.error('删除销售记录失败:', error)
+      return false
     }
-    return false
   }
 
   // 添加进货记录
-  const addPurchase = (purchase) => {
+  const addPurchase = async (purchase) => {
     const productStore = useProductStore()
     const product = productStore.getProductById(purchase.productId)
     
@@ -260,26 +355,55 @@ export const useSalesStore = defineStore('sales', () => {
       return { success: false, message: '商品不存在' }
     }
 
-    const newPurchase = {
-      ...purchase,
-      id: Date.now().toString(),
-      productName: product.name,
-      totalAmount: purchase.costPrice * purchase.quantity,
-      date: Date.now(),
-      type: 'purchase'
-    }
+    try {
+      const dbPurchase = frontendToDbPurchase(purchase, product)
+      
+      const { data, error } = await supabase
+        .from(TABLES.PURCHASES)
+        .insert([dbPurchase])
+        .select()
+        .single()
 
-    purchases.value.unshift(newPurchase)
-    productStore.updateStock(purchase.productId, purchase.quantity, 'add')
-    
-    // 更新商品成本价
-    productStore.updateProduct(purchase.productId, { 
-      costPrice: purchase.costPrice 
-    })
-    
-    savePurchases()
-    
-    return { success: true, data: newPurchase }
+      if (error) throw error
+
+      const savedPurchase = dbToFrontendPurchase(data)
+      purchases.value.unshift(savedPurchase)
+      
+      // 更新商品库存和成本价
+      await productStore.updateStock(purchase.productId, purchase.quantity, 'add')
+      await productStore.updateProduct(purchase.productId, { 
+        costPrice: purchase.costPrice 
+      })
+      
+      savePurchases()
+      
+      return { success: true, data: savedPurchase }
+    } catch (error) {
+      console.error('保存进货记录失败:', error)
+      // 降级处理
+      const localPurchase = {
+        id: Date.now().toString(),
+        productId: purchase.productId,
+        productName: product.name,
+        productCode: product.code,
+        productSize: product.size,
+        quantity: purchase.quantity,
+        costPrice: purchase.costPrice,
+        totalAmount: purchase.costPrice * purchase.quantity,
+        supplier: purchase.supplier || '',
+        notes: purchase.notes || '',
+        date: Date.now(),
+        time: Date.now(),
+        type: 'purchase'
+      }
+
+      purchases.value.unshift(localPurchase)
+      productStore.updateStock(purchase.productId, purchase.quantity, 'add')
+      productStore.updateProduct(purchase.productId, { costPrice: purchase.costPrice })
+      savePurchases()
+      
+      return { success: true, data: localPurchase }
+    }
   }
 
   // 获取所有销售记录
@@ -293,7 +417,7 @@ export const useSalesStore = defineStore('sales', () => {
     
     return sales.value
       .filter(s => (s.time || s.date) >= todayTime)
-      .reduce((sum, s) => sum + s.totalAmount, 0)
+      .reduce((sum, s) => sum + (s.actualAmount || s.totalAmount), 0)
   })
 
   // 获取今日利润
@@ -315,7 +439,7 @@ export const useSalesStore = defineStore('sales', () => {
     
     return sales.value
       .filter(s => (s.time || s.date) >= firstDayTime)
-      .reduce((sum, s) => sum + s.totalAmount, 0)
+      .reduce((sum, s) => sum + (s.actualAmount || s.totalAmount), 0)
   })
 
   // 获取本月利润
@@ -331,7 +455,7 @@ export const useSalesStore = defineStore('sales', () => {
 
   // 获取总销售额
   const totalSales = computed(() => {
-    return sales.value.reduce((sum, s) => sum + s.totalAmount, 0)
+    return sales.value.reduce((sum, s) => sum + (s.actualAmount || s.totalAmount), 0)
   })
 
   // 获取总利润
@@ -361,7 +485,7 @@ export const useSalesStore = defineStore('sales', () => {
         const saleTime = s.time || s.date
         return saleTime >= dayStart && saleTime <= dayEnd
       })
-      const dayAmount = daySales.reduce((sum, s) => sum + s.totalAmount, 0)
+      const dayAmount = daySales.reduce((sum, s) => sum + (s.actualAmount || s.totalAmount), 0)
       const dayProfit = daySales.reduce((sum, s) => sum + s.profit, 0)
       
       amounts.push(dayAmount)
@@ -390,20 +514,18 @@ export const useSalesStore = defineStore('sales', () => {
           productSales[item.productId].quantity += item.quantity
           productSales[item.productId].amount += item.salePrice * item.quantity
         })
-      } else {
-        // 处理单商品记录
-        if (sale.productId) {
-          if (!productSales[sale.productId]) {
-            productSales[sale.productId] = {
-              productId: sale.productId,
-              productName: sale.productName,
-              quantity: 0,
-              amount: 0
-            }
+      } else if (sale.productId) {
+        // 处理单商品记录（兼容旧数据）
+        if (!productSales[sale.productId]) {
+          productSales[sale.productId] = {
+            productId: sale.productId,
+            productName: sale.productName,
+            quantity: 0,
+            amount: 0
           }
-          productSales[sale.productId].quantity += sale.quantity
-          productSales[sale.productId].amount += sale.totalAmount
         }
+        productSales[sale.productId].quantity += sale.quantity || 0
+        productSales[sale.productId].amount += sale.totalAmount || 0
       }
     })
     
@@ -428,7 +550,7 @@ export const useSalesStore = defineStore('sales', () => {
         }
       }
       stats[person].salesCount++
-      stats[person].totalAmount += sale.totalAmount
+      stats[person].totalAmount += sale.actualAmount || sale.totalAmount
       stats[person].totalProfit += sale.profit
       
       // 计算商品数量
@@ -464,7 +586,7 @@ export const useSalesStore = defineStore('sales', () => {
           }
         }
         stats[person].salesCount++
-        stats[person].totalAmount += sale.totalAmount
+        stats[person].totalAmount += sale.actualAmount || sale.totalAmount
         stats[person].totalProfit += sale.profit
         
         // 计算商品数量
@@ -500,7 +622,7 @@ export const useSalesStore = defineStore('sales', () => {
           }
         }
         stats[person].salesCount++
-        stats[person].totalAmount += sale.totalAmount
+        stats[person].totalAmount += sale.actualAmount || sale.totalAmount
         stats[person].totalProfit += sale.profit
         
         // 计算商品数量
@@ -517,6 +639,7 @@ export const useSalesStore = defineStore('sales', () => {
   return {
     sales,
     purchases,
+    loading,
     getAllSales,
     loadSales,
     addSale,

@@ -9,6 +9,10 @@ export const useProductStore = defineStore('product', () => {
 
   // 将数据库格式转换为前端格式
   const dbToFrontend = (dbProduct) => {
+    // 从 code 中解析品牌、分类、颜色信息（如果有的话）
+    // code 格式可能是: 品牌_款式_尺码_颜色 或者自定义格式
+    const codeParts = (dbProduct.code || '').split('_')
+    
     return {
       id: dbProduct.id,
       name: dbProduct.name,
@@ -17,14 +21,14 @@ export const useProductStore = defineStore('product', () => {
       costPrice: parseFloat(dbProduct.purchase_price) || 0,
       salePrice: parseFloat(dbProduct.sale_price) || 0,
       stock: parseInt(dbProduct.stock) || 0,
-      minStock: 0, // 数据库中没有这个字段，默认0
+      minStock: parseInt(dbProduct.min_stock) || 5, // 默认最低库存为5
       image: dbProduct.image || '',
       createTime: new Date(dbProduct.created_at).getTime(),
-      // 兼容字段
-      brand: '',
-      category: '',
-      color: '',
-      supplier: ''
+      // 扩展字段 - 从数据库读取或使用默认值
+      brand: dbProduct.brand || '',
+      category: dbProduct.category || '其他',
+      color: dbProduct.color || '',
+      supplier: dbProduct.supplier || ''
     }
   }
 
@@ -32,12 +36,18 @@ export const useProductStore = defineStore('product', () => {
   const frontendToDb = (product) => {
     return {
       name: product.name,
-      code: product.code || `${product.name}_${product.size || ''}_${Date.now()}`,
+      code: product.code || `${product.brand || ''}_${product.name}_${product.size || ''}_${Date.now()}`,
       size: product.size || '',
       purchase_price: parseFloat(product.costPrice) || 0,
       sale_price: parseFloat(product.salePrice) || 0,
       stock: parseInt(product.stock) || 0,
-      image: product.image || null
+      min_stock: parseInt(product.minStock) || 5,
+      image: product.image || null,
+      // 扩展字段
+      brand: product.brand || null,
+      category: product.category || '其他',
+      color: product.color || null,
+      supplier: product.supplier || null
     }
   }
 
@@ -145,9 +155,12 @@ export const useProductStore = defineStore('product', () => {
   // 获取所有商品
   const getAllProducts = computed(() => products.value)
 
-  // 获取低库存商品
+  // 获取低库存商品（库存 <= 最低库存阈值，默认阈值为5）
   const lowStockProducts = computed(() => {
-    return products.value.filter(p => p.stock <= (p.minStock || 0))
+    return products.value.filter(p => {
+      const minStock = p.minStock || 5 // 默认最低库存为5
+      return p.stock <= minStock
+    })
   })
 
   // 获取商品总数
@@ -205,7 +218,13 @@ export const useProductStore = defineStore('product', () => {
       if (updates.costPrice !== undefined) dbUpdates.purchase_price = updates.costPrice
       if (updates.salePrice !== undefined) dbUpdates.sale_price = updates.salePrice
       if (updates.stock !== undefined) dbUpdates.stock = updates.stock
+      if (updates.minStock !== undefined) dbUpdates.min_stock = updates.minStock
       if (updates.image !== undefined) dbUpdates.image = updates.image
+      // 扩展字段
+      if (updates.brand !== undefined) dbUpdates.brand = updates.brand
+      if (updates.category !== undefined) dbUpdates.category = updates.category
+      if (updates.color !== undefined) dbUpdates.color = updates.color
+      if (updates.supplier !== undefined) dbUpdates.supplier = updates.supplier
 
       const { error } = await supabase
         .from(TABLES.PRODUCTS)

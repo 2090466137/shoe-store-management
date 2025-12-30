@@ -63,26 +63,9 @@
         </div>
       </van-form>
       
-      <!-- 默认账号提示 -->
-      <div class="default-accounts">
-        <div class="accounts-title">
-          <van-icon name="info-o" />
-          <span>默认账号</span>
-        </div>
-        <div class="accounts-list">
-          <div class="account-item" @click="fillAccount('admin', 'admin123')">
-            <span class="role-tag admin">管理员</span>
-            <span class="account-info">admin / admin123</span>
-          </div>
-          <div class="account-item" @click="fillAccount('luhongpeng', 'lu17303838326')">
-            <span class="role-tag manager">店长</span>
-            <span class="account-info">luhongpeng / lu17303838326</span>
-          </div>
-          <div class="account-item" @click="fillAccount('lhp', '123456')">
-            <span class="role-tag staff">店员</span>
-            <span class="account-info">lhp / 123456</span>
-          </div>
-        </div>
+      <!-- 忘记密码提示 -->
+      <div class="forgot-password">
+        <p>忘记密码？请联系管理员重置</p>
       </div>
     </div>
     
@@ -111,11 +94,6 @@ const showPassword = ref(false)
 const rememberMe = ref(false)
 const loading = ref(false)
 
-// 填充账号
-const fillAccount = (username, password) => {
-  form.value.username = username
-  form.value.password = password
-}
 
 // 处理登录
 const handleLogin = async () => {
@@ -301,69 +279,17 @@ onMounted(() => {
   border: none;
 }
 
-/* 默认账号提示 */
-.default-accounts {
-  background: #f8f9fa;
-  border-radius: 12px;
-  padding: 15px;
+/* 忘记密码提示 */
+.forgot-password {
+  text-align: center;
   margin-top: 20px;
+  padding: 15px;
 }
 
-.accounts-title {
-  display: flex;
-  align-items: center;
-  gap: 6px;
+.forgot-password p {
   font-size: 13px;
-  color: #666;
-  margin-bottom: 12px;
-}
-
-.accounts-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.account-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 12px;
-  background: white;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.account-item:active {
-  transform: scale(0.98);
-  background: #f0f0f0;
-}
-
-.role-tag {
-  font-size: 11px;
-  padding: 2px 8px;
-  border-radius: 10px;
-  color: white;
-  font-weight: 500;
-}
-
-.role-tag.admin {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-}
-
-.role-tag.manager {
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-}
-
-.role-tag.staff {
-  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-}
-
-.account-info {
-  font-size: 13px;
-  color: #666;
-  font-family: monospace;
+  color: #999;
+  margin: 0;
 }
 
 /* 版本信息 */
