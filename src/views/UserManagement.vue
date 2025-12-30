@@ -13,17 +13,24 @@
       </template>
     </van-nav-bar>
 
+    <!-- 安全提醒 -->
+    <div v-if="hasSecurityRisk" class="security-banner">
+      <div class="banner-icon">⚠️</div>
+      <div class="banner-content">
+        <div class="banner-title">账号安全提醒</div>
+        <div class="banner-text">
+          发现 {{ riskUserCount }} 个账号超过30天未登录，建议及时禁用离职员工账号
+        </div>
+      </div>
+      <van-button size="small" type="warning" @click="showRiskUsers">
+        查看
+      </van-button>
+    </div>
+
     <!-- 用户统计 -->
     <div class="stats-section">
       <div class="stat-card">
-        <div class="stat-icon admin">👑</div>
-        <div class="stat-info">
-          <div class="stat-value">{{ adminCount }}</div>
-          <div class="stat-label">管理员</div>
-        </div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon manager">💼</div>
+        <div class="stat-icon manager">👑</div>
         <div class="stat-info">
           <div class="stat-value">{{ managerCount }}</div>
           <div class="stat-label">店长</div>
@@ -34,6 +41,13 @@
         <div class="stat-info">
           <div class="stat-value">{{ staffCount }}</div>
           <div class="stat-label">店员</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon disabled">⏸️</div>
+        <div class="stat-info">
+          <div class="stat-value">{{ disabledCount }}</div>
+          <div class="stat-label">已禁用</div>
         </div>
       </div>
     </div>
@@ -65,6 +79,9 @@
             <span class="role-tag" :class="user.role">
               {{ getRoleName(user.role) }}
             </span>
+            <span v-if="isLongTimeNoLogin(user)" class="warning-tag">
+              ⚠️ 长期未登录
+            </span>
           </div>
           <div class="user-meta">
             <span>账号: {{ user.username }}</span>
@@ -74,7 +91,10 @@
             <span v-if="user.lastLoginTime">
               最后登录: {{ formatTime(user.lastLoginTime) }}
             </span>
-            <span v-else>从未登录</span>
+            <span v-else class="never-login">从未登录</span>
+          </div>
+          <div v-if="isLongTimeNoLogin(user) && user.status === 'active'" class="security-warning">
+            ⚠️ 建议禁用：该账号超过30天未登录，可能存在安全风险
           </div>
         </div>
         
@@ -92,7 +112,7 @@
             :type="user.status === 'active' ? 'warning' : 'success'" 
             plain
             @click="handleToggleStatus(user)"
-            v-if="user.role !== 'admin'"
+            v-if="user.id !== '1'"
           >
             {{ user.status === 'active' ? '禁用' : '启用' }}
           </van-button>
@@ -312,14 +332,14 @@ const form = ref({
 const users = computed(() => userStore.getAllUsers)
 
 // 统计
-const adminCount = computed(() => 
-  users.value.filter(u => u.role === ROLES.ADMIN).length
-)
 const managerCount = computed(() => 
-  users.value.filter(u => u.role === ROLES.MANAGER).length
+  users.value.filter(u => u.role === ROLES.MANAGER && u.status === 'active').length
 )
 const staffCount = computed(() => 
-  users.value.filter(u => u.role === ROLES.STAFF).length
+  users.value.filter(u => u.role === ROLES.STAFF && u.status === 'active').length
+)
+const disabledCount = computed(() => 
+  users.value.filter(u => u.status !== 'active').length
 )
 
 // 获取角色名称
@@ -338,6 +358,45 @@ const formatTime = (timestamp) => {
   if (diff < 604800000) return `${Math.floor(diff / 86400000)}天前`
   
   return `${date.getMonth() + 1}/${date.getDate()}`
+}
+
+// 判断是否长期未登录（超过30天）
+const isLongTimeNoLogin = (user) => {
+  // 主店长账号不检查
+  if (user.id === '1') return false
+  
+  // 从未登录
+  if (!user.lastLoginTime) return true
+  
+  const now = Date.now()
+  const daysSinceLogin = (now - user.lastLoginTime) / (1000 * 60 * 60 * 24)
+  
+  // 超过30天未登录
+  return daysSinceLogin > 30
+}
+
+// 安全风险检查
+const riskUsers = computed(() => 
+  users.value.filter(u => u.status === 'active' && isLongTimeNoLogin(u))
+)
+const riskUserCount = computed(() => riskUsers.value.length)
+const hasSecurityRisk = computed(() => riskUserCount.value > 0)
+
+// 显示风险账号列表
+const showRiskUsers = () => {
+  const userList = riskUsers.value.map(u => {
+    const days = u.lastLoginTime 
+      ? Math.floor((Date.now() - u.lastLoginTime) / (1000 * 60 * 60 * 24))
+      : '从未'
+    return `${u.name}（${u.username}）- ${days === '从未' ? '从未登录' : days + '天未登录'}`
+  }).join('\n')
+  
+  showConfirmDialog({
+    title: '⚠️ 风险账号列表',
+    message: userList,
+    confirmButtonText: '知道了',
+    showCancelButton: false
+  })
 }
 
 // 编辑用户
@@ -478,6 +537,42 @@ onMounted(() => {
   padding-bottom: 80px;
 }
 
+/* 安全提醒横幅 */
+.security-banner {
+  margin: 15px;
+  padding: 12px;
+  background: linear-gradient(135deg, #fff3cd 0%, #ffe8a1 100%);
+  border-radius: 12px;
+  border-left: 4px solid #ff6b6b;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 2px 8px rgba(255, 107, 107, 0.2);
+}
+
+.banner-icon {
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.banner-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.banner-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #856404;
+  margin-bottom: 2px;
+}
+
+.banner-text {
+  font-size: 12px;
+  color: #856404;
+  line-height: 1.4;
+}
+
 /* 统计区域 */
 .stats-section {
   display: flex;
@@ -516,6 +611,10 @@ onMounted(() => {
 
 .stat-icon.staff {
   background: linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%);
+}
+
+.stat-icon.disabled {
+  background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
 }
 
 .stat-value {
@@ -646,6 +745,30 @@ onMounted(() => {
   font-size: 12px;
   color: #999;
   margin-top: 2px;
+}
+
+.user-time .never-login {
+  color: #ff6b6b;
+  font-weight: 500;
+}
+
+.warning-tag {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 8px;
+  background: #fff3cd;
+  color: #856404;
+  font-weight: normal;
+}
+
+.security-warning {
+  font-size: 11px;
+  color: #ff6b6b;
+  margin-top: 4px;
+  padding: 4px 8px;
+  background: #fff1f0;
+  border-radius: 4px;
+  border-left: 2px solid #ff6b6b;
 }
 
 .user-actions {
