@@ -7,10 +7,12 @@
   publish = "dist"
 
 # 重定向规则（支持Vue Router的history模式）
+# 所有路由都重定向到 index.html，让 Vue Router 在客户端处理路由
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
+  force = false
 
 # PWA缓存头（支持Service Worker）
 [[headers]]
