@@ -84,10 +84,15 @@ const handleLogin = async () => {
   loading.value = true
   
   try {
-    // 模拟网络延迟
-    await new Promise(resolve => setTimeout(resolve, 500))
+    // 确保用户数据已加载
+    if (userStore.getAllUsers.length === 0) {
+      await userStore.loadUsers()
+    }
     
-    const result = userStore.login(form.value.username, form.value.password)
+    // 模拟网络延迟
+    await new Promise(resolve => setTimeout(resolve, 300))
+    
+    const result = await userStore.login(form.value.username, form.value.password)
     
     if (result.success) {
       // 保存记住密码
@@ -104,12 +109,17 @@ const handleLogin = async () => {
       
       // 跳转到首页
       setTimeout(() => {
-        router.replace('/home')
-      }, 500)
+        router.push('/home').catch(err => {
+          // 如果路由跳转失败，尝试 replace
+          console.warn('路由跳转失败，尝试 replace:', err)
+          router.replace('/home')
+        })
+      }, 300)
     } else {
       showToast(result.message)
     }
   } catch (error) {
+    console.error('登录错误:', error)
     showToast('登录失败，请重试')
   } finally {
     loading.value = false

@@ -86,31 +86,35 @@ window.toggleDarkMode = () => {
 }
 
 onMounted(async () => {
-  // 初始化用户数据
-  userStore.loadUsers()
-  
-  // 初始化商品和销售数据
-  productStore.loadProducts()
-  salesStore.loadSales()
-  
-  // 请求通知权限
-  await requestNotificationPermission()
-  
-  // 检查暗黑模式
-  checkDarkMode()
-  
-  // 监听系统暗黑模式变化
-  if (window.matchMedia) {
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-      if (localStorage.getItem('darkMode') === null) {
-        isDarkMode.value = e.matches
-        if (e.matches) {
-          document.documentElement.classList.add('dark')
-        } else {
-          document.documentElement.classList.remove('dark')
+  try {
+    // 初始化用户数据（等待完成）
+    await userStore.loadUsers()
+    
+    // 初始化商品和销售数据
+    productStore.loadProducts()
+    salesStore.loadSales()
+    
+    // 请求通知权限
+    await requestNotificationPermission()
+    
+    // 检查暗黑模式
+    checkDarkMode()
+    
+    // 监听系统暗黑模式变化
+    if (window.matchMedia) {
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+        if (localStorage.getItem('darkMode') === null) {
+          isDarkMode.value = e.matches
+          if (e.matches) {
+            document.documentElement.classList.add('dark')
+          } else {
+            document.documentElement.classList.remove('dark')
+          }
         }
-      }
-    })
+      })
+    }
+  } catch (error) {
+    console.error('应用初始化错误:', error)
   }
 })
 </script>
