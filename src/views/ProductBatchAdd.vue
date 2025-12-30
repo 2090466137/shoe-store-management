@@ -224,14 +224,14 @@ const showCategoryPicker = ref(false)
 const formRef = ref(null)
 
 const categories = [
-  '运动鞋',
-  '休闲鞋',
-  '皮鞋',
-  '帆布鞋',
-  '滑板鞋',
-  '凉鞋',
-  '靴子',
-  '其他'
+  { text: '运动鞋', value: '运动鞋' },
+  { text: '休闲鞋', value: '休闲鞋' },
+  { text: '皮鞋', value: '皮鞋' },
+  { text: '帆布鞋', value: '帆布鞋' },
+  { text: '滑板鞋', value: '滑板鞋' },
+  { text: '凉鞋', value: '凉鞋' },
+  { text: '靴子', value: '靴子' },
+  { text: '其他', value: '其他' }
 ]
 
 // 可选尺码（28-48）
@@ -306,33 +306,44 @@ const handleSubmit = async () => {
     title: '确认批量添加',
     message: `将添加 ${selectedSizes.value.length} 个商品\n\n${form.value.name}\n尺码：${selectedSizes.value.join(', ')}`,
     showCancelButton: true,
-  }).then(() => {
+  }).then(async () => {
     // 批量添加商品
     let successCount = 0
+    let failCount = 0
     
-    selectedSizes.value.forEach(size => {
-      const productData = {
-        name: `${form.value.name} - ${size}码`,
-        brand: form.value.brand,
-        category: form.value.category,
-        color: form.value.color,
-        size: size,
-        costPrice: parseFloat(form.value.costPrice),
-        salePrice: parseFloat(form.value.salePrice),
-        stock: parseInt(form.value.defaultStock),
-        minStock: parseInt(form.value.minStock),
-        supplier: form.value.supplier,
-        image: 'https://via.placeholder.com/150'
+    for (const size of selectedSizes.value) {
+      try {
+        const productData = {
+          name: `${form.value.name} - ${size}码`,
+          code: `${form.value.name}_${size}_${Date.now()}`,
+          brand: form.value.brand,
+          category: form.value.category,
+          color: form.value.color,
+          size: size,
+          costPrice: parseFloat(form.value.costPrice),
+          salePrice: parseFloat(form.value.salePrice),
+          stock: parseInt(form.value.defaultStock) || 0,
+          minStock: parseInt(form.value.minStock) || 0,
+          supplier: form.value.supplier,
+          image: ''
+        }
+        
+        await productStore.addProduct(productData)
+        successCount++
+      } catch (error) {
+        console.error('添加商品失败:', error)
+        failCount++
       }
-      
-      productStore.addProduct(productData)
-      successCount++
-    })
+    }
 
     // 成功提示
+    const message = failCount > 0 
+      ? `成功添加 ${successCount} 个商品，失败 ${failCount} 个`
+      : `成功添加 ${successCount} 个商品！`
+    
     showDialog({
-      title: '添加成功',
-      message: `成功添加 ${successCount} 个商品！`,
+      title: failCount > 0 ? '部分成功' : '添加成功',
+      message: message,
     }).then(() => {
       router.push('/products')
     })
@@ -467,4 +478,3 @@ const handleSubmit = async () => {
   margin-top: 16px;
 }
 </style>
-
