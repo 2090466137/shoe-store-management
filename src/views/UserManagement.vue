@@ -465,59 +465,70 @@ onMounted(() => {
 <style scoped>
 .user-management-page {
   min-height: 100vh;
-  background: #f7f8fa;
+  background: linear-gradient(to bottom, #f0f7ff 0%, #ffffff 100%);
   padding-bottom: 80px;
 }
 
 /* 统计区域 */
 .stats-section {
   display: flex;
-  gap: 10px;
+  gap: 12px;
   padding: 15px;
 }
 
 .stat-card {
   flex: 1;
   background: white;
-  border-radius: 12px;
-  padding: 15px;
+  border-radius: 16px;
+  padding: 18px 15px;
   display: flex;
   align-items: center;
-  gap: 10px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  gap: 12px;
+  box-shadow: 0 4px 12px rgba(91, 143, 249, 0.08);
+  border: 1px solid rgba(91, 143, 249, 0.1);
+  transition: all 0.3s;
+}
+
+.stat-card:active {
+  transform: scale(0.98);
 }
 
 .stat-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
+  font-size: 22px;
 }
 
 .stat-icon.admin {
-  background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+  background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%);
 }
 
 .stat-icon.manager {
-  background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
 .stat-icon.staff {
-  background: linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%);
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.stat-icon.disabled {
+  background: linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%);
 }
 
 .stat-value {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: bold;
-  color: #333;
+  color: #4a5568;
 }
 
 .stat-label {
-  font-size: 12px;
-  color: #999;
+  font-size: 13px;
+  color: #718096;
+  font-weight: 500;
 }
 
 /* 用户列表 */
@@ -529,50 +540,57 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px 0 10px;
-  font-size: 16px;
+  padding: 15px 0 12px;
+  font-size: 17px;
   font-weight: 600;
-  color: #333;
+  color: #4a5568;
 }
 
 .section-title .count {
-  font-size: 13px;
-  color: #999;
-  font-weight: normal;
+  font-size: 14px;
+  color: #718096;
+  font-weight: 500;
 }
 
 .user-card {
   background: white;
-  border-radius: 12px;
-  padding: 15px;
-  margin-bottom: 10px;
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 12px;
   display: flex;
   align-items: center;
-  gap: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  gap: 14px;
+  box-shadow: 0 4px 12px rgba(91, 143, 249, 0.08);
+  border: 1px solid rgba(91, 143, 249, 0.1);
   transition: all 0.3s;
 }
 
+.user-card:active {
+  transform: scale(0.98);
+}
+
 .user-card.disabled {
-  opacity: 0.6;
-  background: #f5f5f5;
+  opacity: 0.65;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-color: #dee2e6;
 }
 
 .user-avatar {
   position: relative;
-  width: 50px;
-  height: 50px;
+  width: 54px;
+  height: 54px;
   border-radius: 50%;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
 .avatar-text {
   color: white;
-  font-size: 20px;
+  font-size: 22px;
   font-weight: bold;
 }
 
@@ -580,18 +598,19 @@ onMounted(() => {
   position: absolute;
   bottom: 2px;
   right: 2px;
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
   border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .status-dot.online {
-  background: #07c160;
+  background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
 }
 
 .status-dot.offline {
-  background: #ccc;
+  background: linear-gradient(135deg, #cbd5e0 0%, #a0aec0 100%);
 }
 
 .user-info {
@@ -602,17 +621,18 @@ onMounted(() => {
 .user-name {
   font-size: 16px;
   font-weight: 600;
-  color: #333;
+  color: #2d3748;
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
 .role-tag {
-  font-size: 10px;
-  padding: 2px 6px;
-  border-radius: 8px;
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 10px;
   color: white;
+  font-weight: 500;
 }
 
 .role-tag.admin {
@@ -620,23 +640,23 @@ onMounted(() => {
 }
 
 .role-tag.manager {
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
 .role-tag.staff {
-  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
 }
 
 .user-meta {
   font-size: 13px;
-  color: #666;
-  margin-top: 4px;
+  color: #718096;
+  margin-top: 5px;
 }
 
 .user-time {
   font-size: 12px;
-  color: #999;
-  margin-top: 2px;
+  color: #a0aec0;
+  margin-top: 3px;
 }
 
 .user-actions {
@@ -656,20 +676,22 @@ onMounted(() => {
   padding: 20px;
   height: 100%;
   overflow-y: auto;
+  background: linear-gradient(to bottom, #ffffff 0%, #f8f9fa 100%);
 }
 
 .popup-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 18px;
+  font-size: 19px;
   font-weight: 600;
   margin-bottom: 20px;
+  color: #2d3748;
 }
 
 .popup-header .van-icon {
-  font-size: 20px;
-  color: #999;
+  font-size: 22px;
+  color: #a0aec0;
 }
 
 /* 表单 */
@@ -694,51 +716,53 @@ onMounted(() => {
 }
 
 .role-section {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .role-header {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 15px;
-  border-radius: 10px;
-  margin-bottom: 10px;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 8px rgba(91, 143, 249, 0.15);
 }
 
 .role-header.admin {
-  background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+  background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%);
 }
 
 .role-header.manager {
-  background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
 .role-header.staff {
-  background: linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%);
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
 }
 
 .role-icon {
-  font-size: 20px;
+  font-size: 22px;
 }
 
 .role-title {
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 600;
-  color: #333;
+  color: white;
 }
 
 .permission-list {
   list-style: none;
-  padding: 0 15px;
+  padding: 0 16px;
   margin: 0;
 }
 
 .permission-list li {
-  padding: 6px 0;
+  padding: 8px 0;
   font-size: 14px;
-  color: #666;
-  border-bottom: 1px dashed #eee;
+  color: #4a5568;
+  border-bottom: 1px dashed rgba(91, 143, 249, 0.15);
+  line-height: 1.5;
 }
 
 .permission-list li:last-child {
