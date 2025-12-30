@@ -75,7 +75,9 @@
         <div class="product-info">
           <div class="product-header">
             <h3 class="product-name">{{ product.name }}</h3>
-            <div class="product-price">¥{{ product.salePrice }}</div>
+            <div class="product-price" v-if="userStore.hasPermission(PERMISSIONS.STATS_PROFIT)">
+              ¥{{ product.salePrice }}
+            </div>
           </div>
           
           <div class="product-meta">

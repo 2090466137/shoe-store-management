@@ -42,7 +42,7 @@
               <div class="member-phone">{{ member.phone }}</div>
             </div>
             <div class="member-actions">
-              <div class="member-balance">¥{{ member.balance.toFixed(2) }}</div>
+              <div class="member-balance" v-if="canViewBalance">¥{{ member.balance.toFixed(2) }}</div>
               <van-icon 
                 name="delete-o" 
                 class="delete-btn"
@@ -55,7 +55,7 @@
             <span class="member-discount" v-if="member.discount < 1">
               {{ (member.discount * 10).toFixed(1) }}折
             </span>
-            <span class="member-stats">
+            <span class="member-stats" v-if="canViewBalance">
               累计充值: ¥{{ member.totalRecharge.toFixed(2) }} | 
               累计消费: ¥{{ member.totalConsumption.toFixed(2) }}
             </span>
@@ -86,12 +86,13 @@
           placeholder="请输入姓名（可选）"
         />
         <van-field
+          v-if="canViewBalance"
           v-model="newMember.balance"
           name="balance"
           label="初始余额"
           type="number"
           placeholder="请输入初始余额"
-          :rules="[{ required: true, message: '请输入初始余额' }]"
+          :rules="[{ required: canViewBalance, message: '请输入初始余额' }]"
         >
           <template #button>
             <span>元</span>
@@ -114,10 +115,16 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useMemberStore } from '@/stores/member'
+import { useUserStore, PERMISSIONS } from '@/stores/user'
 import { showToast, showConfirmDialog } from 'vant'
 
 const router = useRouter()
 const memberStore = useMemberStore()
+const userStore = useUserStore()
+
+// 权限检查
+const canViewBalance = computed(() => userStore.hasPermission(PERMISSIONS.STATS_PROFIT))
+const canRecharge = computed(() => userStore.hasPermission(PERMISSIONS.MEMBER_RECHARGE))
 
 const searchKeyword = ref('')
 const showAddDialog = ref(false)
@@ -145,21 +152,27 @@ const selectMember = (member, event) => {
     return
   }
   
-  showConfirmDialog({
-    title: '选择操作',
-    message: `会员：${member.name || member.phone}`,
-    confirmButtonText: '充值',
-    cancelButtonText: '查看详情'
-  }).then(() => {
-    // 跳转到充值页面
-    router.push({
-      name: 'MemberRecharge',
-      params: { memberId: member.id }
+  // 如果有充值权限，显示充值选项
+  if (canRecharge.value) {
+    showConfirmDialog({
+      title: '选择操作',
+      message: `会员：${member.name || member.phone}`,
+      confirmButtonText: '充值',
+      cancelButtonText: '查看详情'
+    }).then(() => {
+      // 跳转到充值页面
+      router.push({
+        name: 'MemberRecharge',
+        params: { memberId: member.id }
+      })
+    }).catch(() => {
+      // 查看详情（可以后续扩展）
+      showToast('查看详情功能开发中')
     })
-  }).catch(() => {
-    // 查看详情（可以后续扩展）
-    showToast('查看详情功能开发中')
-  })
+  } else {
+    // 店员只能查看基本信息
+    showToast(`会员：${member.name || member.phone}\n等级：${member.level}\n折扣：${(member.discount * 10).toFixed(1)}折`)
+  }
 }
 
 const handleDeleteMember = async (member, event) => {
