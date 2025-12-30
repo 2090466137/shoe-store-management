@@ -126,14 +126,37 @@ const handleLogin = async () => {
       
       showSuccessToast('登录成功')
       
-      // 跳转到首页
-      setTimeout(() => {
-        router.push('/home').catch(err => {
-          // 如果路由跳转失败，尝试 replace
-          console.warn('路由跳转失败，尝试 replace:', err)
-          router.replace('/home')
-        })
-      }, 300)
+      // 确保 currentUser 已设置（login 函数已经设置，这里再确认一下）
+      const savedUser = localStorage.getItem('currentUser')
+      if (!savedUser) {
+        console.error('登录成功但 currentUser 未设置')
+        showToast('登录状态异常，请刷新页面重试')
+        loading.value = false
+        return
+      }
+      
+      // 确保路由跳转（使用多种方式）
+      console.log('准备跳转到首页...')
+      console.log('currentUser:', localStorage.getItem('currentUser'))
+      
+      // 方式1: 使用 router.push
+      try {
+        await router.push('/home')
+        console.log('router.push 成功，已跳转到首页')
+      } catch (err) {
+        console.warn('router.push 失败，尝试 replace:', err)
+        // 方式2: 使用 router.replace
+        try {
+          await router.replace('/home')
+          console.log('router.replace 成功')
+        } catch (replaceErr) {
+          console.error('router.replace 也失败，使用 window.location:', replaceErr)
+          // 方式3: 使用 window.location（强制刷新）
+          setTimeout(() => {
+            window.location.href = '/home'
+          }, 100)
+        }
+      }
     } else {
       showToast(result.message || '登录失败，请重试')
     }
