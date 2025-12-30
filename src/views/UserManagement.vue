@@ -9,7 +9,14 @@
       placeholder
     >
       <template #right>
-        <van-icon name="plus" size="20" @click="showAddUser = true" />
+        <van-icon 
+          v-if="userStore.hasPermission(PERMISSIONS.USER_ADD)"
+          name="plus" 
+          size="24" 
+          color="#5B8FF9"
+          @click="showAddUser = true" 
+          style="cursor: pointer; padding: 8px;"
+        />
       </template>
     </van-nav-bar>
 
@@ -44,6 +51,19 @@
         <span>用户列表</span>
         <span class="count">共 {{ users.length }} 人</span>
       </div>
+      
+      <!-- 添加员工按钮 -->
+      <van-button 
+        v-if="userStore.hasPermission(PERMISSIONS.USER_ADD)"
+        type="primary" 
+        block 
+        round
+        icon="plus"
+        @click="showAddUser = true"
+        class="add-user-btn"
+      >
+        添加员工
+      </van-button>
       
       <div 
         v-for="user in users" 
@@ -282,7 +302,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { showToast, showSuccessToast, showConfirmDialog } from 'vant'
-import { useUserStore, ROLES, ROLE_NAMES } from '@/stores/user'
+import { useUserStore, ROLES, ROLE_NAMES, PERMISSIONS } from '@/stores/user'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -550,6 +570,23 @@ onMounted(() => {
   font-size: 14px;
   color: #718096;
   font-weight: 500;
+}
+
+/* 添加员工按钮 */
+.add-user-btn {
+  margin-bottom: 16px;
+  height: 48px;
+  font-size: 16px;
+  font-weight: 600;
+  background: linear-gradient(135deg, #5B8FF9 0%, #4A7DEB 100%);
+  border: none;
+  box-shadow: 0 4px 12px rgba(91, 143, 249, 0.3);
+  transition: all 0.3s;
+}
+
+.add-user-btn:active {
+  transform: scale(0.98);
+  box-shadow: 0 2px 8px rgba(91, 143, 249, 0.2);
 }
 
 .user-card {
