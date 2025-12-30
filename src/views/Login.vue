@@ -66,6 +66,10 @@
             <span class="role-tag staff">店员</span>
             <span class="account-info">lhp / 123456</span>
           </div>
+          <div class="account-item" @click="fillAccount('test', '123456')">
+            <span class="role-tag staff">测试店员</span>
+            <span class="account-info">test / 123456</span>
+          </div>
         </div>
       </div>
     </div>
