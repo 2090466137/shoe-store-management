@@ -14,7 +14,8 @@
     "vue-router": "^4.2.5",
     "pinia": "^2.1.7",
     "vant": "^4.8.0",
-    "axios": "^1.6.2"
+    "axios": "^1.6.2",
+    "@supabase/supabase-js": "^2.39.0"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.5.0",
