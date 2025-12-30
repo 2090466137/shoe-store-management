@@ -34,14 +34,21 @@
           v-for="member in filteredMembers" 
           :key="member.id"
           class="member-item"
-          @click="selectMember(member)"
+          @click="selectMember(member, $event)"
         >
           <div class="member-header">
             <div class="member-info">
               <div class="member-name">{{ member.name || '未设置姓名' }}</div>
               <div class="member-phone">{{ member.phone }}</div>
             </div>
-            <div class="member-balance">¥{{ member.balance.toFixed(2) }}</div>
+            <div class="member-actions">
+              <div class="member-balance">¥{{ member.balance.toFixed(2) }}</div>
+              <van-icon 
+                name="delete-o" 
+                class="delete-btn"
+                @click="handleDeleteMember(member, $event)"
+              />
+            </div>
           </div>
           <div class="member-footer">
             <span class="member-level">{{ member.level }}</span>
@@ -132,7 +139,12 @@ const handleSearch = () => {
   // 搜索逻辑已在computed中处理
 }
 
-const selectMember = (member) => {
+const selectMember = (member, event) => {
+  // 如果点击的是删除按钮，不触发选择操作
+  if (event && event.target.closest('.delete-btn')) {
+    return
+  }
+  
   showConfirmDialog({
     title: '选择操作',
     message: `会员：${member.name || member.phone}`,
@@ -147,6 +159,35 @@ const selectMember = (member) => {
   }).catch(() => {
     // 查看详情（可以后续扩展）
     showToast('查看详情功能开发中')
+  })
+}
+
+const handleDeleteMember = async (member, event) => {
+  // 阻止事件冒泡
+  if (event) {
+    event.stopPropagation()
+  }
+  
+  showConfirmDialog({
+    title: '确认删除',
+    message: `确定要删除会员"${member.name || member.phone}"吗？\n删除后无法恢复！`,
+    confirmButtonText: '删除',
+    cancelButtonText: '取消',
+    confirmButtonColor: '#ee0a24'
+  }).then(async () => {
+    const result = await memberStore.deleteMember(member.id)
+    if (result) {
+      showToast({
+        type: 'success',
+        message: '删除成功'
+      })
+      // 重新加载会员列表
+      await memberStore.loadMembers()
+    } else {
+      showToast('删除失败')
+    }
+  }).catch(() => {
+    // 取消删除
   })
 }
 
@@ -210,6 +251,23 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 12px;
+}
+
+.member-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.delete-btn {
+  font-size: 18px;
+  color: #ee0a24;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.delete-btn:active {
+  opacity: 0.6;
 }
 
 .member-info {
