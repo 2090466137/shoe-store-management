@@ -9,7 +9,7 @@ body {
     'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #f7f8fa;
+  background-color: #F5F7FA;
 }
 
 /* 自定义滚动条 */
@@ -31,7 +31,7 @@ body {
 .page-container {
   min-height: 100vh;
   padding-bottom: 60px;
-  background-color: #f7f8fa;
+  background-color: #F5F7FA;
 }
 
 .content-wrapper {
@@ -40,10 +40,10 @@ body {
 
 .card {
   background: white;
-  border-radius: 8px;
+  border-radius: 12px;
   padding: 16px;
   margin-bottom: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 12px rgba(91, 143, 249, 0.08);
 }
 
 .section-title {
@@ -52,12 +52,12 @@ body {
   color: #323233;
   margin-bottom: 12px;
   padding-left: 8px;
-  border-left: 3px solid #1989fa;
+  border-left: 3px solid #5B8FF9;
 }
 
 /* 按钮样式 */
 .btn-primary {
-  background: linear-gradient(135deg, #1989fa 0%, #0e6fd6 100%);
+  background: #5B8FF9;
   border: none;
   border-radius: 8px;
   color: white;
@@ -66,11 +66,11 @@ body {
 }
 
 .btn-success {
-  background: linear-gradient(135deg, #07c160 0%, #06ad56 100%);
+  background: #5AD8A6;
 }
 
 .btn-warning {
-  background: linear-gradient(135deg, #ff976a 0%, #ff6034 100%);
+  background: #FF9845;
 }
 
 /* 状态标签 */
@@ -82,18 +82,18 @@ body {
 }
 
 .status-low {
-  background-color: #fff1f0;
-  color: #ff4d4f;
+  background-color: #FFF1F0;
+  color: #FF6B6B;
 }
 
 .status-normal {
-  background-color: #f0f9ff;
-  color: #1989fa;
+  background-color: #E8F4FF;
+  color: #5B8FF9;
 }
 
 .status-high {
-  background-color: #f6ffed;
-  color: #52c41a;
+  background-color: #E8FFF3;
+  color: #5AD8A6;
 }
 
 /* 数据展示 */

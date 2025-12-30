@@ -20,11 +20,6 @@
               size="22" 
               @click="router.push('/user-management')"
             />
-            <van-icon 
-              :name="isDarkMode ? 'sun-o' : 'moon-o'" 
-              size="22" 
-              @click="toggleDarkMode"
-            />
             <van-icon name="setting-o" size="22" @click="showUserMenu = true" />
           </div>
         </div>
@@ -36,13 +31,17 @@
     <!-- 数据概览 -->
     <div class="content-wrapper">
       <div class="stats-grid">
-        <div class="stat-card" @click="router.push('/statistics')">
-          <div class="stat-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%)">
+        <div 
+          class="stat-card" 
+          @click="router.push('/statistics')"
+          v-if="userStore.hasPermission(PERMISSIONS.STATS_PROFIT)"
+        >
+          <div class="stat-icon stat-icon-primary">
             💰
           </div>
           <div class="stat-info">
             <div class="stat-label">今日销售额</div>
-            <div class="stat-value">¥{{ salesStore.todaySales.toFixed(2) }}</div>
+            <div class="stat-value stat-value-primary">¥{{ salesStore.todaySales.toFixed(2) }}</div>
           </div>
         </div>
 
@@ -51,17 +50,17 @@
           @click="router.push('/statistics')"
           v-if="userStore.hasPermission(PERMISSIONS.STATS_PROFIT)"
         >
-          <div class="stat-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%)">
+          <div class="stat-icon stat-icon-success">
             📈
           </div>
           <div class="stat-info">
             <div class="stat-label">今日利润</div>
-            <div class="stat-value">¥{{ salesStore.todayProfit.toFixed(2) }}</div>
+            <div class="stat-value stat-value-success">¥{{ salesStore.todayProfit.toFixed(2) }}</div>
           </div>
         </div>
 
         <div class="stat-card" @click="router.push('/products')">
-          <div class="stat-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)">
+          <div class="stat-icon stat-icon-info">
             👟
           </div>
           <div class="stat-info">
@@ -75,7 +74,7 @@
           @click="router.push('/products')"
           v-if="userStore.hasPermission(PERMISSIONS.STATS_PROFIT)"
         >
-          <div class="stat-icon" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%)">
+          <div class="stat-icon stat-icon-warning">
             📦
           </div>
           <div class="stat-info">
@@ -128,7 +127,9 @@
               <div class="staff-detail">{{ staff.salesCount }}单 | {{ staff.quantity }}件</div>
             </div>
             <div class="staff-amount">
-              <div class="staff-sales">¥{{ staff.totalAmount.toFixed(0) }}</div>
+              <div class="staff-sales" v-if="userStore.hasPermission(PERMISSIONS.STATS_PROFIT)">
+                ¥{{ staff.totalAmount.toFixed(0) }}
+              </div>
               <div class="staff-profit" v-if="userStore.hasPermission(PERMISSIONS.STATS_PROFIT)">
                 利润 ¥{{ staff.totalProfit.toFixed(0) }}
               </div>
@@ -244,20 +245,6 @@
           </div>
         </div>
       </div>
-
-      <!-- 数据分析入口 -->
-      <div 
-        class="card" 
-        @click="router.push('/data-visualization')"
-        v-if="userStore.hasPermission(PERMISSIONS.STATS_VIEW)"
-      >
-        <div class="section-title">📈 数据分析</div>
-        <div class="quick-action">
-          <div class="action-icon">📊</div>
-          <div class="action-text">查看销售趋势和商品排行</div>
-          <van-icon name="arrow" class="action-arrow" />
-        </div>
-      </div>
     </div>
 
     <!-- 用户菜单弹窗 -->
@@ -316,17 +303,23 @@
     </van-dialog>
 
     <!-- 底部导航 -->
-    <van-tabbar v-model="active" active-color="#1989fa" inactive-color="#7d7e80">
+    <van-tabbar v-model="active" active-color="#5B8FF9" inactive-color="#7d7e80">
       <van-tabbar-item icon="home-o" to="/home">首页</van-tabbar-item>
       <van-tabbar-item icon="bag-o" to="/products">商品</van-tabbar-item>
       <van-tabbar-item icon="shopping-cart-o" to="/sales">销售</van-tabbar-item>
-      <van-tabbar-item icon="bar-chart-o" to="/statistics">统计</van-tabbar-item>
+      <van-tabbar-item 
+        v-if="userStore.hasPermission(PERMISSIONS.STATS_PROFIT)"
+        icon="bar-chart-o" 
+        to="/statistics"
+      >
+        统计
+      </van-tabbar-item>
     </van-tabbar>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { showToast, showSuccessToast, showConfirmDialog } from 'vant'
 import { useProductStore } from '@/stores/product'
@@ -338,7 +331,6 @@ const productStore = useProductStore()
 const salesStore = useSalesStore()
 const userStore = useUserStore()
 const active = ref(0)
-const isDarkMode = ref(false)
 
 const showUserMenu = ref(false)
 const showChangePassword = ref(false)
@@ -435,25 +427,12 @@ const currentDate = computed(() => {
   const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' }
   return date.toLocaleDateString('zh-CN', options)
 })
-
-const toggleDarkMode = () => {
-  if (window.toggleDarkMode) {
-    window.toggleDarkMode()
-    isDarkMode.value = !isDarkMode.value
-  }
-}
-
-onMounted(() => {
-  // 检查当前暗黑模式状态
-  const saved = localStorage.getItem('darkMode')
-  isDarkMode.value = saved === 'true'
-})
 </script>
 
 <style scoped>
 .home-page {
   min-height: 100vh;
-  background: linear-gradient(180deg, #1989fa 0%, #1989fa 200px, #f7f8fa 200px);
+  background: linear-gradient(180deg, #5B8FF9 0%, #5B8FF9 200px, #F5F7FA 200px);
   padding-bottom: 60px;
 }
 
@@ -584,6 +563,22 @@ onMounted(() => {
   flex-shrink: 0;
 }
 
+.stat-icon-primary {
+  background: #E8F4FF;
+}
+
+.stat-icon-success {
+  background: #E8FFF3;
+}
+
+.stat-icon-info {
+  background: #F0F5FF;
+}
+
+.stat-icon-warning {
+  background: #FFF7E8;
+}
+
 .stat-info {
   flex: 1;
   min-width: 0;
@@ -602,6 +597,14 @@ onMounted(() => {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.stat-value-primary {
+  color: #5B8FF9;
+}
+
+.stat-value-success {
+  color: #5AD8A6;
 }
 
 .warning-list {
@@ -660,7 +663,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   padding: 12px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #5B8FF9;
   border-radius: 8px;
   color: white;
   cursor: pointer;
@@ -717,13 +720,13 @@ onMounted(() => {
 }
 
 .backup-btn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #5B8FF9;
   color: white;
   border: none;
 }
 
 .stats-btn {
-  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+  background: #FF9845;
   color: white;
   border: none;
 }
@@ -769,13 +772,13 @@ onMounted(() => {
 .staff-sales {
   font-size: 16px;
   font-weight: 600;
-  color: #1989fa;
+  color: #5B8FF9;
   margin-bottom: 4px;
 }
 
 .staff-profit {
   font-size: 12px;
-  color: #07c160;
+  color: #5AD8A6;
 }
 
 .month-stats {
@@ -801,11 +804,11 @@ onMounted(() => {
 }
 
 .month-stat-value.primary {
-  color: #1989fa;
+  color: #5B8FF9;
 }
 
 .month-stat-value.success {
-  color: #07c160;
+  color: #5AD8A6;
 }
 
 .month-stat-divider {
@@ -820,7 +823,7 @@ onMounted(() => {
   align-items: center;
   gap: 12px;
   padding: 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #5B8FF9;
   margin: -10px -16px 10px;
   border-radius: 16px 16px 0 0;
 }

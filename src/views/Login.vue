@@ -6,72 +6,77 @@
       <div class="circle circle-2"></div>
       <div class="circle circle-3"></div>
     </div>
-    
+
     <!-- 登录卡片 -->
     <div class="login-card">
-      <!-- Logo区域 -->
       <div class="logo-section">
-        <div class="logo-icon">👟</div>
-        <h1 class="app-title">鞋店管理系统</h1>
-        <p class="app-subtitle">专业的鞋店仓库管理解决方案</p>
+        <div class="logo">👟</div>
+        <h1 class="app-name">鞋店管理系统</h1>
+        <p class="app-desc">Shoe Store Management</p>
       </div>
-      
-      <!-- 登录表单 -->
-      <van-form @submit="handleLogin" class="login-form">
+
+      <van-form @submit="handleLogin">
         <van-cell-group inset>
           <van-field
             v-model="form.username"
             name="username"
             label="账号"
             placeholder="请输入账号"
-            left-icon="user-o"
             :rules="[{ required: true, message: '请输入账号' }]"
-            clearable
+            left-icon="user-o"
           />
           <van-field
             v-model="form.password"
-            :type="showPassword ? 'text' : 'password'"
+            type="password"
             name="password"
             label="密码"
             placeholder="请输入密码"
-            left-icon="lock"
-            :right-icon="showPassword ? 'eye-o' : 'closed-eye'"
-            @click-right-icon="showPassword = !showPassword"
             :rules="[{ required: true, message: '请输入密码' }]"
+            left-icon="lock"
           />
         </van-cell-group>
-        
-        <!-- 记住密码 -->
-        <div class="remember-row">
-          <van-checkbox v-model="rememberMe" shape="square" icon-size="16px">
-            记住密码
-          </van-checkbox>
+
+        <div class="remember-section">
+          <van-checkbox v-model="rememberMe">记住密码</van-checkbox>
         </div>
-        
-        <!-- 登录按钮 -->
-        <div class="submit-btn">
-          <van-button 
-            round 
-            block 
-            type="primary" 
+
+        <div class="login-btn-wrapper">
+          <van-button
+            round
+            block
+            type="primary"
             native-type="submit"
             :loading="loading"
             loading-text="登录中..."
           >
-            登 录
+            登录
           </van-button>
         </div>
       </van-form>
-      
-      <!-- 忘记密码提示 -->
-      <div class="forgot-password">
-        <p>忘记密码？请联系管理员重置</p>
+
+      <!-- 默认账号提示 -->
+      <div class="default-accounts">
+        <div class="accounts-title">测试账号</div>
+        <div class="accounts-list">
+          <div class="account-item" @click="fillAccount('admin', 'admin123')">
+            <span class="role-tag admin">管理员</span>
+            <span class="account-info">admin / admin123</span>
+          </div>
+          <div class="account-item" @click="fillAccount('luhongpeng', 'lu17303838326')">
+            <span class="role-tag manager">店长</span>
+            <span class="account-info">luhongpeng / lu17303838326</span>
+          </div>
+          <div class="account-item" @click="fillAccount('lhp', '123456')">
+            <span class="role-tag staff">店员</span>
+            <span class="account-info">lhp / 123456</span>
+          </div>
+        </div>
       </div>
     </div>
-    
+
     <!-- 版本信息 -->
     <div class="version-info">
-      v3.1 · 权限管理版
+      v1.1.0 | © 2025 鞋店管理系统
     </div>
   </div>
 </template>
@@ -79,8 +84,8 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { showToast, showSuccessToast } from 'vant'
 import { useUserStore } from '@/stores/user'
+import { showToast, showSuccessToast } from 'vant'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -90,12 +95,16 @@ const form = ref({
   password: ''
 })
 
-const showPassword = ref(false)
 const rememberMe = ref(false)
 const loading = ref(false)
 
+// 填充账号
+const fillAccount = (username, password) => {
+  form.value.username = username
+  form.value.password = password
+}
 
-// 处理登录
+// 登录处理
 const handleLogin = async () => {
   loading.value = true
   
@@ -156,7 +165,7 @@ onMounted(() => {
 <style scoped>
 .login-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #5B8FF9 0%, #4A7FE8 100%);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -199,106 +208,143 @@ onMounted(() => {
 .circle-3 {
   width: 150px;
   height: 150px;
-  bottom: -50px;
-  right: 50px;
+  top: 50%;
+  right: 10%;
 }
 
 /* 登录卡片 */
 .login-card {
   width: 100%;
-  max-width: 380px;
+  max-width: 400px;
   background: white;
   border-radius: 20px;
-  padding: 30px 20px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  padding: 32px 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   position: relative;
   z-index: 1;
 }
 
-/* Logo区域 */
 .logo-section {
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 32px;
 }
 
-.logo-icon {
-  font-size: 60px;
-  margin-bottom: 10px;
+.logo {
+  font-size: 64px;
+  margin-bottom: 16px;
+  animation: float 3s ease-in-out infinite;
 }
 
-.app-title {
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.app-name {
   font-size: 24px;
-  font-weight: bold;
-  color: #333;
-  margin: 0 0 8px 0;
+  font-weight: 600;
+  color: #323233;
+  margin-bottom: 8px;
 }
 
-.app-subtitle {
+.app-desc {
   font-size: 14px;
-  color: #999;
-  margin: 0;
+  color: #969799;
+  letter-spacing: 1px;
 }
 
-/* 登录表单 */
-.login-form {
-  margin-bottom: 20px;
+.remember-section {
+  padding: 16px 16px 0;
 }
 
-.login-form :deep(.van-cell-group--inset) {
-  margin: 0;
+.login-btn-wrapper {
+  padding: 24px 16px 16px;
 }
 
-.login-form :deep(.van-cell) {
-  padding: 14px 16px;
-}
-
-.login-form :deep(.van-field__left-icon) {
-  margin-right: 10px;
-  color: #667eea;
-}
-
-/* 记住密码 */
-.remember-row {
-  padding: 15px 5px;
-}
-
-.remember-row :deep(.van-checkbox__label) {
-  color: #666;
-  font-size: 14px;
-}
-
-/* 登录按钮 */
-.submit-btn {
-  padding: 0 5px;
-}
-
-.submit-btn :deep(.van-button) {
-  height: 46px;
+.login-btn-wrapper :deep(.van-button) {
+  height: 48px;
   font-size: 16px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  font-weight: 500;
+  background: #5B8FF9;
   border: none;
 }
 
-/* 忘记密码提示 */
-.forgot-password {
-  text-align: center;
-  margin-top: 20px;
-  padding: 15px;
+/* 默认账号 */
+.default-accounts {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #ebedf0;
 }
 
-.forgot-password p {
+.accounts-title {
   font-size: 13px;
-  color: #999;
-  margin: 0;
+  color: #969799;
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.accounts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.account-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background: #f7f8fa;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.account-item:hover {
+  background: #e8f4ff;
+  transform: translateX(4px);
+}
+
+.account-item:active {
+  transform: scale(0.98);
+}
+
+.role-tag {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: white;
+}
+
+.role-tag.admin {
+  background: #5B8FF9;
+}
+
+.role-tag.manager {
+  background: #FF9845;
+}
+
+.role-tag.staff {
+  background: #5AD8A6;
+}
+
+.account-info {
+  font-size: 13px;
+  color: #646566;
+  font-family: 'Courier New', monospace;
 }
 
 /* 版本信息 */
 .version-info {
   position: absolute;
   bottom: 20px;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(255, 255, 255, 0.8);
   font-size: 12px;
+  z-index: 1;
 }
 </style>
-
-
