@@ -36,12 +36,14 @@ CREATE TABLE IF NOT EXISTS sales (
   actual_amount DECIMAL(10, 2) NOT NULL,
   salesperson TEXT,
   payment_method TEXT DEFAULT '现金',
+  member_id UUID REFERENCES members(id) ON DELETE SET NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- 销售表索引
 CREATE INDEX IF NOT EXISTS idx_sales_order_id ON sales(order_id);
 CREATE INDEX IF NOT EXISTS idx_sales_salesperson ON sales(salesperson);
+CREATE INDEX IF NOT EXISTS idx_sales_member_id ON sales(member_id);
 CREATE INDEX IF NOT EXISTS idx_sales_created_at ON sales(created_at DESC);
 
 -- ========================================
