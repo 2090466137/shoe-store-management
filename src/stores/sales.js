@@ -76,22 +76,66 @@ export const useSalesStore = defineStore('sales', () => {
     ]
   }
 
+  // 清理示例数据（通过日期和商品名称判断）
+  const cleanExampleData = (data) => {
+    if (!Array.isArray(data)) return []
+    
+    // 示例数据的特征：
+    // 1. 日期是2024年2月（2024-02-15, 2024-02-16, 2024-02-20等）
+    // 2. 商品名称是示例商品
+    const exampleProducts = [
+      '耐克 Air Max 270',
+      '阿迪达斯 Ultraboost',
+      '匡威 Chuck 70',
+      '新百伦 574',
+      'Vans Old Skool'
+    ]
+    
+    return data.filter(item => {
+      const itemDate = new Date(item.date || item.time || 0)
+      const isExampleDate = itemDate.getFullYear() === 2024 && itemDate.getMonth() === 1 // 2月是索引1
+      const isExampleProduct = item.productName && exampleProducts.some(name => 
+        item.productName.includes(name)
+      )
+      
+      // 如果是2024年2月的示例数据，则删除
+      if (isExampleDate && isExampleProduct) {
+        return false
+      }
+      return true
+    })
+  }
+
   // 加载数据
   const loadSales = () => {
     const storedSales = localStorage.getItem('sales')
     const storedPurchases = localStorage.getItem('purchases')
     
     if (storedSales) {
-      sales.value = JSON.parse(storedSales)
+      const parsed = JSON.parse(storedSales)
+      // 清理示例数据
+      sales.value = cleanExampleData(parsed)
+      if (sales.value.length !== parsed.length) {
+        // 如果有数据被清理，保存更新后的数据
+        saveSales()
+      }
     } else {
-      sales.value = initSales()
+      // 不初始化示例数据，从空数组开始
+      sales.value = []
       saveSales()
     }
 
     if (storedPurchases) {
-      purchases.value = JSON.parse(storedPurchases)
+      const parsed = JSON.parse(storedPurchases)
+      // 清理示例数据
+      purchases.value = cleanExampleData(parsed)
+      if (purchases.value.length !== parsed.length) {
+        // 如果有数据被清理，保存更新后的数据
+        savePurchases()
+      }
     } else {
-      purchases.value = initPurchases()
+      // 不初始化示例数据，从空数组开始
+      purchases.value = []
       savePurchases()
     }
   }
@@ -491,4 +535,3 @@ export const useSalesStore = defineStore('sales', () => {
     monthSalespersonStats
   }
 })
-
