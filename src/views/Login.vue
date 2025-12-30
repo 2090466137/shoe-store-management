@@ -53,25 +53,6 @@
           </van-button>
         </div>
       </van-form>
-
-      <!-- 默认账号提示 -->
-      <div class="default-accounts">
-        <div class="accounts-title">测试账号</div>
-        <div class="accounts-list">
-          <div class="account-item" @click="fillAccount('luhongpeng', 'lu17303838326')">
-            <span class="role-tag manager">店长</span>
-            <span class="account-info">luhongpeng / lu17303838326</span>
-          </div>
-          <div class="account-item" @click="fillAccount('lhp', '123456')">
-            <span class="role-tag staff">店员</span>
-            <span class="account-info">lhp / 123456</span>
-          </div>
-          <div class="account-item" @click="fillAccount('test', '123456')">
-            <span class="role-tag staff">测试店员</span>
-            <span class="account-info">test / 123456</span>
-          </div>
-        </div>
-      </div>
     </div>
 
     <!-- 版本信息 -->
@@ -97,12 +78,6 @@ const form = ref({
 
 const rememberMe = ref(false)
 const loading = ref(false)
-
-// 填充账号
-const fillAccount = (username, password) => {
-  form.value.username = username
-  form.value.password = password
-}
 
 // 登录处理
 const handleLogin = async () => {
@@ -271,72 +246,6 @@ onMounted(() => {
   font-weight: 500;
   background: #5B8FF9;
   border: none;
-}
-
-/* 默认账号 */
-.default-accounts {
-  margin-top: 24px;
-  padding-top: 24px;
-  border-top: 1px solid #ebedf0;
-}
-
-.accounts-title {
-  font-size: 13px;
-  color: #969799;
-  text-align: center;
-  margin-bottom: 12px;
-}
-
-.accounts-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.account-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px;
-  background: #f7f8fa;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.account-item:hover {
-  background: #e8f4ff;
-  transform: translateX(4px);
-}
-
-.account-item:active {
-  transform: scale(0.98);
-}
-
-.role-tag {
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 500;
-  color: white;
-}
-
-.role-tag.admin {
-  background: #5B8FF9;
-}
-
-.role-tag.manager {
-  background: #FF9845;
-}
-
-.role-tag.staff {
-  background: #5AD8A6;
-}
-
-.account-info {
-  font-size: 13px;
-  color: #646566;
-  font-family: 'Courier New', monospace;
 }
 
 /* 版本信息 */

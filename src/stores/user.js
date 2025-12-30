@@ -119,18 +119,6 @@ const DEFAULT_USERS = [
     createTime: Date.now(),
     lastLoginTime: null,
     status: 'active'
-  },
-  {
-    id: '3',
-    username: 'test',
-    password: '123456',
-    name: '测试店员',
-    role: ROLES.STAFF,
-    phone: '',
-    avatar: '',
-    createTime: Date.now(),
-    lastLoginTime: null,
-    status: 'active'
   }
 ]
 
