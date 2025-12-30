@@ -87,13 +87,17 @@ const handleLogin = async () => {
     // 确保用户数据已加载（检查 users.value 而不是 getAllUsers）
     if (!userStore.users || userStore.users.length === 0) {
       console.log('用户数据为空，开始加载...')
-      await userStore.loadUsers()
+      
+      // 设置加载超时（最多等待3秒）
+      const loadPromise = userStore.loadUsers()
+      const timeoutPromise = new Promise(resolve => setTimeout(resolve, 3000))
+      
+      await Promise.race([loadPromise, timeoutPromise])
       
       // 等待加载完成后，再次检查
       if (!userStore.users || userStore.users.length === 0) {
-        showToast('用户数据加载失败，请刷新页面重试')
-        loading.value = false
-        return
+        // 如果还是为空，login 函数会自动使用默认用户
+        console.warn('用户数据加载超时或失败，login 函数将使用默认用户')
       }
     }
     
@@ -104,8 +108,8 @@ const handleLogin = async () => {
       return
     }
     
-    // 模拟网络延迟
-    await new Promise(resolve => setTimeout(resolve, 300))
+    // 模拟网络延迟（减少到100ms）
+    await new Promise(resolve => setTimeout(resolve, 100))
     
     const result = await userStore.login(form.value.username, form.value.password)
     

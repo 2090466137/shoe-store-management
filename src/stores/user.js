@@ -252,11 +252,26 @@ export const useUserStore = defineStore('user', () => {
       // 先执行迁移（如果需要）
       await migrateFromLocalStorage()
       
-      // 从云端加载数据
-      const { data, error } = await supabase
+      // 从云端加载数据（添加超时处理）
+      const supabasePromise = supabase
         .from(TABLES.USERS)
         .select('*')
         .order('create_time', { ascending: true })
+      
+      // 设置5秒超时
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('请求超时')), 5000)
+      })
+      
+      let data, error
+      try {
+        const result = await Promise.race([supabasePromise, timeoutPromise])
+        data = result.data
+        error = result.error
+      } catch (timeoutError) {
+        console.warn('Supabase 请求超时，使用本地数据:', timeoutError)
+        error = { message: '请求超时' }
+      }
       
       if (error) {
         console.error('从云端加载用户失败:', error)
