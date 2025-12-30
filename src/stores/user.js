@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import { supabase, TABLES } from '@/config/supabase'
 
 // 角色定义
 export const ROLES = {
@@ -165,32 +166,137 @@ export const useUserStore = defineStore('user', () => {
   // 检查是否是店长（向后兼容）
   const isManagerOrAbove = computed(() => currentRole.value === ROLES.MANAGER)
   
-  // 加载用户数据
-  const loadUsers = () => {
+  // 从 localStorage 迁移到云端（仅执行一次）
+  const migrateFromLocalStorage = async () => {
+    const migrated = localStorage.getItem('users_migrated_to_cloud')
+    if (migrated) return // 已经迁移过了
+    
     const stored = localStorage.getItem('users')
-    if (stored) {
-      const storedUsers = JSON.parse(stored)
-      // 检查是否需要更新默认用户（比如店长账号变更）
-      const hasNewDefaults = DEFAULT_USERS.some(defaultUser => {
-        const existingUser = storedUsers.find(u => u.id === defaultUser.id)
-        return !existingUser || 
-          (existingUser.username !== defaultUser.username && defaultUser.id !== '1')
-      })
+    if (!stored) {
+      // 没有本地数据，初始化默认用户到云端
+      await initializeDefaultUsers()
+      localStorage.setItem('users_migrated_to_cloud', 'true')
+      return
+    }
+    
+    try {
+      const localUsers = JSON.parse(stored)
+      console.log('开始迁移用户数据到云端...', localUsers.length, '个用户')
       
-      if (hasNewDefaults) {
-        // 合并：保留已有用户，更新默认用户
-        const customUsers = storedUsers.filter(u => 
-          !DEFAULT_USERS.some(d => d.id === u.id)
-        )
-        users.value = [...DEFAULT_USERS, ...customUsers]
-        saveUsers()
-      } else {
-        users.value = storedUsers
+      // 将本地用户上传到云端
+      for (const user of localUsers) {
+        await supabase
+          .from(TABLES.USERS)
+          .upsert({
+            id: user.id,
+            username: user.username,
+            password: user.password,
+            name: user.name,
+            role: user.role,
+            phone: user.phone || '',
+            avatar: user.avatar || '',
+            status: user.status || 'active',
+            create_time: user.createTime || Date.now(),
+            last_login_time: user.lastLoginTime || null
+          }, { onConflict: 'id' })
       }
-    } else {
-      // 初始化默认用户
-      users.value = DEFAULT_USERS
-      saveUsers()
+      
+      console.log('用户数据迁移完成！')
+      localStorage.setItem('users_migrated_to_cloud', 'true')
+    } catch (error) {
+      console.error('迁移用户数据失败:', error)
+    }
+  }
+  
+  // 初始化默认用户到云端
+  const initializeDefaultUsers = async () => {
+    try {
+      // 检查云端是否已有用户
+      const { data: existingUsers } = await supabase
+        .from(TABLES.USERS)
+        .select('id')
+        .limit(1)
+      
+      if (existingUsers && existingUsers.length > 0) {
+        console.log('云端已有用户数据，跳过初始化')
+        return
+      }
+      
+      // 上传默认用户
+      for (const user of DEFAULT_USERS) {
+        await supabase
+          .from(TABLES.USERS)
+          .insert({
+            id: user.id,
+            username: user.username,
+            password: user.password,
+            name: user.name,
+            role: user.role,
+            phone: user.phone || '',
+            avatar: user.avatar || '',
+            status: user.status || 'active',
+            create_time: user.createTime || Date.now(),
+            last_login_time: user.lastLoginTime || null
+          })
+      }
+      
+      console.log('默认用户初始化完成')
+    } catch (error) {
+      console.error('初始化默认用户失败:', error)
+    }
+  }
+  
+  // 从云端加载用户数据
+  const loadUsers = async () => {
+    try {
+      // 先执行迁移（如果需要）
+      await migrateFromLocalStorage()
+      
+      // 从云端加载数据
+      const { data, error } = await supabase
+        .from(TABLES.USERS)
+        .select('*')
+        .order('create_time', { ascending: true })
+      
+      if (error) {
+        console.error('从云端加载用户失败:', error)
+        // 降级到 localStorage
+        const stored = localStorage.getItem('users')
+        if (stored) {
+          users.value = JSON.parse(stored)
+        } else {
+          users.value = DEFAULT_USERS
+        }
+        return
+      }
+      
+      // 转换数据格式（云端 -> 前端）
+      users.value = data.map(u => ({
+        id: u.id,
+        username: u.username,
+        password: u.password,
+        name: u.name,
+        role: u.role,
+        phone: u.phone || '',
+        avatar: u.avatar || '',
+        createTime: u.create_time,
+        lastLoginTime: u.last_login_time,
+        status: u.status || 'active'
+      }))
+      
+      // 同步到 localStorage 作为备份
+      localStorage.setItem('users', JSON.stringify(users.value))
+      
+      console.log('从云端加载用户成功:', users.value.length, '个用户')
+    } catch (error) {
+      console.error('加载用户异常:', error)
+      // 降级到 localStorage
+      const stored = localStorage.getItem('users')
+      if (stored) {
+        users.value = JSON.parse(stored)
+      } else {
+        users.value = DEFAULT_USERS
+      }
     }
     
     // 检查是否有已登录的用户
@@ -207,13 +313,68 @@ export const useUserStore = defineStore('user', () => {
     }
   }
   
-  // 保存用户数据
-  const saveUsers = () => {
-    localStorage.setItem('users', JSON.stringify(users.value))
+  // 保存用户数据（同时保存到云端和本地）
+  const saveUsers = async () => {
+    try {
+      // 保存到 localStorage 作为备份
+      localStorage.setItem('users', JSON.stringify(users.value))
+    } catch (error) {
+      console.error('保存到 localStorage 失败:', error)
+    }
+  }
+  
+  // 保存单个用户到云端
+  const saveUserToCloud = async (user) => {
+    try {
+      const { error } = await supabase
+        .from(TABLES.USERS)
+        .upsert({
+          id: user.id,
+          username: user.username,
+          password: user.password,
+          name: user.name,
+          role: user.role,
+          phone: user.phone || '',
+          avatar: user.avatar || '',
+          status: user.status || 'active',
+          create_time: user.createTime || Date.now(),
+          last_login_time: user.lastLoginTime || null
+        }, { onConflict: 'id' })
+      
+      if (error) {
+        console.error('保存用户到云端失败:', error)
+        return false
+      }
+      
+      return true
+    } catch (error) {
+      console.error('保存用户到云端异常:', error)
+      return false
+    }
+  }
+  
+  // 从云端删除用户
+  const deleteUserFromCloud = async (userId) => {
+    try {
+      const { error } = await supabase
+        .from(TABLES.USERS)
+        .delete()
+        .eq('id', userId)
+      
+      if (error) {
+        console.error('从云端删除用户失败:', error)
+        return false
+      }
+      
+      return true
+    } catch (error) {
+      console.error('从云端删除用户异常:', error)
+      return false
+    }
   }
   
   // 登录
-  const login = (username, password) => {
+  const login = async (username, password) => {
     const user = users.value.find(
       u => u.username === username && u.password === password
     )
@@ -223,12 +384,18 @@ export const useUserStore = defineStore('user', () => {
     }
     
     if (user.status !== 'active') {
-      return { success: false, message: '账号已被禁用，请联系管理员' }
+      return { success: false, message: '账号已被禁用，请联系店长' }
     }
     
     // 更新最后登录时间
     user.lastLoginTime = Date.now()
-    saveUsers()
+    
+    // 保存到云端（异步，不阻塞登录）
+    saveUserToCloud(user).catch(err => {
+      console.warn('更新登录时间到云端失败:', err)
+    })
+    
+    await saveUsers()
     
     // 设置当前用户
     currentUser.value = user
@@ -244,7 +411,7 @@ export const useUserStore = defineStore('user', () => {
   }
   
   // 添加用户
-  const addUser = (userData) => {
+  const addUser = async (userData) => {
     // 检查用户名是否已存在
     if (users.value.some(u => u.username === userData.username)) {
       return { success: false, message: '用户名已存在' }
@@ -263,14 +430,20 @@ export const useUserStore = defineStore('user', () => {
       status: 'active'
     }
     
+    // 保存到云端
+    const cloudSuccess = await saveUserToCloud(newUser)
+    if (!cloudSuccess) {
+      console.warn('保存到云端失败，仅保存到本地')
+    }
+    
     users.value.push(newUser)
-    saveUsers()
+    await saveUsers()
     
     return { success: true, message: '添加成功', user: newUser }
   }
   
   // 更新用户
-  const updateUser = (id, updates) => {
+  const updateUser = async (id, updates) => {
     const index = users.value.findIndex(u => u.id === id)
     if (index === -1) {
       return { success: false, message: '用户不存在' }
@@ -292,7 +465,14 @@ export const useUserStore = defineStore('user', () => {
     }
     
     users.value[index] = { ...users.value[index], ...updates }
-    saveUsers()
+    
+    // 保存到云端
+    const cloudSuccess = await saveUserToCloud(users.value[index])
+    if (!cloudSuccess) {
+      console.warn('保存到云端失败，仅保存到本地')
+    }
+    
+    await saveUsers()
     
     // 如果修改的是当前用户，更新当前用户信息
     if (currentUser.value && currentUser.value.id === id) {
@@ -304,7 +484,7 @@ export const useUserStore = defineStore('user', () => {
   }
   
   // 删除用户
-  const deleteUser = (id) => {
+  const deleteUser = async (id) => {
     const user = users.value.find(u => u.id === id)
     if (!user) {
       return { success: false, message: '用户不存在' }
@@ -320,15 +500,21 @@ export const useUserStore = defineStore('user', () => {
       return { success: false, message: '不能删除当前登录的账号' }
     }
     
+    // 从云端删除
+    const cloudSuccess = await deleteUserFromCloud(id)
+    if (!cloudSuccess) {
+      console.warn('从云端删除失败，仅从本地删除')
+    }
+    
     const index = users.value.findIndex(u => u.id === id)
     users.value.splice(index, 1)
-    saveUsers()
+    await saveUsers()
     
     return { success: true, message: '删除成功' }
   }
   
   // 禁用/启用用户
-  const toggleUserStatus = (id) => {
+  const toggleUserStatus = async (id) => {
     const user = users.value.find(u => u.id === id)
     if (!user) {
       return { success: false, message: '用户不存在' }
@@ -345,7 +531,14 @@ export const useUserStore = defineStore('user', () => {
     }
     
     user.status = user.status === 'active' ? 'disabled' : 'active'
-    saveUsers()
+    
+    // 保存到云端
+    const cloudSuccess = await saveUserToCloud(user)
+    if (!cloudSuccess) {
+      console.warn('保存到云端失败，仅保存到本地')
+    }
+    
+    await saveUsers()
     
     return { 
       success: true, 
@@ -354,7 +547,7 @@ export const useUserStore = defineStore('user', () => {
   }
   
   // 修改密码
-  const changePassword = (oldPassword, newPassword) => {
+  const changePassword = async (oldPassword, newPassword) => {
     if (!currentUser.value) {
       return { success: false, message: '请先登录' }
     }
@@ -367,22 +560,36 @@ export const useUserStore = defineStore('user', () => {
     if (index !== -1) {
       users.value[index].password = newPassword
       currentUser.value.password = newPassword
-      saveUsers()
+      
+      // 保存到云端
+      const cloudSuccess = await saveUserToCloud(users.value[index])
+      if (!cloudSuccess) {
+        console.warn('保存到云端失败，仅保存到本地')
+      }
+      
+      await saveUsers()
       localStorage.setItem('currentUser', JSON.stringify(currentUser.value))
     }
     
     return { success: true, message: '密码修改成功' }
   }
   
-  // 重置用户密码（管理员功能）
-  const resetPassword = (id, newPassword = '123456') => {
+  // 重置用户密码（店长功能）
+  const resetPassword = async (id, newPassword = '123456') => {
     const index = users.value.findIndex(u => u.id === id)
     if (index === -1) {
       return { success: false, message: '用户不存在' }
     }
     
     users.value[index].password = newPassword
-    saveUsers()
+    
+    // 保存到云端
+    const cloudSuccess = await saveUserToCloud(users.value[index])
+    if (!cloudSuccess) {
+      console.warn('保存到云端失败，仅保存到本地')
+    }
+    
+    await saveUsers()
     
     return { success: true, message: `密码已重置为: ${newPassword}` }
   }

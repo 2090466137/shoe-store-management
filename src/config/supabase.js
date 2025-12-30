@@ -13,5 +13,6 @@ export const TABLES = {
   SALES: 'sales',
   PURCHASES: 'purchases',
   MEMBERS: 'members',
-  MEMBER_RECHARGES: 'member_recharges'
+  MEMBER_RECHARGES: 'member_recharges',
+  USERS: 'users'
 }

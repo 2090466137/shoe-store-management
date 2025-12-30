@@ -119,16 +119,40 @@ CREATE INDEX IF NOT EXISTS idx_purchases_product_id ON purchases(product_id);
 CREATE INDEX IF NOT EXISTS idx_purchases_created_at ON purchases(created_at DESC);
 
 -- ========================================
--- 6. 启用行级安全策略 (RLS)
+-- 6. 用户表 (users)
+-- ========================================
+CREATE TABLE IF NOT EXISTS users (
+  id TEXT PRIMARY KEY,
+  username TEXT NOT NULL UNIQUE,
+  password TEXT NOT NULL,
+  name TEXT NOT NULL,
+  role TEXT NOT NULL,
+  phone TEXT,
+  avatar TEXT,
+  status TEXT DEFAULT 'active',
+  create_time BIGINT NOT NULL,
+  last_login_time BIGINT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 用户表索引
+CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
+CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);
+CREATE INDEX IF NOT EXISTS idx_users_status ON users(status);
+
+-- ========================================
+-- 7. 启用行级安全策略 (RLS)
 -- ========================================
 ALTER TABLE products ENABLE ROW LEVEL SECURITY;
 ALTER TABLE sales ENABLE ROW LEVEL SECURITY;
 ALTER TABLE purchases ENABLE ROW LEVEL SECURITY;
 ALTER TABLE members ENABLE ROW LEVEL SECURITY;
 ALTER TABLE member_recharges ENABLE ROW LEVEL SECURITY;
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 
 -- ========================================
--- 7. 创建公开访问策略（允许所有操作）
+-- 8. 创建公开访问策略（允许所有操作）
 -- ========================================
 
 -- 商品表策略（如果已存在则删除后重新创建）
@@ -156,8 +180,13 @@ DROP POLICY IF EXISTS "Enable all access for member_recharges" ON member_recharg
 CREATE POLICY "Enable all access for member_recharges" ON member_recharges
   FOR ALL USING (true) WITH CHECK (true);
 
+-- 用户表策略
+DROP POLICY IF EXISTS "Enable all access for users" ON users;
+CREATE POLICY "Enable all access for users" ON users
+  FOR ALL USING (true) WITH CHECK (true);
+
 -- ========================================
--- 8. 创建更新时间触发器
+-- 9. 创建更新时间触发器
 -- ========================================
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
@@ -174,6 +203,10 @@ CREATE TRIGGER update_products_updated_at BEFORE UPDATE ON products
 
 DROP TRIGGER IF EXISTS update_members_updated_at ON members;
 CREATE TRIGGER update_members_updated_at BEFORE UPDATE ON members
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_users_updated_at ON users;
+CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- ========================================
