@@ -16,16 +16,16 @@
           <div class="member-phone">{{ member.phone }}</div>
           <div class="member-balance">
             <span class="label">当前余额：</span>
-            <span class="value">¥{{ member.balance.toFixed(2) }}</span>
+            <span class="value" :key="member.balance">¥{{ member.balance.toFixed(2) }}</span>
           </div>
           <div class="member-stats">
             <div class="stat-item">
               <span class="stat-label">累计充值</span>
-              <span class="stat-value">¥{{ member.totalRecharge.toFixed(2) }}</span>
+              <span class="stat-value" :key="member.totalRecharge">¥{{ member.totalRecharge.toFixed(2) }}</span>
             </div>
             <div class="stat-item">
               <span class="stat-label">累计消费</span>
-              <span class="stat-value">¥{{ member.totalConsumption.toFixed(2) }}</span>
+              <span class="stat-value" :key="member.totalConsumption">¥{{ member.totalConsumption.toFixed(2) }}</span>
             </div>
           </div>
         </div>
@@ -158,20 +158,21 @@ const handleRecharge = async () => {
   )
 
   if (result.success) {
+    // 立即更新本地显示的会员信息
+    const updatedMember = memberStore.getMemberById(member.value.id)
+    if (updatedMember) {
+      // 使用 Object.assign 强制更新所有属性
+      Object.assign(member.value, {
+        balance: updatedMember.balance,
+        totalRecharge: updatedMember.totalRecharge,
+        totalConsumption: updatedMember.totalConsumption
+      })
+    }
+    
     showToast({
       type: 'success',
       message: `充值成功！余额：¥${result.balance.toFixed(2)}`
     })
-    
-    // 等待 store 重新加载数据完成
-    await new Promise(resolve => setTimeout(resolve, 100))
-    
-    // 重新获取会员信息，确保获取最新数据
-    const updatedMember = memberStore.getMemberById(member.value.id)
-    if (updatedMember) {
-      // 深度拷贝，确保触发响应式更新
-      member.value = JSON.parse(JSON.stringify(updatedMember))
-    }
     
     // 重置表单
     rechargeForm.value = {
@@ -194,7 +195,6 @@ onMounted(async () => {
       router.back()
     }
   } else {
-    // 如果没有memberId，可以显示选择会员的界面
     router.back()
   }
 })
@@ -278,4 +278,3 @@ onMounted(async () => {
   min-width: 80px;
 }
 </style>
-

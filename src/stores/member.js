@@ -47,7 +47,6 @@ export const useMemberStore = defineStore('member', () => {
 
       if (error) {
         console.error('加载会员失败:', error)
-        // 如果云端加载失败，尝试从localStorage加载
         const stored = localStorage.getItem('members')
         if (stored) {
           members.value = JSON.parse(stored)
@@ -55,14 +54,10 @@ export const useMemberStore = defineStore('member', () => {
         return
       }
 
-      // 转换数据格式
       members.value = data.map(dbToFrontend)
-      
-      // 同步更新localStorage，确保与云端一致
       await saveMembers()
     } catch (error) {
       console.error('加载会员异常:', error)
-      // 降级到localStorage
       const stored = localStorage.getItem('members')
       if (stored) {
         members.value = JSON.parse(stored)
@@ -97,7 +92,6 @@ export const useMemberStore = defineStore('member', () => {
   // 注册会员
   const addMember = async (memberData) => {
     try {
-      // 检查手机号是否已存在
       const existing = getMemberByPhone(memberData.phone)
       if (existing) {
         return { success: false, message: '该手机号已注册' }
@@ -120,7 +114,6 @@ export const useMemberStore = defineStore('member', () => {
       return { success: true, data: newMember }
     } catch (error) {
       console.error('注册会员失败:', error)
-      // 降级到localStorage
       const newMember = {
         ...memberData,
         id: Date.now().toString(),
@@ -151,7 +144,6 @@ export const useMemberStore = defineStore('member', () => {
 
       if (error) throw error
 
-      // 更新本地状态
       const index = members.value.findIndex(m => m.id === id)
       if (index !== -1) {
         members.value[index] = { ...members.value[index], ...updates }
@@ -161,7 +153,6 @@ export const useMemberStore = defineStore('member', () => {
       return false
     } catch (error) {
       console.error('更新会员失败:', error)
-      // 降级到localStorage
       const index = members.value.findIndex(m => m.id === id)
       if (index !== -1) {
         members.value[index] = { ...members.value[index], ...updates }
@@ -183,15 +174,34 @@ export const useMemberStore = defineStore('member', () => {
       const newBalance = member.balance + amount
       const newTotalRecharge = member.totalRecharge + amount
 
-      // 更新会员余额
-      const updateResult = await updateMember(memberId, {
-        balance: newBalance,
-        totalRecharge: newTotalRecharge
-      })
-
-      if (!updateResult) {
-        return { success: false, message: '更新余额失败' }
+      // 先更新本地状态，提供即时反馈
+      const index = members.value.findIndex(m => m.id === memberId)
+      if (index !== -1) {
+        members.value[index] = {
+          ...members.value[index],
+          balance: newBalance,
+          totalRecharge: newTotalRecharge
+        }
       }
+
+      // 更新云端数据
+      const dbUpdates = {
+        balance: newBalance,
+        total_recharge: newTotalRecharge
+      }
+
+      const { error: updateError } = await supabase
+        .from(TABLES.MEMBERS)
+        .update(dbUpdates)
+        .eq('id', memberId)
+
+      if (updateError) {
+        console.error('更新云端余额失败:', updateError)
+        // 云端更新失败，但本地已更新，继续执行
+      }
+
+      // 保存到 localStorage
+      await saveMembers()
 
       // 记录充值记录
       const { error } = await supabase
@@ -205,17 +215,9 @@ export const useMemberStore = defineStore('member', () => {
 
       if (error) {
         console.error('记录充值失败:', error)
-        // 即使记录失败，余额已更新，继续执行
       }
 
-      // 重新从云端加载数据，确保数据同步
-      await loadMembers()
-
-      // 重新获取更新后的会员信息
-      const updatedMember = getMemberById(memberId)
-      const finalBalance = updatedMember ? updatedMember.balance : newBalance
-
-      return { success: true, balance: finalBalance }
+      return { success: true, balance: newBalance }
     } catch (error) {
       console.error('充值失败:', error)
       return { success: false, message: '充值失败' }
@@ -257,24 +259,18 @@ export const useMemberStore = defineStore('member', () => {
       return false
     }
     
-    // 临时保存，如果删除失败可以恢复
     const tempMember = members.value[index]
     
     try {
-      // 先从本地删除，避免UI延迟
       members.value.splice(index, 1)
-      
-      // 立即更新localStorage
       await saveMembers()
       
-      // 从云端删除
       const { error } = await supabase
         .from(TABLES.MEMBERS)
         .delete()
         .eq('id', id)
 
       if (error) {
-        // 如果云端删除失败，恢复本地数据
         members.value.splice(index, 0, tempMember)
         await saveMembers()
         throw error
@@ -283,10 +279,8 @@ export const useMemberStore = defineStore('member', () => {
       return true
     } catch (error) {
       console.error('删除会员失败:', error)
-      // 如果云端删除失败，检查是否需要恢复
       const currentIndex = members.value.findIndex(m => m.id === id)
       if (currentIndex === -1 && tempMember) {
-        // 如果会员不在列表中，说明已经被删除了，恢复它
         members.value.splice(index, 0, tempMember)
         await saveMembers()
       }
