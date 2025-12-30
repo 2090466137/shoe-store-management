@@ -1,6 +1,7 @@
 {
   "name": "shoe-store-management",
   "version": "1.0.0",
+  "type": "module",
   "description": "鞋店仓库管理系统 - 移动端应用",
   "main": "index.html",
   "scripts": {
@@ -22,4 +23,3 @@
     "postcss": "^8.4.32"
   }
 }
-
