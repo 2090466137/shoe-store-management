@@ -124,7 +124,13 @@
       <van-tabbar-item icon="home-o" to="/home">首页</van-tabbar-item>
       <van-tabbar-item icon="bag-o" to="/products">商品</van-tabbar-item>
       <van-tabbar-item icon="shopping-cart-o" to="/sales">销售</van-tabbar-item>
-      <van-tabbar-item icon="bar-chart-o" to="/statistics">统计</van-tabbar-item>
+      <van-tabbar-item 
+        v-if="userStore.hasPermission(PERMISSIONS.STATS_PROFIT)"
+        icon="bar-chart-o" 
+        to="/statistics"
+      >
+        统计
+      </van-tabbar-item>
     </van-tabbar>
   </div>
 </template>
@@ -358,4 +364,3 @@ const deleteProduct = (product) => {
   gap: 8px;
 }
 </style>
-

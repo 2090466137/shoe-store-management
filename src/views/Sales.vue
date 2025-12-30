@@ -77,7 +77,9 @@
                 {{ sale.productName }}
               </template>
             </div>
-            <div class="sale-amount">¥{{ sale.totalAmount.toFixed(2) }}</div>
+            <div class="sale-amount" v-if="userStore.hasPermission(PERMISSIONS.STATS_PROFIT)">
+              ¥{{ sale.totalAmount.toFixed(2) }}
+            </div>
           </div>
           <div class="sale-info">
             <!-- 多商品订单信息 -->
@@ -88,12 +90,14 @@
             <!-- 单商品信息 -->
             <template v-else>
               <span>数量: {{ sale.quantity }}件</span>
-              <span>单价: ¥{{ sale.salePrice }}</span>
+              <span v-if="userStore.hasPermission(PERMISSIONS.STATS_PROFIT)">
+                单价: ¥{{ sale.salePrice }}
+              </span>
               <span v-if="sale.salesperson">销售员: {{ sale.salesperson }}</span>
             </template>
           </div>
           <div class="sale-footer">
-            <div class="sale-profit">
+            <div class="sale-profit" v-if="userStore.hasPermission(PERMISSIONS.STATS_PROFIT)">
               <span class="profit-label">利润:</span>
               <span class="profit-value">¥{{ sale.profit.toFixed(2) }}</span>
             </div>
@@ -111,7 +115,13 @@
       <van-tabbar-item icon="home-o" to="/home">首页</van-tabbar-item>
       <van-tabbar-item icon="bag-o" to="/products">商品</van-tabbar-item>
       <van-tabbar-item icon="shopping-cart-o" to="/sales">销售</van-tabbar-item>
-      <van-tabbar-item icon="bar-chart-o" to="/statistics">统计</van-tabbar-item>
+      <van-tabbar-item 
+        v-if="userStore.hasPermission(PERMISSIONS.STATS_PROFIT)"
+        icon="bar-chart-o" 
+        to="/statistics"
+      >
+        统计
+      </van-tabbar-item>
     </van-tabbar>
   </div>
 </template>
@@ -121,11 +131,13 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useSalesStore } from '@/stores/sales'
 import { useProductStore } from '@/stores/product'
+import { useUserStore, PERMISSIONS } from '@/stores/user'
 import { showConfirmDialog, showToast } from 'vant'
 
 const router = useRouter()
 const salesStore = useSalesStore()
 const productStore = useProductStore()
+const userStore = useUserStore()
 const active = ref(2)
 
 const formatDate = (timestamp) => {

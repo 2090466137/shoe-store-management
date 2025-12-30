@@ -38,7 +38,7 @@
           <div class="staff-content">
             <div class="staff-header">
               <div class="staff-name">{{ staff.name }}</div>
-              <div class="staff-amount">¥{{ staff.totalAmount.toFixed(2) }}</div>
+              <div class="staff-amount" v-if="canViewProfit">¥{{ staff.totalAmount.toFixed(2) }}</div>
             </div>
             
             <div class="staff-details">
@@ -50,11 +50,15 @@
                 <span class="detail-label">销售件数</span>
                 <span class="detail-value">{{ staff.quantity }} 件</span>
               </div>
-              <div class="detail-item">
+              <div class="detail-item" v-if="canViewProfit">
+                <span class="detail-label">总销售额</span>
+                <span class="detail-value">¥{{ staff.totalAmount.toFixed(2) }}</span>
+              </div>
+              <div class="detail-item" v-if="canViewProfit">
                 <span class="detail-label">总利润</span>
                 <span class="detail-value profit">¥{{ staff.totalProfit.toFixed(2) }}</span>
               </div>
-              <div class="detail-item">
+              <div class="detail-item" v-if="canViewProfit">
                 <span class="detail-label">客单价</span>
                 <span class="detail-value">¥{{ (staff.totalAmount / staff.salesCount).toFixed(2) }}</span>
               </div>
@@ -70,22 +74,41 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useSalesStore } from '@/stores/sales'
+import { useUserStore, PERMISSIONS } from '@/stores/user'
 
 const router = useRouter()
 const salesStore = useSalesStore()
+const userStore = useUserStore()
 const activeTab = ref('today')
 
+// 检查是否有查看所有员工业绩的权限
+const canViewAllStats = computed(() => userStore.hasPermission(PERMISSIONS.STAFF_STATS_ALL))
+
+// 检查是否有查看利润的权限
+const canViewProfit = computed(() => userStore.hasPermission(PERMISSIONS.STATS_PROFIT))
+
 const currentStats = computed(() => {
+  let stats = []
   switch (activeTab.value) {
     case 'today':
-      return salesStore.todaySalespersonStats
+      stats = salesStore.todaySalespersonStats
+      break
     case 'month':
-      return salesStore.monthSalespersonStats
+      stats = salesStore.monthSalespersonStats
+      break
     case 'total':
-      return salesStore.salespersonStats
+      stats = salesStore.salespersonStats
+      break
     default:
-      return []
+      stats = []
   }
+  
+  // 如果没有查看所有员工业绩的权限，只显示自己的
+  if (!canViewAllStats.value) {
+    return stats.filter(s => s.name === userStore.currentUserName)
+  }
+  
+  return stats
 })
 </script>
 
@@ -193,3 +216,4 @@ const currentStats = computed(() => {
   color: #07c160;
 }
 </style>
+
