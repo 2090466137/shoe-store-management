@@ -110,7 +110,11 @@ export const useProductStore = defineStore('product', () => {
       }
 
       // 转换数据格式
-      products.value = data.map(dbToFrontend)
+      const cloudProducts = data.map(dbToFrontend)
+      products.value = cloudProducts
+      
+      // 同步更新localStorage，确保与云端一致
+      await saveProducts()
     } catch (error) {
       console.error('加载商品异常:', error)
       // 降级到localStorage
@@ -228,29 +232,43 @@ export const useProductStore = defineStore('product', () => {
 
   // 删除商品
   const deleteProduct = async (id) => {
+    const index = products.value.findIndex(p => p.id === id)
+    if (index === -1) {
+      return false
+    }
+    
+    // 临时保存，如果删除失败可以恢复
+    const tempProduct = products.value[index]
+    
     try {
+      // 先从本地删除，避免UI延迟
+      products.value.splice(index, 1)
+      
+      // 立即更新localStorage
+      await saveProducts()
+      
+      // 从云端删除
       const { error } = await supabase
         .from(TABLES.PRODUCTS)
         .delete()
         .eq('id', id)
 
-      if (error) throw error
-
-      const index = products.value.findIndex(p => p.id === id)
-      if (index !== -1) {
-        products.value.splice(index, 1)
+      if (error) {
+        // 如果云端删除失败，恢复本地数据
+        products.value.splice(index, 0, tempProduct)
         await saveProducts()
-        return true
+        throw error
       }
-      return false
+
+      return true
     } catch (error) {
       console.error('删除商品失败:', error)
-      // 降级到localStorage
-      const index = products.value.findIndex(p => p.id === id)
-      if (index !== -1) {
-        products.value.splice(index, 1)
-        saveProducts()
-        return true
+      // 如果云端删除失败，检查是否需要恢复
+      const currentIndex = products.value.findIndex(p => p.id === id)
+      if (currentIndex === -1 && tempProduct) {
+        // 如果商品不在列表中，说明已经被删除了，恢复它
+        products.value.splice(index, 0, tempProduct)
+        await saveProducts()
       }
       return false
     }
