@@ -13,11 +13,13 @@ import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useProductStore } from './stores/product'
 import { useSalesStore } from './stores/sales'
+import { useUserStore } from './stores/user'
 import { requestNotificationPermission } from './utils/notification'
 
 const router = useRouter()
 const productStore = useProductStore()
 const salesStore = useSalesStore()
+const userStore = useUserStore()
 
 // 暗黑模式
 const isDarkMode = ref(false)
@@ -84,7 +86,10 @@ window.toggleDarkMode = () => {
 }
 
 onMounted(async () => {
-  // 初始化数据
+  // 初始化用户数据
+  userStore.loadUsers()
+  
+  // 初始化商品和销售数据
   productStore.loadProducts()
   salesStore.loadSales()
   
@@ -282,4 +287,3 @@ onMounted(async () => {
   color: #808080;
 }
 </style>
-

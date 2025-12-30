@@ -3,16 +3,33 @@
     <!-- 头部 -->
     <div class="header">
       <div class="header-content">
+        <div class="header-top">
+          <div class="user-info" @click="showUserMenu = true">
+            <div class="user-avatar">
+              {{ userStore.currentUserName?.charAt(0) || '?' }}
+            </div>
+            <div class="user-detail">
+              <div class="user-name">{{ userStore.currentUserName || '未登录' }}</div>
+              <div class="user-role">{{ getRoleName(userStore.currentRole) }}</div>
+            </div>
+          </div>
+          <div class="header-actions">
+            <van-icon 
+              v-if="userStore.hasPermission(PERMISSIONS.USER_VIEW)" 
+              name="manager-o" 
+              size="22" 
+              @click="router.push('/user-management')"
+            />
+            <van-icon 
+              :name="isDarkMode ? 'sun-o' : 'moon-o'" 
+              size="22" 
+              @click="toggleDarkMode"
+            />
+            <van-icon name="setting-o" size="22" @click="showUserMenu = true" />
+          </div>
+        </div>
         <h1 class="title">鞋店管理系统</h1>
         <p class="subtitle">{{ currentDate }}</p>
-      </div>
-      <div class="header-actions">
-        <van-icon 
-          :name="isDarkMode ? 'sun-o' : 'moon-o'" 
-          size="24" 
-          @click="toggleDarkMode"
-          class="theme-toggle"
-        />
       </div>
     </div>
 
@@ -29,7 +46,11 @@
           </div>
         </div>
 
-        <div class="stat-card" @click="router.push('/statistics')">
+        <div 
+          class="stat-card" 
+          @click="router.push('/statistics')"
+          v-if="userStore.hasPermission(PERMISSIONS.STATS_PROFIT)"
+        >
           <div class="stat-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%)">
             📈
           </div>
@@ -49,7 +70,11 @@
           </div>
         </div>
 
-        <div class="stat-card" @click="router.push('/products')">
+        <div 
+          class="stat-card" 
+          @click="router.push('/products')"
+          v-if="userStore.hasPermission(PERMISSIONS.STATS_PROFIT)"
+        >
           <div class="stat-icon" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%)">
             📦
           </div>
@@ -61,14 +86,17 @@
       </div>
 
       <!-- 低库存预警 -->
-      <div class="card" v-if="productStore.lowStockProducts.length > 0">
+      <div 
+        class="card" 
+        v-if="productStore.lowStockProducts.length > 0 && userStore.hasPermission(PERMISSIONS.INVENTORY_VIEW)"
+      >
         <div class="section-title">⚠️ 低库存预警</div>
         <div class="warning-list">
           <div 
             v-for="product in productStore.lowStockProducts" 
             :key="product.id"
             class="warning-item"
-            @click="router.push(`/product/edit/${product.id}`)"
+            @click="userStore.hasPermission(PERMISSIONS.PRODUCT_EDIT) && router.push(`/product/edit/${product.id}`)"
           >
             <div class="warning-info">
               <div class="warning-name">{{ product.name }}</div>
@@ -84,7 +112,10 @@
       </div>
 
       <!-- 今日员工业绩 -->
-      <div class="card" v-if="salesStore.todaySalespersonStats.length > 0">
+      <div 
+        class="card" 
+        v-if="salesStore.todaySalespersonStats.length > 0 && userStore.hasPermission(PERMISSIONS.STAFF_STATS_ALL)"
+      >
         <div class="section-title">👥 今日业绩</div>
         <div class="staff-stats">
           <div 
@@ -98,14 +129,20 @@
             </div>
             <div class="staff-amount">
               <div class="staff-sales">¥{{ staff.totalAmount.toFixed(0) }}</div>
-              <div class="staff-profit">利润 ¥{{ staff.totalProfit.toFixed(0) }}</div>
+              <div class="staff-profit" v-if="userStore.hasPermission(PERMISSIONS.STATS_PROFIT)">
+                利润 ¥{{ staff.totalProfit.toFixed(0) }}
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       <!-- 会员管理 -->
-      <div class="card" @click="router.push('/members')">
+      <div 
+        class="card" 
+        @click="router.push('/members')"
+        v-if="userStore.hasPermission(PERMISSIONS.MEMBER_VIEW)"
+      >
         <div class="section-title">👥 会员管理</div>
         <div class="quick-action">
           <div class="action-icon">💳</div>
@@ -119,6 +156,7 @@
         <div class="section-title">🚀 快捷操作</div>
         <div class="quick-actions">
           <van-button 
+            v-if="userStore.hasPermission(PERMISSIONS.SALES_ADD)"
             type="primary" 
             size="large" 
             block
@@ -129,8 +167,9 @@
             收银台
           </van-button>
           
-          <div class="action-row">
+          <div class="action-row" v-if="userStore.hasPermission(PERMISSIONS.PURCHASE_ADD) || userStore.hasPermission(PERMISSIONS.PRODUCT_ADD)">
             <van-button 
+              v-if="userStore.hasPermission(PERMISSIONS.PURCHASE_ADD)"
               type="success" 
               size="large" 
               class="action-btn half"
@@ -141,6 +180,7 @@
             </van-button>
             
             <van-button 
+              v-if="userStore.hasPermission(PERMISSIONS.PRODUCT_ADD)"
               type="warning" 
               size="large" 
               class="action-btn half"
@@ -151,8 +191,9 @@
             </van-button>
           </div>
           
-          <div class="action-row">
+          <div class="action-row" v-if="userStore.hasPermission(PERMISSIONS.STATS_REPORT) || userStore.hasPermission(PERMISSIONS.STAFF_STATS_VIEW)">
             <van-button 
+              v-if="userStore.hasPermission(PERMISSIONS.STATS_REPORT)"
               type="default" 
               size="large" 
               class="action-btn half backup-btn"
@@ -163,6 +204,7 @@
             </van-button>
             
             <van-button 
+              v-if="userStore.hasPermission(PERMISSIONS.STAFF_STATS_VIEW)"
               type="default" 
               size="large" 
               class="action-btn half stats-btn"
@@ -174,6 +216,7 @@
           </div>
           
           <van-button 
+            v-if="userStore.hasPermission(PERMISSIONS.DATA_BACKUP)"
             type="default" 
             size="large" 
             block
@@ -187,7 +230,7 @@
       </div>
 
       <!-- 本月数据 -->
-      <div class="card">
+      <div class="card" v-if="userStore.hasPermission(PERMISSIONS.STATS_PROFIT)">
         <div class="section-title">📊 本月数据</div>
         <div class="month-stats">
           <div class="month-stat-item">
@@ -203,7 +246,11 @@
       </div>
 
       <!-- 数据分析入口 -->
-      <div class="card" @click="router.push('/data-visualization')">
+      <div 
+        class="card" 
+        @click="router.push('/data-visualization')"
+        v-if="userStore.hasPermission(PERMISSIONS.STATS_VIEW)"
+      >
         <div class="section-title">📈 数据分析</div>
         <div class="quick-action">
           <div class="action-icon">📊</div>
@@ -212,6 +259,61 @@
         </div>
       </div>
     </div>
+
+    <!-- 用户菜单弹窗 -->
+    <van-action-sheet
+      v-model:show="showUserMenu"
+      :actions="userMenuActions"
+      cancel-text="取消"
+      close-on-click-action
+      @select="onUserMenuSelect"
+    >
+      <template #description>
+        <div class="user-menu-header">
+          <div class="menu-avatar">
+            {{ userStore.currentUserName?.charAt(0) || '?' }}
+          </div>
+          <div class="menu-info">
+            <div class="menu-name">{{ userStore.currentUserName }}</div>
+            <div class="menu-role">{{ getRoleName(userStore.currentRole) }}</div>
+          </div>
+        </div>
+      </template>
+    </van-action-sheet>
+
+    <!-- 修改密码弹窗 -->
+    <van-dialog
+      v-model:show="showChangePassword"
+      title="修改密码"
+      show-cancel-button
+      :before-close="handleChangePassword"
+    >
+      <van-form ref="passwordForm">
+        <van-cell-group inset>
+          <van-field
+            v-model="passwordData.oldPassword"
+            type="password"
+            label="原密码"
+            placeholder="请输入原密码"
+            :rules="[{ required: true, message: '请输入原密码' }]"
+          />
+          <van-field
+            v-model="passwordData.newPassword"
+            type="password"
+            label="新密码"
+            placeholder="请输入新密码"
+            :rules="[{ required: true, message: '请输入新密码' }]"
+          />
+          <van-field
+            v-model="passwordData.confirmPassword"
+            type="password"
+            label="确认密码"
+            placeholder="请再次输入新密码"
+            :rules="[{ required: true, message: '请确认新密码' }]"
+          />
+        </van-cell-group>
+      </van-form>
+    </van-dialog>
 
     <!-- 底部导航 -->
     <van-tabbar v-model="active" active-color="#1989fa" inactive-color="#7d7e80">
@@ -226,14 +328,107 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { showToast, showSuccessToast, showConfirmDialog } from 'vant'
 import { useProductStore } from '@/stores/product'
 import { useSalesStore } from '@/stores/sales'
+import { useUserStore, PERMISSIONS, ROLE_NAMES } from '@/stores/user'
 
 const router = useRouter()
 const productStore = useProductStore()
 const salesStore = useSalesStore()
+const userStore = useUserStore()
 const active = ref(0)
 const isDarkMode = ref(false)
+
+const showUserMenu = ref(false)
+const showChangePassword = ref(false)
+
+const passwordData = ref({
+  oldPassword: '',
+  newPassword: '',
+  confirmPassword: ''
+})
+
+// 获取角色名称
+const getRoleName = (role) => ROLE_NAMES[role] || '未知'
+
+// 用户菜单选项
+const userMenuActions = computed(() => {
+  const actions = [
+    { name: '修改密码', value: 'changePassword' }
+  ]
+  
+  if (userStore.hasPermission(PERMISSIONS.USER_VIEW)) {
+    actions.push({ name: '用户管理', value: 'userManagement' })
+  }
+  
+  actions.push({ name: '退出登录', value: 'logout', color: '#ee0a24' })
+  
+  return actions
+})
+
+// 用户菜单选择
+const onUserMenuSelect = async (action) => {
+  switch (action.value) {
+    case 'changePassword':
+      passwordData.value = { oldPassword: '', newPassword: '', confirmPassword: '' }
+      showChangePassword.value = true
+      break
+    case 'userManagement':
+      router.push('/user-management')
+      break
+    case 'logout':
+      try {
+        await showConfirmDialog({
+          title: '退出登录',
+          message: '确定要退出登录吗？'
+        })
+        userStore.logout()
+        router.replace('/login')
+      } catch {
+        // 用户取消
+      }
+      break
+  }
+}
+
+// 修改密码
+const handleChangePassword = (action) => {
+  return new Promise((resolve) => {
+    if (action === 'confirm') {
+      const { oldPassword, newPassword, confirmPassword } = passwordData.value
+      
+      if (!oldPassword || !newPassword || !confirmPassword) {
+        showToast('请填写完整信息')
+        resolve(false)
+        return
+      }
+      
+      if (newPassword !== confirmPassword) {
+        showToast('两次输入的密码不一致')
+        resolve(false)
+        return
+      }
+      
+      if (newPassword.length < 6) {
+        showToast('密码长度不能少于6位')
+        resolve(false)
+        return
+      }
+      
+      const result = userStore.changePassword(oldPassword, newPassword)
+      if (result.success) {
+        showSuccessToast('密码修改成功')
+        resolve(true)
+      } else {
+        showToast(result.message)
+        resolve(false)
+      }
+    } else {
+      resolve(true)
+    }
+  })
+}
 
 const currentDate = computed(() => {
   const date = new Date()
@@ -263,30 +458,66 @@ onMounted(() => {
 }
 
 .header {
-  padding: 20px 16px 30px;
+  padding: 15px 16px 30px;
   color: white;
-  position: relative;
 }
 
 .header-content {
   text-align: center;
 }
 
-.header-actions {
-  position: absolute;
-  top: 20px;
-  right: 16px;
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
 }
 
-.theme-toggle {
-  color: white;
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   cursor: pointer;
-  padding: 8px;
-  transition: all 0.3s;
 }
 
-.theme-toggle:active {
-  transform: scale(0.9) rotate(180deg);
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.user-detail {
+  text-align: left;
+}
+
+.user-name {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.user-role {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.header-actions {
+  display: flex;
+  gap: 15px;
+}
+
+.header-actions .van-icon {
+  cursor: pointer;
+  opacity: 0.9;
+}
+
+.header-actions .van-icon:active {
+  opacity: 0.6;
 }
 
 .title {
@@ -300,12 +531,30 @@ onMounted(() => {
   opacity: 0.9;
 }
 
+.content-wrapper {
+  padding: 0 16px;
+}
+
+.card {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #323233;
+}
+
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 12px;
   margin-top: -20px;
-  padding: 0 16px 16px;
+  padding-bottom: 16px;
 }
 
 .stat-card {
@@ -416,6 +665,7 @@ onMounted(() => {
   color: white;
   cursor: pointer;
   transition: transform 0.2s;
+  margin-top: 12px;
 }
 
 .quick-action:active {
@@ -562,5 +812,44 @@ onMounted(() => {
   width: 1px;
   height: 40px;
   background: #ebedf0;
+}
+
+/* 用户菜单样式 */
+.user-menu-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  margin: -10px -16px 10px;
+  border-radius: 16px 16px 0 0;
+}
+
+.menu-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: bold;
+  color: white;
+}
+
+.menu-info {
+  color: white;
+}
+
+.menu-name {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.menu-role {
+  font-size: 13px;
+  opacity: 0.9;
 }
 </style>
