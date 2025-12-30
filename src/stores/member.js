@@ -197,7 +197,6 @@ export const useMemberStore = defineStore('member', () => {
 
       if (updateError) {
         console.error('更新云端余额失败:', updateError)
-        // 云端更新失败，但本地已更新，继续执行
       }
 
       // 保存到 localStorage
@@ -239,11 +238,33 @@ export const useMemberStore = defineStore('member', () => {
       const newBalance = member.balance - amount
       const newTotalConsumption = member.totalConsumption + amount
 
-      // 更新会员余额和消费总额
-      await updateMember(memberId, {
+      // 先更新本地状态，提供即时反馈
+      const index = members.value.findIndex(m => m.id === memberId)
+      if (index !== -1) {
+        members.value[index] = {
+          ...members.value[index],
+          balance: newBalance,
+          totalConsumption: newTotalConsumption
+        }
+      }
+
+      // 更新云端数据
+      const dbUpdates = {
         balance: newBalance,
-        totalConsumption: newTotalConsumption
-      })
+        total_consumption: newTotalConsumption
+      }
+
+      const { error: updateError } = await supabase
+        .from(TABLES.MEMBERS)
+        .update(dbUpdates)
+        .eq('id', memberId)
+
+      if (updateError) {
+        console.error('更新云端余额失败:', updateError)
+      }
+
+      // 保存到 localStorage
+      await saveMembers()
 
       return { success: true, balance: newBalance }
     } catch (error) {
