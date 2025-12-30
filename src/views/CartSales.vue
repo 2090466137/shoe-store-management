@@ -391,8 +391,7 @@ const memberSearchKeyword = ref('')
 // 销售员列表（需要转换为对象数组格式供van-picker使用）
 const salespersons = [
   { text: '老板', value: '老板' },
-  { text: '老婆', value: '老婆' },
-  { text: '小王', value: '小王' }
+  { text: '员工', value: '员工' }
 ]
 
 // 快捷金额

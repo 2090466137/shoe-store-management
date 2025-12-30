@@ -163,9 +163,15 @@ const handleRecharge = async () => {
       message: `充值成功！余额：¥${result.balance.toFixed(2)}`
     })
     
-    // 刷新会员信息
-    await memberStore.loadMembers()
-    member.value = memberStore.getMemberById(member.value.id)
+    // 等待 store 重新加载数据完成
+    await new Promise(resolve => setTimeout(resolve, 100))
+    
+    // 重新获取会员信息，确保获取最新数据
+    const updatedMember = memberStore.getMemberById(member.value.id)
+    if (updatedMember) {
+      // 深度拷贝，确保触发响应式更新
+      member.value = JSON.parse(JSON.stringify(updatedMember))
+    }
     
     // 重置表单
     rechargeForm.value = {
