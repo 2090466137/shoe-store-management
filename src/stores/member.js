@@ -184,10 +184,14 @@ export const useMemberStore = defineStore('member', () => {
       const newTotalRecharge = member.totalRecharge + amount
 
       // 更新会员余额
-      await updateMember(memberId, {
+      const updateResult = await updateMember(memberId, {
         balance: newBalance,
         totalRecharge: newTotalRecharge
       })
+
+      if (!updateResult) {
+        return { success: false, message: '更新余额失败' }
+      }
 
       // 记录充值记录
       const { error } = await supabase
@@ -204,7 +208,14 @@ export const useMemberStore = defineStore('member', () => {
         // 即使记录失败，余额已更新，继续执行
       }
 
-      return { success: true, balance: newBalance }
+      // 重新从云端加载数据，确保数据同步
+      await loadMembers()
+
+      // 重新获取更新后的会员信息
+      const updatedMember = getMemberById(memberId)
+      const finalBalance = updatedMember ? updatedMember.balance : newBalance
+
+      return { success: true, balance: finalBalance }
     } catch (error) {
       console.error('充值失败:', error)
       return { success: false, message: '充值失败' }
@@ -239,6 +250,50 @@ export const useMemberStore = defineStore('member', () => {
     }
   }
 
+  // 删除会员
+  const deleteMember = async (id) => {
+    const index = members.value.findIndex(m => m.id === id)
+    if (index === -1) {
+      return false
+    }
+    
+    // 临时保存，如果删除失败可以恢复
+    const tempMember = members.value[index]
+    
+    try {
+      // 先从本地删除，避免UI延迟
+      members.value.splice(index, 1)
+      
+      // 立即更新localStorage
+      await saveMembers()
+      
+      // 从云端删除
+      const { error } = await supabase
+        .from(TABLES.MEMBERS)
+        .delete()
+        .eq('id', id)
+
+      if (error) {
+        // 如果云端删除失败，恢复本地数据
+        members.value.splice(index, 0, tempMember)
+        await saveMembers()
+        throw error
+      }
+
+      return true
+    } catch (error) {
+      console.error('删除会员失败:', error)
+      // 如果云端删除失败，检查是否需要恢复
+      const currentIndex = members.value.findIndex(m => m.id === id)
+      if (currentIndex === -1 && tempMember) {
+        // 如果会员不在列表中，说明已经被删除了，恢复它
+        members.value.splice(index, 0, tempMember)
+        await saveMembers()
+      }
+      return false
+    }
+  }
+
   // 搜索会员
   const searchMembers = (keyword) => {
     if (!keyword) return members.value
@@ -258,9 +313,9 @@ export const useMemberStore = defineStore('member', () => {
     getMemberById,
     addMember,
     updateMember,
+    deleteMember,
     rechargeMember,
     consumeMember,
     searchMembers
   }
 })
-

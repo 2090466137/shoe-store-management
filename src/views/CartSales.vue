@@ -388,8 +388,12 @@ const showMemberPicker = ref(false)
 const paymentMethod = ref('cash') // 'cash' 或 'member'
 const memberSearchKeyword = ref('')
 
-// 销售员列表
-const salespersons = ['老板', '老婆', '小王']
+// 销售员列表（需要转换为对象数组格式供van-picker使用）
+const salespersons = [
+  { text: '老板', value: '老板' },
+  { text: '老婆', value: '老婆' },
+  { text: '小王', value: '小王' }
+]
 
 // 快捷金额
 const quickAmounts = computed(() => {
@@ -603,7 +607,7 @@ const onSearch = () => {
 
 // 选择销售员
 const onSalespersonConfirm = ({ selectedOptions }) => {
-  salesperson.value = selectedOptions[0]
+  salesperson.value = selectedOptions[0].value
   showSalespersonPicker.value = false
 }
 
