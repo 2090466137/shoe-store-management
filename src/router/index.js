@@ -100,6 +100,12 @@ const routes = [
     name: 'MemberRecharge',
     component: () => import('@/views/MemberRecharge.vue'),
     meta: { title: '会员充值' }
+  },
+  {
+    path: '/data-visualization',
+    name: 'DataVisualization',
+    component: () => import('@/views/DataVisualization.vue'),
+    meta: { title: '数据分析' }
   }
 ]
 

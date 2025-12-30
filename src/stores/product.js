@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { supabase, TABLES } from '../config/supabase'
+import { checkLowStockAndNotify, checkZeroStockAndNotify } from '../utils/notification'
 
 export const useProductStore = defineStore('product', () => {
   const products = ref([])
@@ -115,6 +116,10 @@ export const useProductStore = defineStore('product', () => {
       
       // 同步更新localStorage，确保与云端一致
       await saveProducts()
+      
+      // 检查库存并发送通知
+      checkLowStockAndNotify(products.value, 5)
+      checkZeroStockAndNotify(products.value)
     } catch (error) {
       console.error('加载商品异常:', error)
       // 降级到localStorage

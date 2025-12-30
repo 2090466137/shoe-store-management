@@ -6,6 +6,14 @@
         <h1 class="title">鞋店管理系统</h1>
         <p class="subtitle">{{ currentDate }}</p>
       </div>
+      <div class="header-actions">
+        <van-icon 
+          :name="isDarkMode ? 'sun-o' : 'moon-o'" 
+          size="24" 
+          @click="toggleDarkMode"
+          class="theme-toggle"
+        />
+      </div>
     </div>
 
     <!-- 数据概览 -->
@@ -193,6 +201,16 @@
           </div>
         </div>
       </div>
+
+      <!-- 数据分析入口 -->
+      <div class="card" @click="router.push('/data-visualization')">
+        <div class="section-title">📈 数据分析</div>
+        <div class="quick-action">
+          <div class="action-icon">📊</div>
+          <div class="action-text">查看销售趋势和商品排行</div>
+          <van-icon name="arrow" class="action-arrow" />
+        </div>
+      </div>
     </div>
 
     <!-- 底部导航 -->
@@ -206,7 +224,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useProductStore } from '@/stores/product'
 import { useSalesStore } from '@/stores/sales'
@@ -215,11 +233,25 @@ const router = useRouter()
 const productStore = useProductStore()
 const salesStore = useSalesStore()
 const active = ref(0)
+const isDarkMode = ref(false)
 
 const currentDate = computed(() => {
   const date = new Date()
   const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' }
   return date.toLocaleDateString('zh-CN', options)
+})
+
+const toggleDarkMode = () => {
+  if (window.toggleDarkMode) {
+    window.toggleDarkMode()
+    isDarkMode.value = !isDarkMode.value
+  }
+}
+
+onMounted(() => {
+  // 检查当前暗黑模式状态
+  const saved = localStorage.getItem('darkMode')
+  isDarkMode.value = saved === 'true'
 })
 </script>
 
@@ -233,10 +265,28 @@ const currentDate = computed(() => {
 .header {
   padding: 20px 16px 30px;
   color: white;
+  position: relative;
 }
 
 .header-content {
   text-align: center;
+}
+
+.header-actions {
+  position: absolute;
+  top: 20px;
+  right: 16px;
+}
+
+.theme-toggle {
+  color: white;
+  cursor: pointer;
+  padding: 8px;
+  transition: all 0.3s;
+}
+
+.theme-toggle:active {
+  transform: scale(0.9) rotate(180deg);
 }
 
 .title {
