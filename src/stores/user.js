@@ -263,51 +263,82 @@ export const useUserStore = defineStore('user', () => {
         // 降级到 localStorage
         const stored = localStorage.getItem('users')
         if (stored) {
-          users.value = JSON.parse(stored)
+          try {
+            users.value = JSON.parse(stored)
+            console.log('从 localStorage 加载用户成功:', users.value.length, '个用户')
+          } catch (parseError) {
+            console.error('解析 localStorage 用户数据失败:', parseError)
+            users.value = [...DEFAULT_USERS]
+            localStorage.setItem('users', JSON.stringify(users.value))
+          }
         } else {
-          users.value = DEFAULT_USERS
+          console.warn('localStorage 中没有用户数据，使用默认用户')
+          users.value = [...DEFAULT_USERS]
+          // 保存默认用户到 localStorage
+          localStorage.setItem('users', JSON.stringify(users.value))
         }
         return
       }
       
       // 转换数据格式（云端 -> 前端）
-      users.value = data.map(u => ({
-        id: u.id,
-        username: u.username,
-        password: u.password,
-        name: u.name,
-        role: u.role,
-        phone: u.phone || '',
-        avatar: u.avatar || '',
-        createTime: u.create_time,
-        lastLoginTime: u.last_login_time,
-        status: u.status || 'active'
-      }))
-      
-      // 同步到 localStorage 作为备份
-      localStorage.setItem('users', JSON.stringify(users.value))
-      
-      console.log('从云端加载用户成功:', users.value.length, '个用户')
+      if (data && data.length > 0) {
+        users.value = data.map(u => ({
+          id: u.id,
+          username: u.username,
+          password: u.password,
+          name: u.name,
+          role: u.role,
+          phone: u.phone || '',
+          avatar: u.avatar || '',
+          createTime: u.create_time,
+          lastLoginTime: u.last_login_time,
+          status: u.status || 'active'
+        }))
+        
+        // 同步到 localStorage 作为备份
+        localStorage.setItem('users', JSON.stringify(users.value))
+        
+        console.log('从云端加载用户成功:', users.value.length, '个用户')
+      } else {
+        // 云端没有数据，使用默认用户
+        console.warn('云端没有用户数据，使用默认用户')
+        users.value = [...DEFAULT_USERS]
+        localStorage.setItem('users', JSON.stringify(users.value))
+      }
     } catch (error) {
       console.error('加载用户异常:', error)
       // 降级到 localStorage
       const stored = localStorage.getItem('users')
       if (stored) {
-        users.value = JSON.parse(stored)
+        try {
+          users.value = JSON.parse(stored)
+          console.log('从 localStorage 加载用户成功:', users.value.length, '个用户')
+        } catch (parseError) {
+          console.error('解析 localStorage 用户数据失败:', parseError)
+          users.value = [...DEFAULT_USERS]
+          localStorage.setItem('users', JSON.stringify(users.value))
+        }
       } else {
-        users.value = DEFAULT_USERS
+        console.warn('localStorage 中没有用户数据，使用默认用户')
+        users.value = [...DEFAULT_USERS]
+        localStorage.setItem('users', JSON.stringify(users.value))
       }
     }
     
     // 检查是否有已登录的用户
     const loggedInUser = localStorage.getItem('currentUser')
     if (loggedInUser) {
-      const userData = JSON.parse(loggedInUser)
-      // 验证用户是否仍然存在且状态正常
-      const user = users.value.find(u => u.id === userData.id && u.status === 'active')
-      if (user) {
-        currentUser.value = user
-      } else {
+      try {
+        const userData = JSON.parse(loggedInUser)
+        // 验证用户是否仍然存在且状态正常
+        const user = users.value.find(u => u.id === userData.id && u.status === 'active')
+        if (user) {
+          currentUser.value = user
+        } else {
+          localStorage.removeItem('currentUser')
+        }
+      } catch (error) {
+        console.error('解析已登录用户数据失败:', error)
         localStorage.removeItem('currentUser')
       }
     }
@@ -375,11 +406,32 @@ export const useUserStore = defineStore('user', () => {
   
   // 登录
   const login = async (username, password) => {
+    // 确保用户数据已加载
+    if (!users.value || users.value.length === 0) {
+      console.warn('用户数据为空，尝试重新加载...')
+      await loadUsers()
+      
+      // 重新加载后仍然为空，使用默认用户
+      if (!users.value || users.value.length === 0) {
+        console.warn('用户数据加载失败，使用默认用户')
+        users.value = [...DEFAULT_USERS]
+        // 保存默认用户到 localStorage
+        localStorage.setItem('users', JSON.stringify(users.value))
+      }
+    }
+    
+    // 验证输入
+    if (!username || !password) {
+      return { success: false, message: '请输入账号和密码' }
+    }
+    
+    // 查找用户
     const user = users.value.find(
       u => u.username === username && u.password === password
     )
     
     if (!user) {
+      console.warn('登录失败:', { username, usersCount: users.value.length })
       return { success: false, message: '用户名或密码错误' }
     }
     

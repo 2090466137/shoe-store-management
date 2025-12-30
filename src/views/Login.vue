@@ -84,9 +84,24 @@ const handleLogin = async () => {
   loading.value = true
   
   try {
-    // 确保用户数据已加载
-    if (userStore.getAllUsers.length === 0) {
+    // 确保用户数据已加载（检查 users.value 而不是 getAllUsers）
+    if (!userStore.users || userStore.users.length === 0) {
+      console.log('用户数据为空，开始加载...')
       await userStore.loadUsers()
+      
+      // 等待加载完成后，再次检查
+      if (!userStore.users || userStore.users.length === 0) {
+        showToast('用户数据加载失败，请刷新页面重试')
+        loading.value = false
+        return
+      }
+    }
+    
+    // 验证输入
+    if (!form.value.username || !form.value.password) {
+      showToast('请输入账号和密码')
+      loading.value = false
+      return
     }
     
     // 模拟网络延迟
@@ -116,7 +131,7 @@ const handleLogin = async () => {
         })
       }, 300)
     } else {
-      showToast(result.message)
+      showToast(result.message || '登录失败，请重试')
     }
   } catch (error) {
     console.error('登录错误:', error)
@@ -127,8 +142,14 @@ const handleLogin = async () => {
 }
 
 // 加载记住的账号
-onMounted(() => {
-  userStore.loadUsers()
+onMounted(async () => {
+  // 等待用户数据加载完成
+  try {
+    await userStore.loadUsers()
+  } catch (error) {
+    console.error('加载用户数据失败:', error)
+    // 即使失败也继续，因为 login 时会再次尝试加载
+  }
   
   // 如果已登录，直接跳转
   if (userStore.isLoggedIn) {
@@ -139,10 +160,15 @@ onMounted(() => {
   // 加载记住的账号
   const remembered = localStorage.getItem('rememberedAccount')
   if (remembered) {
-    const account = JSON.parse(remembered)
-    form.value.username = account.username
-    form.value.password = account.password
-    rememberMe.value = true
+    try {
+      const account = JSON.parse(remembered)
+      form.value.username = account.username
+      form.value.password = account.password
+      rememberMe.value = true
+    } catch (error) {
+      console.error('加载记住的账号失败:', error)
+      localStorage.removeItem('rememberedAccount')
+    }
   }
 })
 </script>
