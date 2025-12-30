@@ -116,23 +116,28 @@ ALTER TABLE member_recharges ENABLE ROW LEVEL SECURITY;
 -- 7. 创建公开访问策略（允许所有操作）
 -- ========================================
 
--- 商品表策略
+-- 商品表策略（如果已存在则删除后重新创建）
+DROP POLICY IF EXISTS "Enable all access for products" ON products;
 CREATE POLICY "Enable all access for products" ON products
   FOR ALL USING (true) WITH CHECK (true);
 
--- 销售表策略
+-- 销售表策略（如果已存在则删除后重新创建）
+DROP POLICY IF EXISTS "Enable all access for sales" ON sales;
 CREATE POLICY "Enable all access for sales" ON sales
   FOR ALL USING (true) WITH CHECK (true);
 
--- 采购表策略
+-- 采购表策略（如果已存在则删除后重新创建）
+DROP POLICY IF EXISTS "Enable all access for purchases" ON purchases;
 CREATE POLICY "Enable all access for purchases" ON purchases
   FOR ALL USING (true) WITH CHECK (true);
 
 -- 会员表策略
+DROP POLICY IF EXISTS "Enable all access for members" ON members;
 CREATE POLICY "Enable all access for members" ON members
   FOR ALL USING (true) WITH CHECK (true);
 
 -- 会员充值记录表策略
+DROP POLICY IF EXISTS "Enable all access for member_recharges" ON member_recharges;
 CREATE POLICY "Enable all access for member_recharges" ON member_recharges
   FOR ALL USING (true) WITH CHECK (true);
 
@@ -147,9 +152,12 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
+-- 删除已存在的触发器（如果存在）
+DROP TRIGGER IF EXISTS update_products_updated_at ON products;
 CREATE TRIGGER update_products_updated_at BEFORE UPDATE ON products
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_members_updated_at ON members;
 CREATE TRIGGER update_members_updated_at BEFORE UPDATE ON members
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
@@ -158,4 +166,3 @@ CREATE TRIGGER update_members_updated_at BEFORE UPDATE ON members
 -- ========================================
 -- 所有表创建完成
 -- 可以开始使用了
-
