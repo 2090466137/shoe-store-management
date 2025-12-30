@@ -59,31 +59,6 @@
                 <span class="detail-value">¥{{ (staff.totalAmount / staff.salesCount).toFixed(2) }}</span>
               </div>
             </div>
-
-            <!-- 提成计算（按5%） -->
-            <div class="commission-info">
-              <span class="commission-label">提成（5%）：</span>
-              <span class="commission-value">¥{{ (staff.totalAmount * 0.05).toFixed(2) }}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 提成说明 -->
-      <div class="card">
-        <div class="section-title">💰 提成说明</div>
-        <div class="commission-rules">
-          <div class="rule-item">
-            <van-icon name="checked" color="#07c160" />
-            <span>按销售额的5%计算提成</span>
-          </div>
-          <div class="rule-item">
-            <van-icon name="checked" color="#07c160" />
-            <span>每月1号结算上月提成</span>
-          </div>
-          <div class="rule-item">
-            <van-icon name="info-o" color="#1989fa" />
-            <span>可在设置中修改提成比例</span>
           </div>
         </div>
       </div>
@@ -217,37 +192,4 @@ const currentStats = computed(() => {
 .detail-value.profit {
   color: #07c160;
 }
-
-.commission-info {
-  padding-top: 12px;
-  border-top: 1px dashed #ebedf0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.commission-label {
-  font-size: 14px;
-  color: #646566;
-}
-
-.commission-value {
-  font-size: 18px;
-  font-weight: 600;
-  color: #ff976a;
-}
-
-.commission-rules {
-  margin-top: 12px;
-}
-
-.rule-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 0;
-  font-size: 14px;
-  color: #646566;
-}
 </style>
-
