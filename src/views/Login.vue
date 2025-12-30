@@ -58,10 +58,6 @@
       <div class="default-accounts">
         <div class="accounts-title">测试账号</div>
         <div class="accounts-list">
-          <div class="account-item" @click="fillAccount('admin', 'admin123')">
-            <span class="role-tag admin">管理员</span>
-            <span class="account-info">admin / admin123</span>
-          </div>
           <div class="account-item" @click="fillAccount('luhongpeng', 'lu17303838326')">
             <span class="role-tag manager">店长</span>
             <span class="account-info">luhongpeng / lu17303838326</span>
