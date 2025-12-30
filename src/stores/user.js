@@ -3,14 +3,12 @@ import { ref, computed } from 'vue'
 
 // 角色定义
 export const ROLES = {
-  ADMIN: 'admin',      // 管理员 - 所有权限
-  MANAGER: 'manager',  // 店长 - 大部分权限，不能管理用户
+  MANAGER: 'manager',  // 店长 - 所有权限
   STAFF: 'staff'       // 店员 - 基本销售权限
 }
 
 // 角色中文名称
 export const ROLE_NAMES = {
-  [ROLES.ADMIN]: '管理员',
   [ROLES.MANAGER]: '店长',
   [ROLES.STAFF]: '店员'
 }
@@ -73,43 +71,8 @@ export const PERMISSIONS = {
 
 // 角色权限映射
 const ROLE_PERMISSIONS = {
-  [ROLES.ADMIN]: Object.values(PERMISSIONS), // 管理员拥有所有权限
+  [ROLES.MANAGER]: Object.values(PERMISSIONS), // 店长拥有所有权限
   
-  [ROLES.MANAGER]: [
-    // 商品管理
-    PERMISSIONS.PRODUCT_VIEW,
-    PERMISSIONS.PRODUCT_ADD,
-    PERMISSIONS.PRODUCT_EDIT,
-    PERMISSIONS.PRODUCT_DELETE,
-    // 进货管理
-    PERMISSIONS.PURCHASE_VIEW,
-    PERMISSIONS.PURCHASE_ADD,
-    // 销售管理
-    PERMISSIONS.SALES_VIEW,
-    PERMISSIONS.SALES_ADD,
-    PERMISSIONS.SALES_DELETE,
-    // 退换货
-    PERMISSIONS.RETURNS_VIEW,
-    PERMISSIONS.RETURNS_ADD,
-    // 会员管理
-    PERMISSIONS.MEMBER_VIEW,
-    PERMISSIONS.MEMBER_ADD,
-    PERMISSIONS.MEMBER_EDIT,
-    PERMISSIONS.MEMBER_RECHARGE,
-    // 统计报表
-    PERMISSIONS.STATS_VIEW,
-    PERMISSIONS.STATS_PROFIT,
-    PERMISSIONS.STATS_REPORT,
-    // 库存盘点
-    PERMISSIONS.INVENTORY_VIEW,
-    PERMISSIONS.INVENTORY_CHECK,
-    // 员工业绩
-    PERMISSIONS.STAFF_STATS_VIEW,
-    PERMISSIONS.STAFF_STATS_ALL,
-    // 数据管理
-    PERMISSIONS.DATA_BACKUP,
-    PERMISSIONS.DATA_RESTORE
-  ],
   
   [ROLES.STAFF]: [
     // 商品管理 - 只能查看
@@ -134,18 +97,6 @@ const ROLE_PERMISSIONS = {
 const DEFAULT_USERS = [
   {
     id: '1',
-    username: 'admin',
-    password: 'admin123',
-    name: '系统管理员',
-    role: ROLES.ADMIN,
-    phone: '',
-    avatar: '',
-    createTime: Date.now(),
-    lastLoginTime: null,
-    status: 'active'
-  },
-  {
-    id: '2',
     username: 'luhongpeng',
     password: 'lu17303838326',
     name: '店长',
@@ -157,7 +108,7 @@ const DEFAULT_USERS = [
     status: 'active'
   },
   {
-    id: '3',
+    id: '2',
     username: 'lhp',
     password: '123456',
     name: '店员',
@@ -208,13 +159,11 @@ export const useUserStore = defineStore('user', () => {
     return permissions.every(p => hasPermission(p))
   }
   
-  // 检查是否是管理员
-  const isAdmin = computed(() => currentRole.value === ROLES.ADMIN)
+  // 检查是否是店长
+  const isManager = computed(() => currentRole.value === ROLES.MANAGER)
   
-  // 检查是否是店长或以上
-  const isManagerOrAbove = computed(() => 
-    [ROLES.ADMIN, ROLES.MANAGER].includes(currentRole.value)
-  )
+  // 检查是否是店长（向后兼容）
+  const isManagerOrAbove = computed(() => currentRole.value === ROLES.MANAGER)
   
   // 加载用户数据
   const loadUsers = () => {
@@ -337,9 +286,9 @@ export const useUserStore = defineStore('user', () => {
       }
     }
     
-    // 不允许修改管理员的角色
-    if (users.value[index].role === ROLES.ADMIN && updates.role && updates.role !== ROLES.ADMIN) {
-      return { success: false, message: '不能修改管理员的角色' }
+    // 不允许修改店长的角色（如果是第一个用户）
+    if (users.value[index].id === '1' && updates.role && updates.role !== ROLES.MANAGER) {
+      return { success: false, message: '不能修改主店长的角色' }
     }
     
     users.value[index] = { ...users.value[index], ...updates }
@@ -361,9 +310,9 @@ export const useUserStore = defineStore('user', () => {
       return { success: false, message: '用户不存在' }
     }
     
-    // 不允许删除管理员
-    if (user.role === ROLES.ADMIN) {
-      return { success: false, message: '不能删除管理员账号' }
+    // 不允许删除主店长
+    if (user.id === '1') {
+      return { success: false, message: '不能删除主店长账号' }
     }
     
     // 不允许删除自己
@@ -385,9 +334,9 @@ export const useUserStore = defineStore('user', () => {
       return { success: false, message: '用户不存在' }
     }
     
-    // 不允许禁用管理员
-    if (user.role === ROLES.ADMIN) {
-      return { success: false, message: '不能禁用管理员账号' }
+    // 不允许禁用主店长
+    if (user.id === '1') {
+      return { success: false, message: '不能禁用主店长账号' }
     }
     
     // 不允许禁用自己
@@ -465,7 +414,7 @@ export const useUserStore = defineStore('user', () => {
     currentRole,
     currentUserName,
     currentPermissions,
-    isAdmin,
+    isManager,
     isManagerOrAbove,
     getAllUsers,
     activeUsers,
@@ -486,5 +435,3 @@ export const useUserStore = defineStore('user', () => {
     getUserNameById
   }
 })
-
-
