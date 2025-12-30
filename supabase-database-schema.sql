@@ -1,0 +1,161 @@
+-- 鞋店管理系统 - Supabase数据库表结构
+-- 创建时间：2025-12-30
+
+-- ========================================
+-- 1. 商品表 (products)
+-- ========================================
+CREATE TABLE IF NOT EXISTS products (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  name TEXT NOT NULL,
+  code TEXT NOT NULL UNIQUE,
+  size TEXT NOT NULL,
+  purchase_price DECIMAL(10, 2) NOT NULL,
+  sale_price DECIMAL(10, 2) NOT NULL,
+  stock INTEGER NOT NULL DEFAULT 0,
+  image TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 商品表索引
+CREATE INDEX IF NOT EXISTS idx_products_code ON products(code);
+CREATE INDEX IF NOT EXISTS idx_products_name ON products(name);
+CREATE INDEX IF NOT EXISTS idx_products_created_at ON products(created_at DESC);
+
+-- ========================================
+-- 2. 销售表 (sales)
+-- ========================================
+CREATE TABLE IF NOT EXISTS sales (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  order_id TEXT NOT NULL,
+  products JSONB NOT NULL,
+  total_amount DECIMAL(10, 2) NOT NULL,
+  total_cost DECIMAL(10, 2) NOT NULL,
+  profit DECIMAL(10, 2) NOT NULL,
+  discount DECIMAL(5, 2) DEFAULT 0,
+  actual_amount DECIMAL(10, 2) NOT NULL,
+  salesperson TEXT,
+  payment_method TEXT DEFAULT '现金',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 销售表索引
+CREATE INDEX IF NOT EXISTS idx_sales_order_id ON sales(order_id);
+CREATE INDEX IF NOT EXISTS idx_sales_salesperson ON sales(salesperson);
+CREATE INDEX IF NOT EXISTS idx_sales_created_at ON sales(created_at DESC);
+
+-- ========================================
+-- 3. 会员表 (members)
+-- ========================================
+CREATE TABLE IF NOT EXISTS members (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  phone TEXT NOT NULL UNIQUE,
+  name TEXT,
+  balance DECIMAL(10, 2) NOT NULL DEFAULT 0,
+  total_recharge DECIMAL(10, 2) NOT NULL DEFAULT 0,
+  total_consumption DECIMAL(10, 2) NOT NULL DEFAULT 0,
+  discount DECIMAL(5, 2) DEFAULT 1.0,
+  level TEXT DEFAULT '普通会员',
+  notes TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 会员表索引
+CREATE INDEX IF NOT EXISTS idx_members_phone ON members(phone);
+CREATE INDEX IF NOT EXISTS idx_members_name ON members(name);
+CREATE INDEX IF NOT EXISTS idx_members_created_at ON members(created_at DESC);
+
+-- ========================================
+-- 4. 会员充值记录表 (member_recharges)
+-- ========================================
+CREATE TABLE IF NOT EXISTS member_recharges (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  member_id UUID REFERENCES members(id) ON DELETE CASCADE,
+  amount DECIMAL(10, 2) NOT NULL,
+  payment_method TEXT DEFAULT '现金',
+  notes TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 会员充值记录表索引
+CREATE INDEX IF NOT EXISTS idx_member_recharges_member_id ON member_recharges(member_id);
+CREATE INDEX IF NOT EXISTS idx_member_recharges_created_at ON member_recharges(created_at DESC);
+
+-- ========================================
+-- 5. 采购表 (purchases)
+-- ========================================
+CREATE TABLE IF NOT EXISTS purchases (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  product_id UUID REFERENCES products(id) ON DELETE CASCADE,
+  product_name TEXT NOT NULL,
+  product_code TEXT NOT NULL,
+  product_size TEXT NOT NULL,
+  quantity INTEGER NOT NULL,
+  purchase_price DECIMAL(10, 2) NOT NULL,
+  total_amount DECIMAL(10, 2) NOT NULL,
+  supplier TEXT,
+  notes TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 采购表索引
+CREATE INDEX IF NOT EXISTS idx_purchases_product_id ON purchases(product_id);
+CREATE INDEX IF NOT EXISTS idx_purchases_created_at ON purchases(created_at DESC);
+
+-- ========================================
+-- 6. 启用行级安全策略 (RLS)
+-- ========================================
+ALTER TABLE products ENABLE ROW LEVEL SECURITY;
+ALTER TABLE sales ENABLE ROW LEVEL SECURITY;
+ALTER TABLE purchases ENABLE ROW LEVEL SECURITY;
+ALTER TABLE members ENABLE ROW LEVEL SECURITY;
+ALTER TABLE member_recharges ENABLE ROW LEVEL SECURITY;
+
+-- ========================================
+-- 7. 创建公开访问策略（允许所有操作）
+-- ========================================
+
+-- 商品表策略
+CREATE POLICY "Enable all access for products" ON products
+  FOR ALL USING (true) WITH CHECK (true);
+
+-- 销售表策略
+CREATE POLICY "Enable all access for sales" ON sales
+  FOR ALL USING (true) WITH CHECK (true);
+
+-- 采购表策略
+CREATE POLICY "Enable all access for purchases" ON purchases
+  FOR ALL USING (true) WITH CHECK (true);
+
+-- 会员表策略
+CREATE POLICY "Enable all access for members" ON members
+  FOR ALL USING (true) WITH CHECK (true);
+
+-- 会员充值记录表策略
+CREATE POLICY "Enable all access for member_recharges" ON member_recharges
+  FOR ALL USING (true) WITH CHECK (true);
+
+-- ========================================
+-- 8. 创建更新时间触发器
+-- ========================================
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+CREATE TRIGGER update_products_updated_at BEFORE UPDATE ON products
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_members_updated_at BEFORE UPDATE ON members
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- ========================================
+-- 完成！
+-- ========================================
+-- 所有表创建完成
+-- 可以开始使用了
+

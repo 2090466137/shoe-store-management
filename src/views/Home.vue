@@ -96,6 +96,16 @@
         </div>
       </div>
 
+      <!-- 会员管理 -->
+      <div class="card" @click="router.push('/members')">
+        <div class="section-title">👥 会员管理</div>
+        <div class="quick-action">
+          <div class="action-icon">💳</div>
+          <div class="action-text">查看和管理会员信息</div>
+          <van-icon name="arrow" class="action-arrow" />
+        </div>
+      </div>
+
       <!-- 快捷操作 -->
       <div class="card">
         <div class="section-title">🚀 快捷操作</div>
@@ -347,6 +357,37 @@ const currentDate = computed(() => {
   color: white;
 }
 
+.quick-action {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.quick-action:active {
+  transform: scale(0.98);
+}
+
+.action-icon {
+  font-size: 32px;
+  margin-right: 12px;
+}
+
+.action-text {
+  flex: 1;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.action-arrow {
+  font-size: 18px;
+  opacity: 0.8;
+}
+
 .quick-actions {
   display: flex;
   flex-direction: column;
@@ -473,4 +514,3 @@ const currentDate = computed(() => {
   background: #ebedf0;
 }
 </style>
-

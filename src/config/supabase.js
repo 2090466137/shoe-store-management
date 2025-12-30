@@ -11,6 +11,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 export const TABLES = {
   PRODUCTS: 'products',
   SALES: 'sales',
-  PURCHASES: 'purchases'
+  PURCHASES: 'purchases',
+  MEMBERS: 'members',
+  MEMBER_RECHARGES: 'member_recharges'
 }
-

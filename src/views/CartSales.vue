@@ -157,7 +157,7 @@
           </div>
 
           <!-- 实收金额 -->
-          <div class="checkout-row">
+          <div class="checkout-row" v-if="paymentMethod === 'cash'">
             <span class="label">实收金额</span>
             <van-field
               v-model="receivedAmount"
@@ -168,7 +168,7 @@
           </div>
 
           <!-- 快捷金额 -->
-          <div class="quick-amount">
+          <div class="quick-amount" v-if="paymentMethod === 'cash'">
             <van-button 
               size="small" 
               v-for="amount in quickAmounts" 
@@ -180,11 +180,48 @@
           </div>
 
           <!-- 找零 -->
-          <div class="checkout-row change-row" v-if="changeAmount !== null">
+          <div class="checkout-row change-row" v-if="paymentMethod === 'cash' && changeAmount !== null">
             <span class="label">找零</span>
             <span class="value change" :class="{ negative: changeAmount < 0 }">
               {{ changeAmount >= 0 ? '¥' : '-¥' }}{{ Math.abs(changeAmount).toFixed(2) }}
             </span>
+          </div>
+
+          <!-- 会员选择 -->
+          <div class="checkout-row">
+            <span class="label">会员</span>
+            <van-field
+              v-model="selectedMemberText"
+              placeholder="选择会员（可选）"
+              readonly
+              is-link
+              @click="showMemberPicker = true"
+              class="member-input"
+            />
+            <van-icon 
+              v-if="selectedMember" 
+              name="cross" 
+              class="clear-member"
+              @click="clearMember"
+            />
+          </div>
+
+          <!-- 会员信息 -->
+          <div class="member-info-card" v-if="selectedMember">
+            <div class="member-info-row">
+              <span>会员：{{ selectedMember.name || selectedMember.phone }}</span>
+              <span class="member-balance">余额：¥{{ selectedMember.balance.toFixed(2) }}</span>
+            </div>
+            <div class="member-info-row" v-if="selectedMember.discount < 1">
+              <span>会员折扣：{{ (selectedMember.discount * 10).toFixed(1) }}折</span>
+            </div>
+            <div class="payment-method-row">
+              <span class="label">支付方式：</span>
+              <van-radio-group v-model="paymentMethod" direction="horizontal">
+                <van-radio name="cash">现金</van-radio>
+                <van-radio name="member" :disabled="!canUseMemberBalance">会员余额</van-radio>
+              </van-radio-group>
+            </div>
           </div>
 
           <!-- 销售员 -->
@@ -258,6 +295,38 @@
       </div>
     </van-popup>
 
+    <!-- 会员选择器 -->
+    <van-popup v-model:show="showMemberPicker" position="bottom" :style="{ height: '60%' }">
+      <div class="member-picker">
+        <div class="picker-header">
+          <van-search
+            v-model="memberSearchKeyword"
+            placeholder="搜索会员手机号或姓名"
+            @search="onMemberSearch"
+          />
+        </div>
+        <div class="picker-content">
+          <div 
+            v-for="member in filteredMembers" 
+            :key="member.id"
+            class="picker-item"
+            @click="selectMember(member)"
+          >
+            <div class="picker-item-info">
+              <div class="picker-item-name">{{ member.name || '未设置姓名' }}</div>
+              <div class="picker-item-spec">{{ member.phone }}</div>
+            </div>
+            <div class="picker-item-price">
+              <div>余额: ¥{{ member.balance.toFixed(2) }}</div>
+              <div v-if="member.discount < 1" class="member-discount">
+                {{ (member.discount * 10).toFixed(1) }}折
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </van-popup>
+
     <!-- 销售员选择器 -->
     <van-popup v-model:show="showSalespersonPicker" position="bottom">
       <van-picker
@@ -285,16 +354,18 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useProductStore } from '@/stores/product'
 import { useSalesStore } from '@/stores/sales'
+import { useMemberStore } from '@/stores/member'
 import { showToast, showDialog, showConfirmDialog } from 'vant'
 import { smartSearch } from '@/utils/search'
 
 const router = useRouter()
 const productStore = useProductStore()
 const salesStore = useSalesStore()
+const memberStore = useMemberStore()
 
 // 购物车
 const cart = ref([])
@@ -310,6 +381,12 @@ const salesperson = ref('老板')
 const remark = ref('')
 const orderDiscount = ref(1) // 整单折扣
 const customDiscountValue = ref('')
+
+// 会员相关
+const selectedMember = ref(null)
+const showMemberPicker = ref(false)
+const paymentMethod = ref('cash') // 'cash' 或 'member'
+const memberSearchKeyword = ref('')
 
 // 销售员列表
 const salespersons = ['老板', '老婆', '小王']
@@ -331,10 +408,21 @@ const quickProducts = computed(() => {
     // 热销商品：根据销售记录统计
     const productSales = {}
     salesStore.sales.forEach(sale => {
-      if (!productSales[sale.productId]) {
-        productSales[sale.productId] = 0
+      // 处理多商品订单
+      if (sale.products && Array.isArray(sale.products)) {
+        sale.products.forEach(item => {
+          if (!productSales[item.productId]) {
+            productSales[item.productId] = 0
+          }
+          productSales[item.productId] += item.quantity
+        })
+      } else if (sale.productId) {
+        // 单商品订单
+        if (!productSales[sale.productId]) {
+          productSales[sale.productId] = 0
+        }
+        productSales[sale.productId] += sale.quantity || 0
       }
-      productSales[sale.productId] += sale.quantity
     })
     
     // 获取销量前6的商品
@@ -352,11 +440,25 @@ const quickProducts = computed(() => {
     const seen = new Set()
     
     for (const sale of salesStore.sales) {
-      if (!seen.has(sale.productId) && recentProductIds.length < 6) {
-        const product = productStore.getProductById(sale.productId)
-        if (product && product.stock > 0) {
-          recentProductIds.push(sale.productId)
-          seen.add(sale.productId)
+      // 处理多商品订单
+      if (sale.products && Array.isArray(sale.products)) {
+        sale.products.forEach(item => {
+          if (!seen.has(item.productId) && recentProductIds.length < 6) {
+            const product = productStore.getProductById(item.productId)
+            if (product && product.stock > 0) {
+              recentProductIds.push(item.productId)
+              seen.add(item.productId)
+            }
+          }
+        })
+      } else if (sale.productId) {
+        // 单商品订单
+        if (!seen.has(sale.productId) && recentProductIds.length < 6) {
+          const product = productStore.getProductById(sale.productId)
+          if (product && product.stock > 0) {
+            recentProductIds.push(sale.productId)
+            seen.add(sale.productId)
+          }
         }
       }
       if (recentProductIds.length >= 6) break
@@ -401,15 +503,34 @@ const totalDiscount = computed(() => {
   return itemDiscount + orderDiscountAmount
 })
 
-// 计算最终金额
+// 计算最终金额（应用会员折扣）
 const finalTotal = computed(() => {
   const subtotal = cart.value.reduce((sum, item) => sum + item.total, 0)
-  return subtotal * orderDiscount.value
+  let total = subtotal * orderDiscount.value
+  
+  // 如果选择了会员，应用会员折扣
+  if (selectedMember.value && selectedMember.value.discount < 1) {
+    total = total * selectedMember.value.discount
+  }
+  
+  return total
+})
+
+// 会员显示文本
+const selectedMemberText = computed(() => {
+  if (!selectedMember.value) return ''
+  return `${selectedMember.value.name || selectedMember.value.phone} (余额: ¥${selectedMember.value.balance.toFixed(2)})`
+})
+
+// 是否可以使用会员余额支付
+const canUseMemberBalance = computed(() => {
+  if (!selectedMember.value) return false
+  return selectedMember.value.balance >= finalTotal.value
 })
 
 // 计算找零
 const changeAmount = computed(() => {
-  if (!receivedAmount.value) return null
+  if (!receivedAmount.value || paymentMethod.value === 'member') return null
   return parseFloat(receivedAmount.value) - finalTotal.value
 })
 
@@ -430,7 +551,7 @@ const addToCart = (product) => {
     cart.value.push({
       productId: product.id,
       productName: product.name,
-      brand: product.brand,
+      brand: product.brand || '',
       size: product.size,
       costPrice: product.costPrice,
       originalPrice: product.salePrice,
@@ -469,6 +590,8 @@ const clearCart = () => {
     receivedAmount.value = ''
     orderDiscount.value = 1
     remark.value = ''
+    selectedMember.value = null
+    paymentMethod.value = 'cash'
     showToast('已清空')
   }).catch(() => {})
 }
@@ -495,6 +618,34 @@ const applyCustomDiscount = () => {
   }
 }
 
+// 会员相关函数
+const filteredMembers = computed(() => {
+  if (memberSearchKeyword.value) {
+    return memberStore.searchMembers(memberSearchKeyword.value)
+  }
+  return memberStore.getAllMembers
+})
+
+const selectMember = (member) => {
+  selectedMember.value = member
+  showMemberPicker.value = false
+  memberSearchKeyword.value = ''
+  
+  // 如果会员余额足够，默认使用会员余额支付
+  if (member.balance >= finalTotal.value) {
+    paymentMethod.value = 'member'
+  }
+}
+
+const clearMember = () => {
+  selectedMember.value = null
+  paymentMethod.value = 'cash'
+}
+
+const onMemberSearch = () => {
+  // 搜索逻辑已在computed中处理
+}
+
 // 结算
 const handleCheckout = () => {
   if (cart.value.length === 0) {
@@ -502,14 +653,27 @@ const handleCheckout = () => {
     return
   }
 
-  if (!receivedAmount.value) {
-    showToast('请输入实收金额')
-    return
-  }
+  // 会员余额支付检查
+  if (paymentMethod.value === 'member') {
+    if (!selectedMember.value) {
+      showToast('请选择会员')
+      return
+    }
+    if (selectedMember.value.balance < finalTotal.value) {
+      showToast('会员余额不足')
+      return
+    }
+  } else {
+    // 现金支付检查
+    if (!receivedAmount.value) {
+      showToast('请输入实收金额')
+      return
+    }
 
-  if (changeAmount.value < 0) {
-    showToast('实收金额不足')
-    return
+    if (changeAmount.value < 0) {
+      showToast('实收金额不足')
+      return
+    }
   }
 
   // 检查库存
@@ -522,17 +686,29 @@ const handleCheckout = () => {
   }
 
   // 确认对话框
+  const paymentInfo = paymentMethod.value === 'member' 
+    ? `会员余额支付：¥${finalTotal.value.toFixed(2)}`
+    : `实收：¥${parseFloat(receivedAmount.value).toFixed(2)}\n找零：¥${changeAmount.value.toFixed(2)}`
+  
   showDialog({
     title: '确认收款',
     message: `
       应收：¥${finalTotal.value.toFixed(2)}
-      实收：¥${parseFloat(receivedAmount.value).toFixed(2)}
-      找零：¥${changeAmount.value.toFixed(2)}
+      ${paymentInfo}
+      ${selectedMember.value ? `会员：${selectedMember.value.name || selectedMember.value.phone}` : ''}
       
       确认收款吗？
     `,
     showCancelButton: true,
-  }).then(() => {
+  }).then(async () => {
+    // 如果是会员支付，先扣减余额
+    if (paymentMethod.value === 'member' && selectedMember.value) {
+      const consumeResult = await memberStore.consumeMember(selectedMember.value.id, finalTotal.value)
+      if (!consumeResult.success) {
+        showToast(consumeResult.message || '扣减余额失败')
+        return
+      }
+    }
     // 创建多商品订单
     const saleData = {
       products: cart.value.map(item => ({
@@ -547,8 +723,10 @@ const handleCheckout = () => {
       salesperson: salesperson.value,
       remark: remark.value,
       discount: orderDiscount.value,
-      receivedAmount: parseFloat(receivedAmount.value),
-      changeAmount: changeAmount.value
+      receivedAmount: paymentMethod.value === 'member' ? finalTotal.value : parseFloat(receivedAmount.value),
+      changeAmount: paymentMethod.value === 'member' ? 0 : changeAmount.value,
+      memberId: selectedMember.value?.id,
+      paymentMethod: paymentMethod.value === 'member' ? '会员余额' : '现金'
     }
     
     const result = salesStore.addSale(saleData)
@@ -570,6 +748,8 @@ const handleCheckout = () => {
         receivedAmount.value = ''
         orderDiscount.value = 1
         remark.value = ''
+        selectedMember.value = null
+        paymentMethod.value = 'cash'
         router.back()
       })
     } else {
@@ -577,6 +757,11 @@ const handleCheckout = () => {
     }
   }).catch(() => {})
 }
+
+// 加载会员数据
+onMounted(() => {
+  memberStore.loadMembers()
+})
 
 // 返回
 const handleBack = () => {
@@ -933,5 +1118,61 @@ const handleBack = () => {
   font-weight: 600;
   color: #ff4d4f;
 }
-</style>
 
+.member-input {
+  flex: 1;
+  padding: 0;
+}
+
+.clear-member {
+  margin-left: 8px;
+  color: #969799;
+  cursor: pointer;
+}
+
+.member-info-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 8px;
+  padding: 12px;
+  margin: 12px 0;
+  color: white;
+}
+
+.member-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.member-balance {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.payment-method-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.payment-method-row .label {
+  font-size: 14px;
+}
+
+.member-picker {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.member-discount {
+  font-size: 12px;
+  color: #ff976a;
+  margin-top: 4px;
+}
+</style>

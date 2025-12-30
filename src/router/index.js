@@ -88,6 +88,18 @@ const routes = [
     name: 'Returns',
     component: () => import('@/views/Returns.vue'),
     meta: { title: '退换货管理' }
+  },
+  {
+    path: '/members',
+    name: 'Members',
+    component: () => import('@/views/Members.vue'),
+    meta: { title: '会员管理' }
+  },
+  {
+    path: '/member/recharge/:memberId',
+    name: 'MemberRecharge',
+    component: () => import('@/views/MemberRecharge.vue'),
+    meta: { title: '会员充值' }
   }
 ]
 
@@ -102,4 +114,3 @@ router.beforeEach((to, from, next) => {
 })
 
 export default router
-
