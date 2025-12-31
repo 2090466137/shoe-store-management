@@ -317,7 +317,10 @@ export const useSalesStore = defineStore('sales', () => {
   // 删除销售记录
   const deleteSale = async (id) => {
     const index = sales.value.findIndex(s => s.id === id)
-    if (index === -1) return false
+    if (index === -1) {
+      console.error('❌ 销售记录不存在:', id)
+      return false
+    }
     
     const tempSale = sales.value[index]
     
@@ -326,22 +329,34 @@ export const useSalesStore = defineStore('sales', () => {
       sales.value.splice(index, 1)
       saveSales()
 
-      // 从云端删除
+      // 判断是否是本地记录（UUID 格式: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx）
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+      const isCloudRecord = uuidRegex.test(id)
+      
+      if (!isCloudRecord) {
+        // 本地记录，只需要从 localStorage 删除即可
+        console.log('✅ 本地销售记录已删除:', id)
+        return true
+      }
+
+      // 云端记录，需要从 Supabase 删除
       const { error } = await supabase
         .from(TABLES.SALES)
         .delete()
         .eq('id', id)
 
       if (error) {
+        console.error('❌ 云端删除失败:', error)
         // 恢复本地数据
         sales.value.splice(index, 0, tempSale)
         saveSales()
         throw error
       }
 
+      console.log('✅ 云端销售记录已删除:', id)
       return true
     } catch (error) {
-      console.error('删除销售记录失败:', error)
+      console.error('❌ 删除销售记录失败:', error)
       return false
     }
   }
