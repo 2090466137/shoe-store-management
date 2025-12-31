@@ -127,10 +127,46 @@ export const useProductStore = defineStore('product', () => {
       // 转换数据格式
       const cloudProducts = data.map(dbToFrontend)
       
-      // 只有在云端有数据时才更新
+      // 🔧 智能合并：比较本地和云端数据，使用最新的
       if (cloudProducts.length > 0) {
-        products.value = cloudProducts
-        console.log('✅ 从云端加载了', cloudProducts.length, '个商品')
+        // 如果本地有数据，需要智能合并
+        if (products.value.length > 0) {
+          console.log('🔄 智能合并本地和云端商品数据...')
+          
+          const mergedMap = new Map()
+          
+          // 先添加本地数据（最新操作）
+          products.value.forEach(localProduct => {
+            mergedMap.set(localProduct.id, localProduct)
+          })
+          
+          // 再处理云端数据
+          cloudProducts.forEach(cloudProduct => {
+            const localProduct = mergedMap.get(cloudProduct.id)
+            if (!localProduct) {
+              // 云端有，本地没有 → 使用云端
+              mergedMap.set(cloudProduct.id, cloudProduct)
+            } else {
+              // 两边都有 → 比较关键字段（库存、价格）
+              if (localProduct.stock !== cloudProduct.stock ||
+                  localProduct.costPrice !== cloudProduct.costPrice ||
+                  localProduct.salePrice !== cloudProduct.salePrice) {
+                // 数据不一致，使用本地数据（最新操作）
+                console.log('  ↳', localProduct.name, '- 使用本地数据（最新操作）')
+              } else {
+                // 数据一致，使用云端（可能有其他字段更新）
+                mergedMap.set(cloudProduct.id, cloudProduct)
+              }
+            }
+          })
+          
+          products.value = Array.from(mergedMap.values())
+          console.log('✅ 智能合并完成，共', products.value.length, '个商品')
+        } else {
+          // 本地无数据，直接使用云端
+          products.value = cloudProducts
+          console.log('✅ 从云端加载了', cloudProducts.length, '个商品')
+        }
         
         // 同步更新localStorage
         await saveProducts()

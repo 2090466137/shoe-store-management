@@ -276,10 +276,10 @@ export const useUserStore = defineStore('user', () => {
         return // 保持 localStorage 数据，不覆盖
       }
       
-      // 只有云端有数据时才更新
+      // 🔧 智能合并：比较本地和云端数据，使用最新的
       if (data && data.length > 0) {
         // 转换数据格式（云端 -> 前端）
-        users.value = data.map(u => ({
+        const cloudUsers = data.map(u => ({
           id: u.id,
           username: u.username,
           password: u.password,
@@ -291,7 +291,45 @@ export const useUserStore = defineStore('user', () => {
           lastLoginTime: u.last_login_time,
           status: u.status || 'active'
         }))
-        console.log('✅ 从云端加载了', users.value.length, '个用户')
+        
+        // 如果本地有数据，需要智能合并
+        if (users.value.length > 0) {
+          console.log('🔄 智能合并本地和云端用户数据...')
+          
+          const mergedMap = new Map()
+          
+          // 先添加本地数据（最新操作）
+          users.value.forEach(localUser => {
+            mergedMap.set(localUser.id, localUser)
+          })
+          
+          // 再处理云端数据
+          cloudUsers.forEach(cloudUser => {
+            const localUser = mergedMap.get(cloudUser.id)
+            if (!localUser) {
+              // 云端有，本地没有 → 使用云端
+              mergedMap.set(cloudUser.id, cloudUser)
+            } else {
+              // 两边都有 → 比较关键字段
+              if (localUser.status !== cloudUser.status ||
+                  localUser.phone !== cloudUser.phone ||
+                  localUser.name !== cloudUser.name) {
+                // 数据不一致，使用本地数据（最新操作）
+                console.log('  ↳', localUser.name, '- 使用本地数据（最新操作）')
+              } else {
+                // 数据一致，使用云端（可能有其他字段更新）
+                mergedMap.set(cloudUser.id, cloudUser)
+              }
+            }
+          })
+          
+          users.value = Array.from(mergedMap.values())
+          console.log('✅ 智能合并完成，共', users.value.length, '个用户')
+        } else {
+          // 本地无数据，直接使用云端
+          users.value = cloudUsers
+          console.log('✅ 从云端加载了', users.value.length, '个用户')
+        }
         
         // 同步到 localStorage 作为备份
         localStorage.setItem('users', JSON.stringify(users.value))

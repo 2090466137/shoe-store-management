@@ -115,8 +115,33 @@ export const useSalesStore = defineStore('sales', () => {
         console.error('❌ 云端加载销售数据失败:', salesError)
         console.log('⚠️ 使用 localStorage 销售数据')
       } else if (salesData && salesData.length > 0) {
-        sales.value = salesData.map(dbToFrontendSale)
-        console.log('✅ 从云端加载了', sales.value.length, '条销售记录')
+        const cloudSales = salesData.map(dbToFrontendSale)
+        
+        // 🔧 智能合并：销售记录通常不修改，只新增
+        if (sales.value.length > 0) {
+          console.log('🔄 智能合并本地和云端销售数据...')
+          
+          const mergedMap = new Map()
+          
+          // 先添加本地数据
+          sales.value.forEach(localSale => {
+            mergedMap.set(localSale.id, localSale)
+          })
+          
+          // 再添加云端数据（只添加本地没有的）
+          cloudSales.forEach(cloudSale => {
+            if (!mergedMap.has(cloudSale.id)) {
+              mergedMap.set(cloudSale.id, cloudSale)
+            }
+          })
+          
+          sales.value = Array.from(mergedMap.values())
+          console.log('✅ 智能合并完成，共', sales.value.length, '条销售记录')
+        } else {
+          sales.value = cloudSales
+          console.log('✅ 从云端加载了', sales.value.length, '条销售记录')
+        }
+        
         localStorage.setItem('sales', JSON.stringify(sales.value))
       } else {
         console.log('⚠️ 云端无销售数据，保持 localStorage 数据')
@@ -132,8 +157,33 @@ export const useSalesStore = defineStore('sales', () => {
         console.error('❌ 云端加载进货数据失败:', purchasesError)
         console.log('⚠️ 使用 localStorage 进货数据')
       } else if (purchasesData && purchasesData.length > 0) {
-        purchases.value = purchasesData.map(dbToFrontendPurchase)
-        console.log('✅ 从云端加载了', purchases.value.length, '条进货记录')
+        const cloudPurchases = purchasesData.map(dbToFrontendPurchase)
+        
+        // 🔧 智能合并：进货记录通常不修改，只新增
+        if (purchases.value.length > 0) {
+          console.log('🔄 智能合并本地和云端进货数据...')
+          
+          const mergedMap = new Map()
+          
+          // 先添加本地数据
+          purchases.value.forEach(localPurchase => {
+            mergedMap.set(localPurchase.id, localPurchase)
+          })
+          
+          // 再添加云端数据（只添加本地没有的）
+          cloudPurchases.forEach(cloudPurchase => {
+            if (!mergedMap.has(cloudPurchase.id)) {
+              mergedMap.set(cloudPurchase.id, cloudPurchase)
+            }
+          })
+          
+          purchases.value = Array.from(mergedMap.values())
+          console.log('✅ 智能合并完成，共', purchases.value.length, '条进货记录')
+        } else {
+          purchases.value = cloudPurchases
+          console.log('✅ 从云端加载了', purchases.value.length, '条进货记录')
+        }
+        
         localStorage.setItem('purchases', JSON.stringify(purchases.value))
       } else {
         console.log('⚠️ 云端无进货数据，保持 localStorage 数据')
