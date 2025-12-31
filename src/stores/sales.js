@@ -92,42 +92,51 @@ export const useSalesStore = defineStore('sales', () => {
   const loadSales = async () => {
     loading.value = true
     try {
-      // 加载销售数据
+      // 🔧 优先从 localStorage 加载，防止数据丢失
+      const storedSales = localStorage.getItem('sales')
+      if (storedSales) {
+        sales.value = JSON.parse(storedSales)
+        console.log('✅ 从 localStorage 加载了', sales.value.length, '条销售记录')
+      }
+
+      const storedPurchases = localStorage.getItem('purchases')
+      if (storedPurchases) {
+        purchases.value = JSON.parse(storedPurchases)
+        console.log('✅ 从 localStorage 加载了', purchases.value.length, '条进货记录')
+      }
+
+      // 尝试从云端加载销售数据并同步
       const { data: salesData, error: salesError } = await supabase
         .from(TABLES.SALES)
         .select('*')
         .order('created_at', { ascending: false })
 
       if (salesError) {
-        console.error('加载销售数据失败:', salesError)
-        // 降级到 localStorage
-        const stored = localStorage.getItem('sales')
-        if (stored) {
-          sales.value = JSON.parse(stored)
-        }
-      } else {
+        console.error('❌ 云端加载销售数据失败:', salesError)
+        console.log('⚠️ 使用 localStorage 销售数据')
+      } else if (salesData && salesData.length > 0) {
         sales.value = salesData.map(dbToFrontendSale)
-        // 同步到 localStorage 作为备份
+        console.log('✅ 从云端加载了', sales.value.length, '条销售记录')
         localStorage.setItem('sales', JSON.stringify(sales.value))
+      } else {
+        console.log('⚠️ 云端无销售数据，保持 localStorage 数据')
       }
 
-      // 加载进货数据
+      // 尝试从云端加载进货数据并同步
       const { data: purchasesData, error: purchasesError } = await supabase
         .from(TABLES.PURCHASES)
         .select('*')
         .order('created_at', { ascending: false })
 
       if (purchasesError) {
-        console.error('加载进货数据失败:', purchasesError)
-        // 降级到 localStorage
-        const stored = localStorage.getItem('purchases')
-        if (stored) {
-          purchases.value = JSON.parse(stored)
-        }
-      } else {
+        console.error('❌ 云端加载进货数据失败:', purchasesError)
+        console.log('⚠️ 使用 localStorage 进货数据')
+      } else if (purchasesData && purchasesData.length > 0) {
         purchases.value = purchasesData.map(dbToFrontendPurchase)
-        // 同步到 localStorage 作为备份
+        console.log('✅ 从云端加载了', purchases.value.length, '条进货记录')
         localStorage.setItem('purchases', JSON.stringify(purchases.value))
+      } else {
+        console.log('⚠️ 云端无进货数据，保持 localStorage 数据')
       }
     } catch (error) {
       console.error('加载数据异常:', error)

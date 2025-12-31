@@ -251,43 +251,53 @@ export const useUserStore = defineStore('user', () => {
   // 从云端加载用户数据
   const loadUsers = async () => {
     try {
+      // 🔧 优先从 localStorage 加载，防止数据丢失
+      const stored = localStorage.getItem('users')
+      if (stored) {
+        users.value = JSON.parse(stored)
+        console.log('✅ 从 localStorage 加载了', users.value.length, '个用户')
+      } else {
+        users.value = DEFAULT_USERS
+        console.log('✅ 使用默认用户数据')
+      }
+
       // 先执行迁移（如果需要）
       await migrateFromLocalStorage()
       
-      // 从云端加载数据
+      // 尝试从云端加载数据并同步
       const { data, error } = await supabase
         .from(TABLES.USERS)
         .select('*')
         .order('create_time', { ascending: true })
       
       if (error) {
-        console.error('从云端加载用户失败:', error)
-        // 降级到 localStorage
-        const stored = localStorage.getItem('users')
-        if (stored) {
-          users.value = JSON.parse(stored)
-        } else {
-          users.value = DEFAULT_USERS
-        }
-        return
+        console.error('❌ 从云端加载用户失败:', error)
+        console.log('⚠️ 使用 localStorage 用户数据')
+        return // 保持 localStorage 数据，不覆盖
       }
       
-      // 转换数据格式（云端 -> 前端）
-      users.value = data.map(u => ({
-        id: u.id,
-        username: u.username,
-        password: u.password,
-        name: u.name,
-        role: u.role,
-        phone: u.phone || '',
-        avatar: u.avatar || '',
-        createTime: u.create_time,
-        lastLoginTime: u.last_login_time,
-        status: u.status || 'active'
-      }))
-      
-      // 同步到 localStorage 作为备份
-      localStorage.setItem('users', JSON.stringify(users.value))
+      // 只有云端有数据时才更新
+      if (data && data.length > 0) {
+        // 转换数据格式（云端 -> 前端）
+        users.value = data.map(u => ({
+          id: u.id,
+          username: u.username,
+          password: u.password,
+          name: u.name,
+          role: u.role,
+          phone: u.phone || '',
+          avatar: u.avatar || '',
+          createTime: u.create_time,
+          lastLoginTime: u.last_login_time,
+          status: u.status || 'active'
+        }))
+        console.log('✅ 从云端加载了', users.value.length, '个用户')
+        
+        // 同步到 localStorage 作为备份
+        localStorage.setItem('users', JSON.stringify(users.value))
+      } else {
+        console.log('⚠️ 云端无用户数据，保持 localStorage 数据')
+      }
       
       console.log('从云端加载用户成功:', users.value.length, '个用户')
     } catch (error) {
