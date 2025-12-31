@@ -156,6 +156,24 @@
         </div>
       </div>
 
+      <!-- 系统管理 -->
+      <div 
+        class="card" 
+        v-if="userStore.hasPermission(PERMISSIONS.USER_VIEW)"
+      >
+        <div class="section-title">⚙️ 系统管理</div>
+        <div class="quick-action" @click="router.push('/user-management')">
+          <div class="action-icon">👥</div>
+          <div class="action-text">用户管理</div>
+          <van-icon name="arrow" class="action-arrow" />
+        </div>
+        <div class="quick-action" @click="router.push('/operation-logs')">
+          <div class="action-icon">📝</div>
+          <div class="action-text">操作日志</div>
+          <van-icon name="arrow" class="action-arrow" />
+        </div>
+      </div>
+
       <!-- 快捷操作 -->
       <div class="card">
         <div class="section-title">🚀 快捷操作</div>

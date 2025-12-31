@@ -6,6 +6,12 @@ import { checkLowStockAndNotify, checkZeroStockAndNotify } from '../utils/notifi
 export const useProductStore = defineStore('product', () => {
   const products = ref([])
   const loading = ref(false)
+  
+  // 获取操作日志 Store（延迟导入避免循环依赖）
+  const getLogStore = () => {
+    const { useOperationLogStore } = require('./operationLog')
+    return useOperationLogStore()
+  }
 
   // 将数据库格式转换为前端格式
   const dbToFrontend = (dbProduct) => {
@@ -70,280 +76,435 @@ export const useProductStore = defineStore('product', () => {
 
     try {
       const localProducts = JSON.parse(stored)
-      console.log(`🔄 发现本地商品数据 ${localProducts.length} 条，准备迁移...`)
+      if (localProducts.length === 0) return
 
-      for (const product of localProducts) {
-        const dbProduct = frontendToDb(product)
-        const { error } = await supabase
-          .from(TABLES.PRODUCTS)
-          .upsert([{ ...dbProduct, id: product.id }])
+      // 检查云端是否已有数据
+      const { data: cloudProducts } = await supabase
+        .from(TABLES.PRODUCTS)
+        .select('*')
+        .limit(1)
 
-        if (error) {
-          console.error('迁移商品失败:', product.name, error)
-        }
+      if (cloudProducts && cloudProducts.length > 0) {
+        // 云端已有数据，不迁移
+        return
       }
 
-      console.log('✅ 商品数据迁移完成')
-      // 迁移成功后可以选择删除本地数据
-      // localStorage.removeItem('products')
+      // 批量插入本地数据到云端
+      const dbProducts = localProducts.map(p => ({
+        id: p.id,
+        name: p.name,
+        code: p.code || `${p.name}_${p.size || ''}_${p.id}`,
+        size: p.size || '',
+        purchase_price: parseFloat(p.costPrice) || 0,
+        sale_price: parseFloat(p.salePrice) || 0,
+        stock: parseInt(p.stock) || 0,
+        image: p.image || null
+      }))
+
+      const { error } = await supabase
+        .from(TABLES.PRODUCTS)
+        .insert(dbProducts)
+
+      if (!error) {
+        console.log('数据已从localStorage迁移到云端')
+        // 迁移成功后可以清除localStorage
+        // localStorage.removeItem('products')
+      }
     } catch (error) {
-      console.error('❌ 商品数据迁移失败:', error)
+      console.error('迁移数据失败:', error)
     }
   }
 
-  // 智能合并云端和本地数据
-  const smartMergeProducts = (cloudProducts, localProducts) => {
-    const merged = new Map()
-
-    // 先添加云端数据（优先级高）
-    cloudProducts.forEach(product => {
-      merged.set(product.id, product)
-    })
-
-    // 再添加本地独有的数据
-    localProducts.forEach(product => {
-      if (!merged.has(product.id)) {
-        merged.set(product.id, product)
-      }
-    })
-
-    return Array.from(merged.values())
-  }
-
-  // 从云端加载商品
+  // 从云端加载商品数据
   const loadProducts = async () => {
     loading.value = true
     try {
+      // 先从 localStorage 加载（作为初始数据，防止数据丢失）
+      const stored = localStorage.getItem('products')
+      if (stored) {
+        products.value = JSON.parse(stored)
+        console.log('✅ 从 localStorage 加载了', products.value.length, '个商品')
+      }
+
+      // 尝试从localStorage迁移（仅一次）
+      await migrateFromLocalStorage()
+
+      // 从云端加载数据
       const { data, error } = await supabase
         .from(TABLES.PRODUCTS)
         .select('*')
         .order('created_at', { ascending: false })
 
       if (error) {
-        console.error('❌ 从云端加载商品失败:', error)
-        // 降级到本地存储
-        const stored = localStorage.getItem('products')
-        if (stored) {
-          products.value = JSON.parse(stored)
-          console.log('✅ 已从本地加载商品数据')
-        }
-        return false
+        console.error('❌ 云端加载失败:', error)
+        console.log('⚠️ 使用 localStorage 数据')
+        // 不清空 products.value，继续使用 localStorage 数据
+        return
       }
 
+      // 转换数据格式
       const cloudProducts = data.map(dbToFrontend)
       
-      // 获取本地数据
-      const stored = localStorage.getItem('products')
-      const localProducts = stored ? JSON.parse(stored) : []
-
-      // 智能合并
-      products.value = smartMergeProducts(cloudProducts, localProducts)
-      
-      // 保存合并后的数据到本地
-      saveProducts()
-
-      console.log(`✅ 已加载 ${products.value.length} 个商品`)
-      return true
-    } catch (error) {
-      console.error('❌ 加载商品失败:', error)
-      // 降级到本地存储
-      const stored = localStorage.getItem('products')
-      if (stored) {
-        products.value = JSON.parse(stored)
+      // 只有在云端有数据时才更新
+      if (cloudProducts.length > 0) {
+        products.value = cloudProducts
+        console.log('✅ 从云端加载了', cloudProducts.length, '个商品')
+        
+        // 同步更新localStorage
+        await saveProducts()
+      } else {
+        console.log('⚠️ 云端无数据，保持 localStorage 数据')
       }
-      return false
+      
+      // 检查库存并发送通知
+      checkLowStockAndNotify(products.value, 5)
+      checkZeroStockAndNotify(products.value)
+    } catch (error) {
+      console.error('❌ 加载商品异常:', error)
+      // 不清空数据，继续使用 localStorage
+      console.log('⚠️ 使用 localStorage 数据')
     } finally {
       loading.value = false
     }
   }
 
-  const saveProducts = () => {
+  // 保存到云端（也保存到localStorage作为备份）
+  const saveProducts = async () => {
     try {
+      // 同步到localStorage作为备份
       localStorage.setItem('products', JSON.stringify(products.value))
     } catch (error) {
-      console.error('❌ 保存商品到本地失败:', error)
+      console.error('保存到localStorage失败:', error)
     }
   }
 
-  // 保存单个商品到云端
-  const saveProductToCloud = async (product) => {
-    try {
-      const dbProduct = frontendToDb(product)
-      const { data, error } = await supabase
-        .from(TABLES.PRODUCTS)
-        .upsert([{ ...dbProduct, id: product.id }])
-        .select()
+  // 获取所有商品
+  const getAllProducts = computed(() => products.value)
 
-      if (error) {
-        console.error('❌ 保存商品到云端失败:', error)
-        return false
-      }
+  // 获取低库存商品（库存 <= 最低库存阈值，默认阈值为5）
+  const lowStockProducts = computed(() => {
+    return products.value.filter(p => {
+      const minStock = p.minStock || 5 // 默认最低库存为5
+      return p.stock <= minStock
+    })
+  })
 
-      console.log('✅ 商品已同步到云端:', product.name)
-      return true
-    } catch (error) {
-      console.error('❌ 保存商品到云端异常:', error)
-      return false
-    }
+  // 获取商品总数
+  const totalProducts = computed(() => products.value.length)
+
+  // 获取库存总值
+  const totalStockValue = computed(() => {
+    return products.value.reduce((sum, p) => sum + (p.costPrice * p.stock), 0)
+  })
+
+  // 根据ID获取商品
+  const getProductById = (id) => {
+    return products.value.find(p => p.id === id)
   }
 
   // 添加商品
   const addProduct = async (product) => {
-    const newProduct = {
-      id: Date.now().toString(),
-      ...product,
-      createTime: Date.now()
+    try {
+      const dbProduct = frontendToDb(product)
+      
+      const { data, error } = await supabase
+        .from(TABLES.PRODUCTS)
+        .insert([dbProduct])
+        .select()
+        .single()
+
+      if (error) {
+        console.error('❌ 云端保存失败:', error)
+        // 降级到 localStorage
+        const newProduct = {
+          ...product,
+          id: `local_${Date.now()}`,
+          createTime: Date.now()
+        }
+        products.value.unshift(newProduct)
+        await saveProducts()
+        console.log('⚠️ 商品已保存到 localStorage（云端失败）')
+        
+        // 记录操作日志
+        try {
+          const logStore = getLogStore()
+          await logStore.addLog({
+            operationType: logStore.OPERATION_TYPES.PRODUCT_ADD,
+            targetType: 'product',
+            targetId: newProduct.id,
+            targetName: `${newProduct.name} (${newProduct.size}码)`,
+            details: `添加商品：${newProduct.brand} ${newProduct.name}，库存${newProduct.stock}件`,
+            newValue: JSON.stringify(newProduct)
+          })
+        } catch (logError) {
+          console.warn('⚠️ 记录日志失败:', logError)
+        }
+        
+        return newProduct
+      }
+
+      const newProduct = dbToFrontend(data)
+      products.value.unshift(newProduct)
+      await saveProducts()
+      console.log('✅ 商品已保存到云端和 localStorage')
+      
+      // 记录操作日志
+      try {
+        const logStore = getLogStore()
+        await logStore.addLog({
+          operationType: logStore.OPERATION_TYPES.PRODUCT_ADD,
+          targetType: 'product',
+          targetId: newProduct.id,
+          targetName: `${newProduct.name} (${newProduct.size}码)`,
+          details: `添加商品：${newProduct.brand} ${newProduct.name}，库存${newProduct.stock}件`,
+          newValue: JSON.stringify(newProduct)
+        })
+      } catch (logError) {
+        console.warn('⚠️ 记录日志失败:', logError)
+      }
+      
+      return newProduct
+    } catch (error) {
+      console.error('❌ 添加商品异常:', error)
+      // 降级到 localStorage
+      const newProduct = {
+        ...product,
+        id: `local_${Date.now()}`,
+        createTime: Date.now()
+      }
+      products.value.unshift(newProduct)
+      await saveProducts()
+      console.log('⚠️ 商品已保存到 localStorage（异常降级）')
+      
+      // 记录操作日志
+      try {
+        const logStore = getLogStore()
+        await logStore.addLog({
+          operationType: logStore.OPERATION_TYPES.PRODUCT_ADD,
+          targetType: 'product',
+          targetId: newProduct.id,
+          targetName: `${newProduct.name} (${newProduct.size}码)`,
+          details: `添加商品：${newProduct.brand} ${newProduct.name}，库存${newProduct.stock}件`,
+          newValue: JSON.stringify(newProduct)
+        })
+      } catch (logError) {
+        console.warn('⚠️ 记录日志失败:', logError)
+      }
+      
+      return newProduct
     }
-
-    // 先保存到云端
-    const cloudSuccess = await saveProductToCloud(newProduct)
-    if (!cloudSuccess) {
-      console.warn('⚠️ 云端保存失败，仅保存到本地')
-    }
-
-    // 添加到本地
-    products.value.unshift(newProduct)
-    saveProducts()
-
-    // 检查库存预警
-    checkLowStockAndNotify(newProduct)
-    checkZeroStockAndNotify(newProduct)
-
-    return newProduct
   }
 
   // 更新商品
   const updateProduct = async (id, updates) => {
-    const index = products.value.findIndex(p => p.id === id)
-    if (index === -1) return false
+    try {
+      // 保存旧值用于日志
+      const index = products.value.findIndex(p => p.id === id)
+      const oldProduct = index !== -1 ? { ...products.value[index] } : null
+      
+      const dbUpdates = {}
+      if (updates.name !== undefined) dbUpdates.name = updates.name
+      if (updates.code !== undefined) dbUpdates.code = updates.code
+      if (updates.size !== undefined) dbUpdates.size = updates.size
+      if (updates.costPrice !== undefined) dbUpdates.purchase_price = updates.costPrice
+      if (updates.salePrice !== undefined) dbUpdates.sale_price = updates.salePrice
+      if (updates.stock !== undefined) dbUpdates.stock = updates.stock
+      if (updates.minStock !== undefined) dbUpdates.min_stock = updates.minStock
+      if (updates.image !== undefined) dbUpdates.image = updates.image
+      // 扩展字段
+      if (updates.brand !== undefined) dbUpdates.brand = updates.brand
+      if (updates.category !== undefined) dbUpdates.category = updates.category
+      if (updates.color !== undefined) dbUpdates.color = updates.color
+      if (updates.supplier !== undefined) dbUpdates.supplier = updates.supplier
 
-    const oldProduct = { ...products.value[index] }
-    const updatedProduct = { ...oldProduct, ...updates }
+      const { error } = await supabase
+        .from(TABLES.PRODUCTS)
+        .update(dbUpdates)
+        .eq('id', id)
 
-    // 先更新云端
-    const cloudSuccess = await saveProductToCloud(updatedProduct)
-    if (!cloudSuccess) {
-      console.warn('⚠️ 云端更新失败，仅更新本地')
+      if (error) throw error
+
+      // 更新本地状态
+      if (index !== -1) {
+        products.value[index] = { ...products.value[index], ...updates }
+        await saveProducts()
+        
+        // 记录操作日志
+        try {
+          const logStore = getLogStore()
+          const newProduct = products.value[index]
+          await logStore.addLog({
+            operationType: logStore.OPERATION_TYPES.PRODUCT_UPDATE,
+            targetType: 'product',
+            targetId: id,
+            targetName: `${newProduct.name} (${newProduct.size}码)`,
+            details: `修改商品信息`,
+            oldValue: JSON.stringify(oldProduct),
+            newValue: JSON.stringify(newProduct)
+          })
+        } catch (logError) {
+          console.warn('⚠️ 记录日志失败:', logError)
+        }
+        
+        return true
+      }
+      return false
+    } catch (error) {
+      console.error('更新商品失败:', error)
+      // 降级到localStorage
+      const index = products.value.findIndex(p => p.id === id)
+      if (index !== -1) {
+        const oldProduct = { ...products.value[index] }
+        products.value[index] = { ...products.value[index], ...updates }
+        saveProducts()
+        
+        // 记录操作日志
+        try {
+          const logStore = getLogStore()
+          const newProduct = products.value[index]
+          await logStore.addLog({
+            operationType: logStore.OPERATION_TYPES.PRODUCT_UPDATE,
+            targetType: 'product',
+            targetId: id,
+            targetName: `${newProduct.name} (${newProduct.size}码)`,
+            details: `修改商品信息`,
+            oldValue: JSON.stringify(oldProduct),
+            newValue: JSON.stringify(newProduct)
+          })
+        } catch (logError) {
+          console.warn('⚠️ 记录日志失败:', logError)
+        }
+        
+        return true
+      }
+      return false
     }
-
-    // 更新本地
-    products.value[index] = updatedProduct
-    saveProducts()
-
-    // 检查库存预警
-    checkLowStockAndNotify(updatedProduct)
-    checkZeroStockAndNotify(updatedProduct)
-
-    return true
   }
 
   // 删除商品
   const deleteProduct = async (id) => {
     const index = products.value.findIndex(p => p.id === id)
-    if (index === -1) return false
-
-    // 先从云端删除
+    if (index === -1) {
+      console.error('❌ 商品不存在:', id)
+      return false
+    }
+    
+    // 临时保存，如果删除失败可以恢复
+    const tempProduct = products.value[index]
+    
     try {
+      // 先从本地删除，避免UI延迟
+      products.value.splice(index, 1)
+      
+      // 立即更新localStorage
+      await saveProducts()
+      
+      // 判断是否是本地商品（ID 以 'local_' 开头）
+      const isLocalProduct = String(id).startsWith('local_')
+      
+      if (isLocalProduct) {
+        // 本地商品，只需要从 localStorage 删除即可
+        console.log('✅ 本地商品已删除:', id)
+        
+        // 记录操作日志
+        try {
+          const logStore = getLogStore()
+          await logStore.addLog({
+            operationType: logStore.OPERATION_TYPES.PRODUCT_DELETE,
+            targetType: 'product',
+            targetId: id,
+            targetName: `${tempProduct.name} (${tempProduct.size}码)`,
+            details: `删除商品：${tempProduct.brand} ${tempProduct.name}`,
+            oldValue: JSON.stringify(tempProduct)
+          })
+        } catch (logError) {
+          console.warn('⚠️ 记录日志失败:', logError)
+        }
+        
+        return true
+      }
+      
+      // 云端商品，需要从 Supabase 删除
       const { error } = await supabase
         .from(TABLES.PRODUCTS)
         .delete()
         .eq('id', id)
 
       if (error) {
-        console.error('❌ 从云端删除商品失败:', error)
-      } else {
-        console.log('✅ 商品已从云端删除')
+        console.error('❌ 云端删除失败:', error)
+        // 如果云端删除失败，恢复本地数据
+        products.value.splice(index, 0, tempProduct)
+        await saveProducts()
+        throw error
       }
-    } catch (error) {
-      console.error('❌ 删除商品异常:', error)
-    }
 
-    // 从本地删除
-    products.value.splice(index, 1)
-    saveProducts()
-    return true
+      console.log('✅ 云端商品已删除:', id)
+      
+      // 记录操作日志
+      try {
+        const logStore = getLogStore()
+        await logStore.addLog({
+          operationType: logStore.OPERATION_TYPES.PRODUCT_DELETE,
+          targetType: 'product',
+          targetId: id,
+          targetName: `${tempProduct.name} (${tempProduct.size}码)`,
+          details: `删除商品：${tempProduct.brand} ${tempProduct.name}`,
+          oldValue: JSON.stringify(tempProduct)
+        })
+      } catch (logError) {
+        console.warn('⚠️ 记录日志失败:', logError)
+      }
+      
+      return true
+    } catch (error) {
+      console.error('❌ 删除商品失败:', error)
+      // 如果云端删除失败，检查是否需要恢复
+      const currentIndex = products.value.findIndex(p => p.id === id)
+      if (currentIndex === -1 && tempProduct) {
+        // 如果商品不在列表中，说明已经被删除了，恢复它
+        products.value.splice(index, 0, tempProduct)
+        await saveProducts()
+      }
+      return false
+    }
   }
 
   // 更新库存
-  const updateStock = async (productId, quantity, type = 'add') => {
-    const product = products.value.find(p => p.id === productId)
-    if (!product) {
-      console.error('❌ 商品不存在:', productId)
-      return false
-    }
+  const updateStock = async (id, quantity, type = 'add') => {
+    const product = products.value.find(p => p.id === id)
+    if (!product) return false
 
-    const oldStock = product.stock
-    
-    if (type === 'add') {
-      product.stock += quantity
-    } else if (type === 'subtract') {
-      if (product.stock < quantity) {
-        console.error('❌ 库存不足:', product.name)
-        return false
-      }
-      product.stock -= quantity
-    }
+    const newStock = type === 'add' 
+      ? product.stock + quantity 
+      : product.stock - quantity
 
-    // 同步到云端
-    await saveProductToCloud(product)
-    
-    // 保存到本地
-    saveProducts()
-
-    console.log(`✅ 商品 ${product.name} 库存已更新: ${oldStock} → ${product.stock}`)
-
-    // 检查库存预警
-    checkLowStockAndNotify(product)
-    checkZeroStockAndNotify(product)
-
-    return true
+    return await updateProduct(id, { stock: newStock })
   }
 
-  // Getters
-  const getAllProducts = computed(() => products.value)
-  
-  const getProductById = (id) => {
-    return products.value.find(p => p.id === id)
-  }
-
-  const getLowStockProducts = computed(() => {
-    return products.value.filter(p => p.stock <= p.minStock && p.stock > 0)
-  })
-
-  const getOutOfStockProducts = computed(() => {
-    return products.value.filter(p => p.stock === 0)
-  })
-
-  const getTotalValue = computed(() => {
-    return products.value.reduce((sum, p) => sum + (p.costPrice * p.stock), 0)
-  })
-
+  // 搜索商品
   const searchProducts = (keyword) => {
     if (!keyword) return products.value
-    
     const lowerKeyword = keyword.toLowerCase()
     return products.value.filter(p => 
       p.name.toLowerCase().includes(lowerKeyword) ||
       (p.code && p.code.toLowerCase().includes(lowerKeyword)) ||
-      (p.brand && p.brand.toLowerCase().includes(lowerKeyword)) ||
-      (p.category && p.category.toLowerCase().includes(lowerKeyword))
+      (p.size && p.size.toLowerCase().includes(lowerKeyword))
     )
   }
 
   return {
     products,
     loading,
+    getAllProducts,
+    lowStockProducts,
+    totalProducts,
+    totalStockValue,
     loadProducts,
+    getProductById,
     addProduct,
     updateProduct,
     deleteProduct,
     updateStock,
-    getAllProducts,
-    getProductById,
-    getLowStockProducts,
-    getOutOfStockProducts,
-    getTotalValue,
-    searchProducts,
-    migrateFromLocalStorage
+    searchProducts
   }
 })

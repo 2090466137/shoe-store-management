@@ -9,6 +9,7 @@
       placeholder
     >
       <template #right>
+        <van-icon name="notes-o" size="20" @click="router.push('/operation-logs')" style="margin-right: 16px" />
         <van-icon name="plus" size="20" @click="showAddUser = true" />
       </template>
     </van-nav-bar>
