@@ -82,8 +82,9 @@ const ROLE_PERMISSIONS = {
     // 销售管理
     PERMISSIONS.SALES_VIEW,
     PERMISSIONS.SALES_ADD,
-    // 退换货 - 只能查看
+    // 退换货 - 可以查看和处理
     PERMISSIONS.RETURNS_VIEW,
+    PERMISSIONS.RETURNS_ADD,
     // 会员管理 - 只能查看、添加、充值，不能编辑和删除
     PERMISSIONS.MEMBER_VIEW,
     PERMISSIONS.MEMBER_ADD,
@@ -656,4 +657,3 @@ export const useUserStore = defineStore('user', () => {
     getUserNameById
   }
 })
-
