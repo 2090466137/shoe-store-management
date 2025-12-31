@@ -378,10 +378,10 @@ const closePopup = () => {
 }
 
 // 提交表单
-const handleSubmit = () => {
+const handleSubmit = async () => {
   if (editingUser.value) {
     // 更新用户
-    const result = userStore.updateUser(editingUser.value.id, {
+    const result = await userStore.updateUser(editingUser.value.id, {
       username: form.value.username,
       name: form.value.name,
       phone: form.value.phone,
@@ -396,7 +396,7 @@ const handleSubmit = () => {
     }
   } else {
     // 添加用户
-    const result = userStore.addUser({
+    const result = await userStore.addUser({
       username: form.value.username,
       name: form.value.name,
       phone: form.value.phone,
