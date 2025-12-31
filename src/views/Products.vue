@@ -35,8 +35,12 @@
       <van-tabs v-model:active="activeTab" @change="onTabChange">
         <van-tab title="全部" name="all"></van-tab>
         <van-tab title="低库存" name="low"></van-tab>
-        <van-tab title="运动鞋" name="运动鞋"></van-tab>
-        <van-tab title="休闲鞋" name="休闲鞋"></van-tab>
+        <van-tab 
+          v-for="category in dynamicCategories" 
+          :key="category.name"
+          :title="`${category.name}(${category.count})`" 
+          :name="category.name"
+        ></van-tab>
       </van-tabs>
     </div>
 
@@ -162,6 +166,34 @@ const addActions = [
   { name: '批量添加（多尺码）', icon: 'apps-o', color: '#1989fa' },
   { name: '单个添加', icon: 'plus', color: '#07c160' }
 ]
+
+// 动态分类标签 - 根据商品自动生成
+const dynamicCategories = computed(() => {
+  const products = productStore.getAllProducts
+  const categoryMap = {}
+  
+  // 统计每个分类的商品数量
+  products.forEach(product => {
+    const category = product.category
+    if (category) {
+      if (!categoryMap[category]) {
+        categoryMap[category] = 0
+      }
+      categoryMap[category]++
+    }
+  })
+  
+  // 转换为数组并按数量排序
+  const categories = Object.keys(categoryMap).map(name => ({
+    name,
+    count: categoryMap[name]
+  }))
+  
+  // 按商品数量降序排序
+  categories.sort((a, b) => b.count - a.count)
+  
+  return categories
+})
 
 const onSelectAdd = (action) => {
   if (action.name === '批量添加（多尺码）') {
