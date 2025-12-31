@@ -60,12 +60,13 @@
       v3.2 | © 2025 鞋店管理系统
     </div>
     
-    <!-- 设计署名 -->
+    <!-- 设计署名 卢宏鹏 -->
     <div class="copyright-info">
       卢宏鹏设计，请勿改动
     </div>
   </div>
 </template>
+
 
 
 
