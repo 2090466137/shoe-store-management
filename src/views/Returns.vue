@@ -54,13 +54,19 @@
           v-for="item in filteredReturns" 
           :key="item.id"
           class="return-item"
-          @click="viewDetail(item)"
         >
           <div class="return-header">
             <span class="return-type" :class="item.type">
               {{ item.type === 'return' ? '退货' : '换货' }}
             </span>
-            <span class="return-time">{{ formatDate(item.time) }}</span>
+            <div class="return-header-right">
+              <span class="return-time">{{ formatDate(item.time) }}</span>
+              <van-icon 
+                name="delete-o" 
+                class="delete-btn"
+                @click.stop="handleDeleteReturn(item)"
+              />
+            </div>
           </div>
 
           <div class="return-content">
@@ -150,7 +156,7 @@
             <div class="form-section-title">选择商品</div>
             <div class="product-select-list">
               <div 
-                v-for="product in selectedSale.products" 
+                v-for="product in availableProductsForReturn" 
                 :key="product.productId"
                 class="product-select-item"
                 :class="{ 'selected': selectedProduct?.productId === product.productId }"
@@ -159,7 +165,7 @@
                 <div class="product-select-info">
                   <div class="product-select-name">{{ product.productName }}</div>
                   <div class="product-select-spec">
-                    {{ product.brand }} | {{ product.size }}码 | ×{{ product.quantity }}
+                    {{ product.brand }} | {{ product.size }}码 | 可退：×{{ getAvailableReturnQuantity(product) }}
                   </div>
                 </div>
                 <div class="product-select-price">¥{{ product.salePrice.toFixed(2) }}</div>
@@ -169,11 +175,11 @@
 
           <!-- 退换货数量 -->
           <div class="form-section" v-if="selectedProduct">
-            <div class="form-section-title">退换货数量</div>
+            <div class="form-section-title">退换货数量（最多可退：{{ getAvailableReturnQuantity(selectedProduct) }}）</div>
             <van-stepper 
               v-model="returnQuantity" 
               :min="1"
-              :max="selectedProduct.quantity"
+              :max="getAvailableReturnQuantity(selectedProduct)"
             />
           </div>
 
@@ -206,11 +212,11 @@
 
           <!-- 退换货原因 -->
           <div class="form-section">
-            <div class="form-section-title">退换货原因（可选）</div>
+            <div class="form-section-title">退换货原因</div>
             <van-field
               v-model="returnReason"
               type="textarea"
-              placeholder="请输入退换货原因（可选）"
+              placeholder="请输入退换货原因"
               rows="3"
               maxlength="200"
               show-word-limit
@@ -374,16 +380,46 @@ const filteredReturns = computed(() => {
   return returns.value.filter(r => r.type === activeTab.value)
 })
 
-// 最近订单
+// 最近订单（过滤掉已完全退货的订单）
 const recentSales = computed(() => {
   return salesStore.getAllSales
+    .filter(sale => {
+      // 检查订单中是否还有可退货的商品
+      return sale.products.some(product => {
+        const returnedQty = getReturnedQuantity(sale.id, product.productId)
+        return product.quantity > returnedQty
+      })
+    })
     .sort((a, b) => b.time - a.time)
     .slice(0, 20)
 })
 
-// 可用商品
+// 获取某个商品在某个订单中已退货的数量
+const getReturnedQuantity = (saleId, productId) => {
+  return returns.value
+    .filter(r => r.originalSaleId === saleId && r.originalProduct.productId === productId)
+    .reduce((sum, r) => sum + r.originalProduct.quantity, 0)
+}
+
+// 获取商品的可退数量
+const getAvailableReturnQuantity = (product) => {
+  if (!selectedSale.value) return 0
+  const returnedQty = getReturnedQuantity(selectedSale.value.id, product.productId)
+  return product.quantity - returnedQty
+}
+
+// 可用商品（换货时选择）
 const availableProducts = computed(() => {
   return productStore.getAllProducts.filter(p => p.stock > 0)
+})
+
+// 当前订单中可退货的商品列表
+const availableProductsForReturn = computed(() => {
+  if (!selectedSale.value) return []
+  return selectedSale.value.products.filter(product => {
+    const availableQty = getAvailableReturnQuantity(product)
+    return availableQty > 0
+  })
 })
 
 // 表单文本
@@ -524,6 +560,38 @@ const viewDetail = (item) => {
   showToast('详情功能待开发')
 }
 
+// 删除退换货记录
+const handleDeleteReturn = async (item) => {
+  try {
+    await showConfirmDialog({
+      title: '确认撤销',
+      message: `确定要撤销这条${item.type === 'return' ? '退货' : '换货'}记录吗？\n\n撤销后将恢复库存变化。`,
+      confirmButtonText: '确认撤销',
+      confirmButtonColor: '#ee0a24'
+    })
+    
+    // 恢复库存：退货时减少库存，换货时恢复两边的库存
+    await productStore.updateStock(item.originalProduct.productId, item.originalProduct.quantity, 'subtract')
+    
+    if (item.type === 'exchange' && item.newProduct) {
+      await productStore.updateStock(item.newProduct.productId, item.newProduct.quantity, 'add')
+    }
+    
+    // 从记录中删除
+    const index = returns.value.findIndex(r => r.id === item.id)
+    if (index !== -1) {
+      returns.value.splice(index, 1)
+      saveReturns()
+      showToast({
+        type: 'success',
+        message: '已撤销退换货记录'
+      })
+    }
+  } catch {
+    // 用户取消
+  }
+}
+
 const formatDate = (timestamp) => {
   const date = new Date(timestamp)
   return `${date.getMonth() + 1}/${date.getDate()} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`
@@ -622,6 +690,23 @@ onMounted(() => {
   margin-bottom: 12px;
   padding-bottom: 12px;
   border-bottom: 1px solid #ebedf0;
+}
+
+.return-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.delete-btn {
+  font-size: 18px;
+  color: #ee0a24;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.delete-btn:active {
+  opacity: 0.6;
 }
 
 .return-type {
