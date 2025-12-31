@@ -101,6 +101,13 @@ export const useProductStore = defineStore('product', () => {
   const loadProducts = async () => {
     loading.value = true
     try {
+      // 先从 localStorage 加载（作为初始数据，防止数据丢失）
+      const stored = localStorage.getItem('products')
+      if (stored) {
+        products.value = JSON.parse(stored)
+        console.log('✅ 从 localStorage 加载了', products.value.length, '个商品')
+      }
+
       // 尝试从localStorage迁移（仅一次）
       await migrateFromLocalStorage()
 
@@ -111,32 +118,33 @@ export const useProductStore = defineStore('product', () => {
         .order('created_at', { ascending: false })
 
       if (error) {
-        console.error('加载商品失败:', error)
-        // 如果云端加载失败，尝试从localStorage加载
-        const stored = localStorage.getItem('products')
-        if (stored) {
-          products.value = JSON.parse(stored)
-        }
+        console.error('❌ 云端加载失败:', error)
+        console.log('⚠️ 使用 localStorage 数据')
+        // 不清空 products.value，继续使用 localStorage 数据
         return
       }
 
       // 转换数据格式
       const cloudProducts = data.map(dbToFrontend)
-      products.value = cloudProducts
       
-      // 同步更新localStorage，确保与云端一致
-      await saveProducts()
+      // 只有在云端有数据时才更新
+      if (cloudProducts.length > 0) {
+        products.value = cloudProducts
+        console.log('✅ 从云端加载了', cloudProducts.length, '个商品')
+        
+        // 同步更新localStorage
+        await saveProducts()
+      } else {
+        console.log('⚠️ 云端无数据，保持 localStorage 数据')
+      }
       
       // 检查库存并发送通知
       checkLowStockAndNotify(products.value, 5)
       checkZeroStockAndNotify(products.value)
     } catch (error) {
-      console.error('加载商品异常:', error)
-      // 降级到localStorage
-      const stored = localStorage.getItem('products')
-      if (stored) {
-        products.value = JSON.parse(stored)
-      }
+      console.error('❌ 加载商品异常:', error)
+      // 不清空数据，继续使用 localStorage
+      console.log('⚠️ 使用 localStorage 数据')
     } finally {
       loading.value = false
     }
@@ -187,23 +195,37 @@ export const useProductStore = defineStore('product', () => {
         .select()
         .single()
 
-      if (error) throw error
+      if (error) {
+        console.error('❌ 云端保存失败:', error)
+        // 降级到 localStorage
+        const newProduct = {
+          ...product,
+          id: `local_${Date.now()}`,
+          createTime: Date.now()
+        }
+        products.value.unshift(newProduct)
+        await saveProducts()
+        console.log('⚠️ 商品已保存到 localStorage（云端失败）')
+        return newProduct
+      }
 
       const newProduct = dbToFrontend(data)
       products.value.unshift(newProduct)
       await saveProducts()
+      console.log('✅ 商品已保存到云端和 localStorage')
       
       return newProduct
     } catch (error) {
-      console.error('添加商品失败:', error)
-      // 降级到localStorage
+      console.error('❌ 添加商品异常:', error)
+      // 降级到 localStorage
       const newProduct = {
         ...product,
-        id: Date.now().toString(),
+        id: `local_${Date.now()}`,
         createTime: Date.now()
       }
-      products.value.push(newProduct)
-      saveProducts()
+      products.value.unshift(newProduct)
+      await saveProducts()
+      console.log('⚠️ 商品已保存到 localStorage（异常降级）')
       return newProduct
     }
   }
