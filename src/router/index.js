@@ -122,7 +122,7 @@ const router = createRouter({
 })
 
 // 路由守卫
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   document.title = to.meta.title || '鞋店仓库管理系统'
   
   // 公开页面直接放行
@@ -131,9 +131,17 @@ router.beforeEach((to, from, next) => {
     return
   }
   
+  // 动态导入 userStore
+  const { useUserStore } = await import('@/stores/user')
+  const userStore = useUserStore()
+  
+  // 确保用户数据已加载
+  if (!userStore.users.length) {
+    await userStore.loadUsers()
+  }
+  
   // 检查是否已登录
-  const currentUser = localStorage.getItem('currentUser')
-  if (!currentUser) {
+  if (!userStore.isLoggedIn) {
     // 未登录，跳转到登录页
     next({ path: '/login', query: { redirect: to.fullPath } })
     return
@@ -141,10 +149,7 @@ router.beforeEach((to, from, next) => {
   
   // 检查权限
   if (to.meta.permission) {
-    const user = JSON.parse(currentUser)
-    const userPermissions = getUserPermissions(user.role)
-    
-    if (!userPermissions.includes(to.meta.permission)) {
+    if (!userStore.hasPermission(to.meta.permission)) {
       // 无权限，提示并返回首页
       next({ path: '/home' })
       return
@@ -153,26 +158,6 @@ router.beforeEach((to, from, next) => {
   
   next()
 })
-
-// 获取用户权限列表
-function getUserPermissions(role) {
-  const ROLE_PERMISSIONS = {
-    [ROLES.MANAGER]: Object.values(PERMISSIONS), // 店长拥有所有权限
-    [ROLES.STAFF]: [
-      PERMISSIONS.PRODUCT_VIEW,
-      PERMISSIONS.SALES_VIEW,
-      PERMISSIONS.SALES_ADD,
-      PERMISSIONS.RETURNS_VIEW,
-      PERMISSIONS.MEMBER_VIEW,
-      PERMISSIONS.MEMBER_ADD,
-      PERMISSIONS.MEMBER_RECHARGE,
-      PERMISSIONS.STATS_VIEW,
-      PERMISSIONS.STAFF_STATS_VIEW
-    ]
-  }
-  
-  return ROLE_PERMISSIONS[role] || []
-}
 
 export default router
 
