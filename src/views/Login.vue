@@ -6,7 +6,7 @@
       <div class="circle circle-2"></div>
       <div class="circle circle-3"></div>
     </div>
-
+    
     <!-- 登录卡片 -->
     <div class="login-card">
       <div class="logo-section">
@@ -14,7 +14,7 @@
         <h1 class="app-name">鞋店管理系统</h1>
         <p class="app-desc">Shoe Store Management</p>
       </div>
-
+      
       <van-form @submit="handleLogin">
         <van-cell-group inset>
           <van-field
@@ -54,7 +54,7 @@
         </div>
       </van-form>
     </div>
-
+    
     <!-- 版本信息 -->
     <div class="version-info">
       v3.2 | © 2025 鞋店管理系统
@@ -70,8 +70,8 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useUserStore } from '@/stores/user'
 import { showToast, showSuccessToast } from 'vant'
+import { useUserStore } from '@/stores/user'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -84,7 +84,8 @@ const form = ref({
 const rememberMe = ref(false)
 const loading = ref(false)
 
-// 登录处理
+
+// 处理登录
 const handleLogin = async () => {
   loading.value = true
   
