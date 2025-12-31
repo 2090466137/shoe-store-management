@@ -231,14 +231,17 @@ export const useUserStore = defineStore('user', () => {
         return
       }
       
-      // 上传默认用户
+      // 上传默认用户（密码需要加密）
       for (const user of DEFAULT_USERS) {
+        // 加密密码
+        const hashedPassword = await migratePassword(user.password)
+        
         await supabase
           .from(TABLES.USERS)
           .insert({
             id: user.id,
             username: user.username,
-            password: user.password,
+            password: hashedPassword, // 使用加密后的密码
             name: user.name,
             role: user.role,
             phone: user.phone || '',
@@ -272,25 +275,41 @@ export const useUserStore = defineStore('user', () => {
         // 降级到 localStorage
         const stored = localStorage.getItem('users')
         if (stored) {
-          users.value = JSON.parse(stored)
+          const localUsers = JSON.parse(stored)
+          // 迁移本地用户的密码（如果还是明文）
+          users.value = await Promise.all(localUsers.map(async u => ({
+            ...u,
+            password: await migratePassword(u.password)
+          })))
         } else {
-          users.value = DEFAULT_USERS
+          // 使用默认用户，并加密密码
+          users.value = await Promise.all(DEFAULT_USERS.map(async u => ({
+            ...u,
+            password: await migratePassword(u.password)
+          })))
         }
+        // 保存迁移后的数据
+        localStorage.setItem('users', JSON.stringify(users.value))
         return
       }
       
-      // 转换数据格式（云端 -> 前端）
-      users.value = data.map(u => ({
-        id: u.id,
-        username: u.username,
-        password: u.password,
-        name: u.name,
-        role: u.role,
-        phone: u.phone || '',
-        avatar: u.avatar || '',
-        createTime: u.create_time,
-        lastLoginTime: u.last_login_time,
-        status: u.status || 'active'
+      // 转换数据格式（云端 -> 前端），并迁移密码
+      users.value = await Promise.all(data.map(async u => {
+        // 如果密码是明文，需要加密
+        const password = await migratePassword(u.password)
+        
+        return {
+          id: u.id,
+          username: u.username,
+          password: password, // 确保密码已加密
+          name: u.name,
+          role: u.role,
+          phone: u.phone || '',
+          avatar: u.avatar || '',
+          createTime: u.create_time,
+          lastLoginTime: u.last_login_time,
+          status: u.status || 'active'
+        }
       }))
       
       // 同步到 localStorage 作为备份
@@ -302,10 +321,21 @@ export const useUserStore = defineStore('user', () => {
       // 降级到 localStorage
       const stored = localStorage.getItem('users')
       if (stored) {
-        users.value = JSON.parse(stored)
+        const localUsers = JSON.parse(stored)
+        // 迁移本地用户的密码（如果还是明文）
+        users.value = await Promise.all(localUsers.map(async u => ({
+          ...u,
+          password: await migratePassword(u.password)
+        })))
       } else {
-        users.value = DEFAULT_USERS
+        // 使用默认用户，并加密密码
+        users.value = await Promise.all(DEFAULT_USERS.map(async u => ({
+          ...u,
+          password: await migratePassword(u.password)
+        })))
       }
+      // 保存迁移后的数据
+      localStorage.setItem('users', JSON.stringify(users.value))
     }
     
     // 恢复当前登录用户
@@ -578,14 +608,19 @@ export const useUserStore = defineStore('user', () => {
       return { success: false, message: '请先登录' }
     }
     
-    if (currentUser.value.password !== oldPassword) {
+    // 验证旧密码
+    const isOldPasswordValid = await verifyPassword(oldPassword, currentUser.value.password)
+    if (!isOldPasswordValid) {
       return { success: false, message: '原密码错误' }
     }
     
+    // 加密新密码
+    const hashedNewPassword = await hashPassword(newPassword)
+    
     const index = users.value.findIndex(u => u.id === currentUser.value.id)
     if (index !== -1) {
-      users.value[index].password = newPassword
-      currentUser.value.password = newPassword
+      users.value[index].password = hashedNewPassword
+      currentUser.value.password = hashedNewPassword
       
       // 保存到云端
       const cloudSuccess = await saveUserToCloud(users.value[index])
