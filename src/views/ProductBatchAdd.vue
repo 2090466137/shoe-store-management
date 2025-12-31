@@ -373,11 +373,15 @@ const toggleSize = (size) => {
 
 // 快速设置单个尺码库存
 const quickSetStock = (size) => {
+  const currentStock = sizeStocks.value[size] || 10
+  
   showDialog({
     title: `设置 ${size}码 库存`,
-    message: '',
+    message: ' ', // 必须有内容，否则 message 元素不会渲染
     showCancelButton: true,
     closeOnClickOverlay: false,
+    confirmButtonText: '确认',
+    cancelButtonText: '取消',
     beforeClose: (action) => {
       return new Promise((resolve) => {
         if (action === 'confirm') {
@@ -406,11 +410,17 @@ const quickSetStock = (size) => {
     }
   })
   
-  // 添加输入框
-  setTimeout(() => {
+  // 添加输入框 - 增加延迟时间并添加重试机制
+  const addInputField = (retryCount = 0) => {
     const messageEl = document.querySelector('.van-dialog__message')
+    
+    if (!messageEl && retryCount < 5) {
+      // 如果找不到元素，重试
+      setTimeout(() => addInputField(retryCount + 1), 100)
+      return
+    }
+    
     if (messageEl && !messageEl.querySelector('.quick-stock-input')) {
-      const currentStock = sizeStocks.value[size] || 10
       messageEl.innerHTML = `
         <div style="padding: 16px 0;">
           <input 
@@ -428,16 +438,24 @@ const quickSetStock = (size) => {
             <span onclick="document.querySelector('.quick-stock-input').value=10" style="display: inline-block; padding: 4px 12px; margin: 4px; background: #f7f8fa; border-radius: 4px; cursor: pointer;">10</span>
             <span onclick="document.querySelector('.quick-stock-input').value=15" style="display: inline-block; padding: 4px 12px; margin: 4px; background: #f7f8fa; border-radius: 4px; cursor: pointer;">15</span>
             <span onclick="document.querySelector('.quick-stock-input').value=20" style="display: inline-block; padding: 4px 12px; margin: 4px; background: #f7f8fa; border-radius: 4px; cursor: pointer;">20</span>
+            <span onclick="document.querySelector('.quick-stock-input').value=30" style="display: inline-block; padding: 4px 12px; margin: 4px; background: #f7f8fa; border-radius: 4px; cursor: pointer;">30</span>
           </div>
         </div>
       `
-      const input = messageEl.querySelector('.quick-stock-input')
-      if (input) {
-        input.focus()
-        input.select()
-      }
+      
+      // 聚焦输入框
+      setTimeout(() => {
+        const input = document.querySelector('.quick-stock-input')
+        if (input) {
+          input.focus()
+          input.select()
+        }
+      }, 100)
     }
-  }, 50)
+  }
+  
+  // 延迟 150ms 后添加输入框
+  setTimeout(() => addInputField(), 150)
 }
 
 // 快速批量设置
@@ -449,9 +467,11 @@ const quickBatchSet = () => {
   
   showDialog({
     title: '批量设置所有尺码',
-    message: '',
+    message: ' ', // 必须有内容，否则 message 元素不会渲染
     showCancelButton: true,
     closeOnClickOverlay: false,
+    confirmButtonText: '确认',
+    cancelButtonText: '取消',
     beforeClose: (action) => {
       return new Promise((resolve) => {
         if (action === 'confirm') {
@@ -483,9 +503,16 @@ const quickBatchSet = () => {
     }
   })
   
-  // 添加输入框
-  setTimeout(() => {
+  // 添加输入框 - 增加延迟时间并添加重试机制
+  const addInputField = (retryCount = 0) => {
     const messageEl = document.querySelector('.van-dialog__message')
+    
+    if (!messageEl && retryCount < 5) {
+      // 如果找不到元素，重试
+      setTimeout(() => addInputField(retryCount + 1), 100)
+      return
+    }
+    
     if (messageEl && !messageEl.querySelector('.batch-stock-input')) {
       messageEl.innerHTML = `
         <div style="padding: 16px 0;">
@@ -508,13 +535,20 @@ const quickBatchSet = () => {
           </div>
         </div>
       `
-      const input = messageEl.querySelector('.batch-stock-input')
-      if (input) {
-        input.focus()
-        input.select()
-      }
+      
+      // 聚焦输入框
+      setTimeout(() => {
+        const input = document.querySelector('.batch-stock-input')
+        if (input) {
+          input.focus()
+          input.select()
+        }
+      }, 100)
     }
-  }, 50)
+  }
+  
+  // 延迟 150ms 后添加输入框
+  setTimeout(() => addInputField(), 150)
 }
 
 // 智能填充（中间尺码多，两端少）
