@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { PERMISSIONS } from '@/stores/user'
+import { PERMISSIONS, ROLES } from '@/stores/user'
 
 const routes = [
   {
@@ -64,7 +64,7 @@ const routes = [
     path: '/statistics',
     name: 'Statistics',
     component: () => import('@/views/Statistics.vue'),
-    meta: { title: '数据统计', permission: PERMISSIONS.STATS_VIEW }
+    meta: { title: '数据统计', permission: PERMISSIONS.STATS_PROFIT }
   },
   {
     path: '/data-management',
@@ -107,12 +107,6 @@ const routes = [
     name: 'MemberRecharge',
     component: () => import('@/views/MemberRecharge.vue'),
     meta: { title: '会员充值', permission: PERMISSIONS.MEMBER_RECHARGE }
-  },
-  {
-    path: '/data-visualization',
-    name: 'DataVisualization',
-    component: () => import('@/views/DataVisualization.vue'),
-    meta: { title: '数据分析', permission: PERMISSIONS.STATS_VIEW }
   },
   {
     path: '/user-management',
@@ -163,8 +157,8 @@ router.beforeEach((to, from, next) => {
 // 获取用户权限列表
 function getUserPermissions(role) {
   const ROLE_PERMISSIONS = {
-    manager: Object.values(PERMISSIONS), // 店长拥有所有权限
-    staff: [
+    [ROLES.MANAGER]: Object.values(PERMISSIONS), // 店长拥有所有权限
+    [ROLES.STAFF]: [
       PERMISSIONS.PRODUCT_VIEW,
       PERMISSIONS.SALES_VIEW,
       PERMISSIONS.SALES_ADD,
@@ -181,3 +175,4 @@ function getUserPermissions(role) {
 }
 
 export default router
+

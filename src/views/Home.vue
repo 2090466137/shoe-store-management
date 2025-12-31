@@ -303,7 +303,7 @@
     </van-dialog>
 
     <!-- 底部导航 -->
-    <van-tabbar v-model="active" active-color="#5B8FF9" inactive-color="#7d7e80">
+    <van-tabbar v-model="active" active-color="#1989fa" inactive-color="#7d7e80">
       <van-tabbar-item icon="home-o" to="/home">首页</van-tabbar-item>
       <van-tabbar-item icon="bag-o" to="/products">商品</van-tabbar-item>
       <van-tabbar-item icon="shopping-cart-o" to="/sales">销售</van-tabbar-item>
@@ -319,7 +319,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { showToast, showSuccessToast, showConfirmDialog } from 'vant'
 import { useProductStore } from '@/stores/product'
@@ -331,6 +331,27 @@ const productStore = useProductStore()
 const salesStore = useSalesStore()
 const userStore = useUserStore()
 const active = ref(0)
+
+// 确保用户数据已加载
+onMounted(async () => {
+  // 如果 userStore 中没有当前用户，但 localStorage 有，重新加载
+  if (!userStore.currentUser) {
+    const savedUser = localStorage.getItem('currentUser')
+    if (savedUser) {
+      console.log('检测到未同步的登录状态，重新加载用户数据...')
+      await userStore.loadUsers()
+      
+      // 再次检查，如果还是没有，说明登录已过期
+      if (!userStore.currentUser) {
+        console.warn('登录状态已过期，跳转到登录页')
+        router.replace('/login')
+      }
+    } else {
+      // 没有登录信息，跳转到登录页
+      router.replace('/login')
+    }
+  }
+})
 
 const showUserMenu = ref(false)
 const showChangePassword = ref(false)
