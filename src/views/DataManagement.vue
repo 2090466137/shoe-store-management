@@ -43,9 +43,42 @@
         </van-notice-bar>
       </div>
 
-      <!-- 数据备份 -->
+      <!-- 云端备份 -->
       <div class="card">
-        <div class="section-title">💾 数据备份</div>
+        <div class="section-title">☁️ 云端备份</div>
+        <div class="action-list">
+          <van-button
+            type="primary"
+            size="large"
+            block
+            icon="cloud-o"
+            @click="handleCloudBackup"
+            class="action-button"
+          >
+            立即备份到云端
+          </van-button>
+          
+          <van-button
+            type="default"
+            size="large"
+            block
+            icon="records"
+            @click="handleViewCloudBackups"
+            class="action-button"
+          >
+            查看云端备份列表
+          </van-button>
+        </div>
+        
+        <div class="tips">
+          <van-icon name="info-o" />
+          <span>云端备份每天自动执行一次，数据更安全</span>
+        </div>
+      </div>
+
+      <!-- 本地备份 -->
+      <div class="card">
+        <div class="section-title">💾 本地备份</div>
         <div class="action-list">
           <van-button
             type="primary"
@@ -83,7 +116,7 @@
         
         <div class="tips">
           <van-icon name="info-o" />
-          <span>建议定期备份数据，防止数据丢失</span>
+          <span>本地备份可下载到设备，方便离线保存</span>
         </div>
       </div>
 
@@ -107,7 +140,7 @@
             @click="$refs.fileInput.click()"
             class="action-button"
           >
-            从备份文件恢复数据
+            从本地文件恢复数据
           </van-button>
         </div>
         
@@ -182,7 +215,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { showToast, showDialog, showLoadingToast, closeToast } from 'vant'
+import { showToast, showDialog, showLoadingToast, closeToast, showSuccessToast } from 'vant'
 import {
   exportDataAsJSON,
   importDataFromJSON,
@@ -193,6 +226,13 @@ import {
   clearAllData,
   getDataStats
 } from '@/utils/backup'
+import {
+  manualCloudBackup,
+  getCloudBackups,
+  restoreFromCloud,
+  deleteCloudBackup,
+  getBackupStats
+} from '@/utils/cloudBackup'
 
 const router = useRouter()
 const fileInput = ref(null)
@@ -374,6 +414,146 @@ const handleClearData = () => {
         .catch(() => {
           // 取消操作
         })
+    })
+    .catch(() => {
+      // 取消操作
+    })
+}
+
+// 云端备份功能
+const handleCloudBackup = async () => {
+  showLoadingToast({
+    message: '正在备份到云端...',
+    forbidClick: true,
+    duration: 0
+  })
+  
+  try {
+    const result = await manualCloudBackup()
+    closeToast()
+    
+    if (result.success) {
+      loadDataStats()
+      checkBackupStatus()
+      
+      showSuccessToast({
+        message: '云端备份成功！',
+        duration: 2000
+      })
+    } else {
+      showToast({
+        type: 'fail',
+        message: '备份失败：' + result.error
+      })
+    }
+  } catch (error) {
+    closeToast()
+    showToast({
+      type: 'fail',
+      message: '备份失败：' + error.message
+    })
+  }
+}
+
+// 查看云端备份列表
+const handleViewCloudBackups = async () => {
+  showLoadingToast({
+    message: '加载中...',
+    forbidClick: true,
+    duration: 0
+  })
+  
+  try {
+    const result = await getCloudBackups(20)
+    closeToast()
+    
+    if (result.success && result.data.length > 0) {
+      // 构建备份列表选项
+      const actions = result.data.map(backup => ({
+        name: `${new Date(backup.created_at).toLocaleString('zh-CN')} (${backup.backup_type === 'auto' ? '自动' : '手动'})`,
+        subname: `商品:${backup.backup_data.stats.products_count} | 销售:${backup.backup_data.stats.sales_count}`,
+        id: backup.id
+      }))
+      
+      // 显示备份列表
+      showDialog({
+        title: '选择要恢复的备份',
+        message: '点击备份记录可恢复数据',
+        showCancelButton: true,
+        confirmButtonText: '取消',
+        className: 'backup-list-dialog'
+      }).catch(() => {})
+      
+      // 使用 action sheet 显示列表
+      import('vant').then(({ showActionSheet }) => {
+        showActionSheet({
+          actions: actions,
+          cancelText: '取消',
+          description: '选择要恢复的云端备份',
+          onSelect: (action) => {
+            handleRestoreFromCloud(action.id)
+          }
+        })
+      })
+    } else if (result.success && result.data.length === 0) {
+      showToast({
+        message: '暂无云端备份记录',
+        duration: 2000
+      })
+    } else {
+      showToast({
+        type: 'fail',
+        message: '获取备份列表失败：' + result.error
+      })
+    }
+  } catch (error) {
+    closeToast()
+    showToast({
+      type: 'fail',
+      message: '获取备份列表失败：' + error.message
+    })
+  }
+}
+
+// 从云端恢复数据
+const handleRestoreFromCloud = async (backupId) => {
+  showDialog({
+    title: '确认恢复',
+    message: '恢复数据将覆盖当前所有数据，确定要继续吗？\n\n建议先备份当前数据！',
+    showCancelButton: true,
+  })
+    .then(async () => {
+      showLoadingToast({
+        message: '正在恢复数据...',
+        forbidClick: true,
+        duration: 0
+      })
+      
+      try {
+        const result = await restoreFromCloud(backupId)
+        closeToast()
+        
+        if (result.success) {
+          showDialog({
+            title: '恢复成功',
+            message: result.message,
+          }).then(() => {
+            // 刷新页面以加载新数据
+            window.location.reload()
+          })
+        } else {
+          showToast({
+            type: 'fail',
+            message: '恢复失败：' + result.error
+          })
+        }
+      } catch (error) {
+        closeToast()
+        showToast({
+          type: 'fail',
+          message: '恢复失败：' + error.message
+        })
+      }
     })
     .catch(() => {
       // 取消操作
