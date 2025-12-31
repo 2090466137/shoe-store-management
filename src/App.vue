@@ -1,5 +1,8 @@
 <template>
   <div id="app" :class="{ 'dark-mode': isDarkMode }">
+    <!-- 离线状态指示器 -->
+    <OfflineIndicator />
+    
     <router-view v-slot="{ Component, route }">
       <transition :name="transitionName" mode="out-in">
         <component :is="Component" :key="route.path" />
@@ -14,12 +17,16 @@ import { useRouter } from 'vue-router'
 import { useProductStore } from './stores/product'
 import { useSalesStore } from './stores/sales'
 import { useUserStore } from './stores/user'
+import { useMemberStore } from './stores/member'
 import { requestNotificationPermission } from './utils/notification'
+import { setupAutoSync, getQueueSize } from './utils/offlineQueue'
+import OfflineIndicator from './components/OfflineIndicator.vue'
 
 const router = useRouter()
 const productStore = useProductStore()
 const salesStore = useSalesStore()
 const userStore = useUserStore()
+const memberStore = useMemberStore()
 
 // 暗黑模式
 const isDarkMode = ref(false)
@@ -93,9 +100,24 @@ onMounted(async () => {
     // 初始化商品和销售数据
     productStore.loadProducts()
     salesStore.loadSales()
+    memberStore.loadMembers()
     
     // 请求通知权限
     await requestNotificationPermission()
+    
+    // 设置自动同步
+    setupAutoSync({
+      productStore,
+      salesStore,
+      memberStore,
+      userStore
+    })
+    
+    // 检查离线队列
+    const queueSize = getQueueSize()
+    if (queueSize > 0) {
+      console.log(`📝 有 ${queueSize} 个操作待同步`)
+    }
     
     // 检查暗黑模式
     checkDarkMode()
