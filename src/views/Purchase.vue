@@ -29,7 +29,11 @@
             type="number"
             label="进货数量"
             placeholder="请输入进货数量"
-            :rules="[{ required: true, message: '请输入进货数量' }]"
+            :rules="[
+              { required: true, message: '请输入进货数量' },
+              { validator: validatePositiveInteger, message: '数量必须为正整数' }
+            ]"
+            @blur="validateQuantity"
           >
             <template #button>
               <span>件</span>
@@ -42,7 +46,11 @@
             type="number"
             label="进货单价"
             placeholder="请输入进货单价"
-            :rules="[{ required: true, message: '请输入进货单价' }]"
+            :rules="[
+              { required: true, message: '请输入进货单价' },
+              { validator: validatePositiveNumber, message: '单价必须大于0' }
+            ]"
+            @blur="validateCostPrice"
           >
             <template #button>
               <span>元</span>
@@ -179,6 +187,51 @@ const onProductConfirm = ({ selectedOptions }) => {
   showProductPicker.value = false
 }
 
+// 验证正数（价格）
+const validatePositiveNumber = (value) => {
+  const num = parseFloat(value)
+  return !isNaN(num) && num > 0
+}
+
+// 验证正整数（数量）
+const validatePositiveInteger = (value) => {
+  const num = parseInt(value)
+  return !isNaN(num) && num > 0 && Number.isInteger(parseFloat(value))
+}
+
+// 进货数量验证
+const validateQuantity = () => {
+  const quantity = parseInt(form.value.quantity)
+  if (isNaN(quantity) || quantity < 0) {
+    form.value.quantity = '1'
+    showToast('进货数量不能为负数，已调整为1')
+  } else if (quantity === 0) {
+    form.value.quantity = '1'
+    showToast('进货数量不能为0，已调整为1')
+  } else if (!Number.isInteger(parseFloat(form.value.quantity))) {
+    form.value.quantity = Math.floor(quantity).toString()
+    showToast('进货数量必须为整数')
+  } else if (quantity > 999999) {
+    form.value.quantity = '999999'
+    showToast('进货数量过大，已调整为999999')
+  }
+}
+
+// 进货单价验证
+const validateCostPrice = () => {
+  const price = parseFloat(form.value.costPrice)
+  if (isNaN(price) || price < 0) {
+    form.value.costPrice = '0'
+    showToast('进货单价不能为负数')
+  } else if (price < 0.01 && price !== 0) {
+    form.value.costPrice = '0.01'
+    showToast('进货单价过小，已调整为0.01元')
+  } else if (price > 999999) {
+    form.value.costPrice = '999999'
+    showToast('进货单价过大，已调整为999999元')
+  }
+}
+
 const onSubmit = () => {
   if (!form.value.productId) {
     showToast({
@@ -188,10 +241,34 @@ const onSubmit = () => {
     return
   }
 
+  // 最终验证
+  const quantity = parseInt(form.value.quantity)
+  const costPrice = parseFloat(form.value.costPrice)
+
+  if (isNaN(quantity) || quantity <= 0) {
+    showToast('请输入有效的进货数量（必须大于0）')
+    return
+  }
+
+  if (!Number.isInteger(quantity)) {
+    showToast('进货数量必须为整数')
+    return
+  }
+
+  if (isNaN(costPrice) || costPrice <= 0) {
+    showToast('请输入有效的进货单价（必须大于0）')
+    return
+  }
+
+  if (costPrice > 999999) {
+    showToast('进货单价过大，请检查输入')
+    return
+  }
+
   const purchaseData = {
     productId: form.value.productId,
-    quantity: parseInt(form.value.quantity),
-    costPrice: parseFloat(form.value.costPrice),
+    quantity: quantity,
+    costPrice: costPrice,
     supplier: form.value.supplier
   }
 
