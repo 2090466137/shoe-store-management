@@ -109,6 +109,12 @@ const routes = [
     meta: { title: '会员充值', permission: PERMISSIONS.MEMBER_RECHARGE }
   },
   {
+    path: '/member/history',
+    name: 'MemberHistory',
+    component: () => import('@/views/MemberHistory.vue'),
+    meta: { title: '会员历史记录', permission: PERMISSIONS.MEMBER_VIEW }
+  },
+  {
     path: '/user-management',
     name: 'UserManagement',
     component: () => import('@/views/UserManagement.vue'),

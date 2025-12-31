@@ -98,7 +98,14 @@
         >
           <div class="record-header">
             <div class="record-product">{{ purchase.productName }}</div>
-            <div class="record-amount">¥{{ purchase.totalAmount.toFixed(2) }}</div>
+            <div class="record-header-right">
+              <div class="record-amount">¥{{ purchase.totalAmount.toFixed(2) }}</div>
+              <van-icon 
+                name="delete-o" 
+                class="delete-btn"
+                @click.stop="handleDeletePurchase(purchase)"
+              />
+            </div>
           </div>
           <div class="record-info">
             <span>数量: {{ purchase.quantity }}件</span>
@@ -128,7 +135,7 @@ import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useProductStore } from '@/stores/product'
 import { useSalesStore } from '@/stores/sales'
-import { showToast } from 'vant'
+import { showToast, showConfirmDialog } from 'vant'
 
 const router = useRouter()
 const productStore = useProductStore()
@@ -172,7 +179,7 @@ const onProductConfirm = ({ selectedOptions }) => {
   showProductPicker.value = false
 }
 
-const onSubmit = async () => {
+const onSubmit = () => {
   if (!form.value.productId) {
     showToast({
       type: 'fail',
@@ -188,7 +195,7 @@ const onSubmit = async () => {
     supplier: form.value.supplier
   }
 
-  const result = await salesStore.addPurchase(purchaseData)
+  const result = salesStore.addPurchase(purchaseData)
   
   if (result.success) {
     showToast({
@@ -210,6 +217,33 @@ const onSubmit = async () => {
       type: 'fail',
       message: result.message
     })
+  }
+}
+
+const handleDeletePurchase = async (purchase) => {
+  try {
+    await showConfirmDialog({
+      title: '确认删除',
+      message: `确定要删除这条进货记录吗？\n\n商品：${purchase.productName}\n数量：${purchase.quantity}件\n金额：¥${purchase.totalAmount.toFixed(2)}\n\n删除后将减少对应的库存。`,
+      confirmButtonText: '确认删除',
+      confirmButtonColor: '#ee0a24'
+    })
+    
+    const success = await salesStore.deletePurchase(purchase.id)
+    
+    if (success) {
+      showToast({
+        type: 'success',
+        message: '已删除进货记录'
+      })
+    } else {
+      showToast({
+        type: 'fail',
+        message: '删除失败'
+      })
+    }
+  } catch {
+    // 用户取消
   }
 }
 
@@ -242,6 +276,12 @@ const formatDate = (timestamp) => {
   margin-bottom: 8px;
 }
 
+.record-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .record-product {
   font-size: 15px;
   font-weight: 600;
@@ -252,6 +292,17 @@ const formatDate = (timestamp) => {
   font-size: 16px;
   font-weight: 600;
   color: #07c160;
+}
+
+.delete-btn {
+  font-size: 18px;
+  color: #ee0a24;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.delete-btn:active {
+  opacity: 0.6;
 }
 
 .record-info {
@@ -274,4 +325,3 @@ const formatDate = (timestamp) => {
   color: #1989fa;
 }
 </style>
-

@@ -7,6 +7,7 @@
       @click-left="router.back()"
     >
       <template #right>
+        <van-icon name="records" @click="router.push('/member/history')" style="margin-right: 16px" />
         <van-icon name="plus" @click="showAddDialog = true" />
       </template>
     </van-nav-bar>

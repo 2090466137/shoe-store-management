@@ -487,6 +487,62 @@ export const useSalesStore = defineStore('sales', () => {
     }
   }
 
+  // 删除进货记录
+  const deletePurchase = async (id) => {
+    const productStore = useProductStore()
+    const index = purchases.value.findIndex(p => p.id === id)
+    if (index === -1) {
+      console.error('❌ 进货记录不存在:', id)
+      return false
+    }
+    
+    const tempPurchase = purchases.value[index]
+    
+    try {
+      // 1. 恢复库存（进货记录删除 = 库存减少）
+      await productStore.updateStock(tempPurchase.productId, tempPurchase.quantity, 'subtract')
+      console.log(`✅ 已恢复商品 ${tempPurchase.productName} 库存 -${tempPurchase.quantity}`)
+      
+      // 2. 从本地删除
+      purchases.value.splice(index, 1)
+      savePurchases()
+
+      // 3. 判断是否是本地记录（UUID 格式: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx）
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+      const isCloudRecord = uuidRegex.test(id)
+      
+      if (!isCloudRecord) {
+        // 本地记录，只需要从 localStorage 删除即可
+        console.log('✅ 本地进货记录已删除:', id)
+        return true
+      }
+
+      // 4. 云端记录，需要从 Supabase 删除
+      const { error } = await supabase
+        .from(TABLES.PURCHASES)
+        .delete()
+        .eq('id', id)
+
+      if (error) {
+        console.error('❌ 云端删除失败:', error)
+        // 恢复本地数据和库存
+        purchases.value.splice(index, 0, tempPurchase)
+        savePurchases()
+        
+        // 回滚库存
+        await productStore.updateStock(tempPurchase.productId, tempPurchase.quantity, 'add')
+        
+        throw error
+      }
+
+      console.log('✅ 云端进货记录已删除:', id)
+      return true
+    } catch (error) {
+      console.error('❌ 删除进货记录失败:', error)
+      return false
+    }
+  }
+
   // 获取所有销售记录
   const getAllSales = computed(() => sales.value)
 
@@ -726,6 +782,7 @@ export const useSalesStore = defineStore('sales', () => {
     addSale,
     deleteSale,
     addPurchase,
+    deletePurchase,
     todaySales,
     todayProfit,
     monthSales,

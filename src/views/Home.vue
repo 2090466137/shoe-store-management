@@ -141,13 +141,17 @@
       <!-- 会员管理 -->
       <div 
         class="card" 
-        @click="router.push('/members')"
         v-if="userStore.hasPermission(PERMISSIONS.MEMBER_VIEW)"
       >
         <div class="section-title">👥 会员管理</div>
-        <div class="quick-action">
+        <div class="quick-action" @click="router.push('/members')">
           <div class="action-icon">💳</div>
           <div class="action-text">查看和管理会员信息</div>
+          <van-icon name="arrow" class="action-arrow" />
+        </div>
+        <div class="quick-action" @click="router.push('/member/history')">
+          <div class="action-icon">📋</div>
+          <div class="action-text">会员历史记录</div>
           <van-icon name="arrow" class="action-arrow" />
         </div>
       </div>
