@@ -372,41 +372,95 @@ const toggleSize = (size) => {
 }
 
 // 批量设置库存
-const batchSetStock = () => {
+const batchSetStock = async () => {
+  if (selectedSizes.value.length === 0) {
+    showToast('请先选择尺码')
+    return
+  }
+  
+  try {
+    await showDialog({
+      title: '批量设置库存',
+      message: '请输入要设置的库存数量（0-999）',
+      showCancelButton: true,
+      closeOnClickOverlay: false,
+    })
+    
+    // 用户点击确认后，再弹出输入框
+    const result = await showDialog({
+      title: '输入库存数量',
+      message: '',
+      showCancelButton: true,
+      closeOnClickOverlay: false,
+    })
+    
+  } catch (error) {
+    // 用户取消
+    return
+  }
+  
+  // 使用 Vant 的 Dialog 组件配合 Field
+  let inputValue = '10'
+  
   showDialog({
     title: '批量设置库存',
     message: '请输入库存数量',
     showCancelButton: true,
-    beforeClose: (action, done) => {
-      if (action === 'confirm') {
-        const input = document.querySelector('.van-dialog__message input')
-        const value = input ? parseInt(input.value) : 10
-        if (isNaN(value) || value < 0) {
-          showToast('请输入有效的数量')
-          done(false)
-        } else {
+    closeOnClickOverlay: false,
+    beforeClose: (action) => {
+      return new Promise((resolve) => {
+        if (action === 'confirm') {
+          const input = document.querySelector('.batch-stock-input')
+          const value = input ? parseInt(input.value) : 10
+          
+          if (!input || input.value === '') {
+            showToast('请输入库存数量')
+            resolve(false)
+            return
+          }
+          
+          if (isNaN(value) || value < 0 || value > 999) {
+            showToast('请输入有效的数量（0-999）')
+            resolve(false)
+            return
+          }
+          
+          // 设置所有尺码的库存
           selectedSizes.value.forEach(size => {
             sizeStocks.value[size] = value
           })
-          showToast('设置成功')
-          done()
+          
+          showToast(`已将所有尺码库存设置为 ${value} 件`)
+          resolve(true)
+        } else {
+          resolve(true)
         }
-      } else {
-        done()
-      }
+      })
     }
-  }).catch(() => {})
+  })
   
   // 添加输入框
   setTimeout(() => {
     const messageEl = document.querySelector('.van-dialog__message')
-    if (messageEl && !messageEl.querySelector('input')) {
-      const input = document.createElement('input')
-      input.type = 'number'
-      input.value = '10'
-      input.style.cssText = 'width: 100%; padding: 8px; margin-top: 12px; border: 1px solid #ebedf0; border-radius: 4px; font-size: 14px;'
-      messageEl.appendChild(input)
-      input.focus()
+    if (messageEl && !messageEl.querySelector('.batch-stock-input')) {
+      messageEl.innerHTML = `
+        <div style="padding: 12px 0;">
+          <input 
+            type="number" 
+            class="batch-stock-input"
+            value="10"
+            min="0"
+            max="999"
+            placeholder="请输入库存数量"
+            style="width: 100%; padding: 10px; border: 1px solid #ebedf0; border-radius: 4px; font-size: 14px; text-align: center;"
+          />
+        </div>
+      `
+      const input = messageEl.querySelector('.batch-stock-input')
+      if (input) {
+        input.focus()
+        input.select()
+      }
     }
   }, 50)
 }
