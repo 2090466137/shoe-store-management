@@ -348,6 +348,10 @@ const getStockForSize = (size) => {
   if (stockMode.value === 'unified') {
     return form.value.defaultStock || 0
   } else {
+    // 如果没有设置，返回默认值
+    if (!(size in sizeStocks.value)) {
+      sizeStocks.value[size] = parseInt(form.value.defaultStock) || 10
+    }
     return sizeStocks.value[size] || 0
   }
 }
@@ -520,14 +524,37 @@ const smartFill = () => {
     return
   }
   
+  if (stockMode.value !== 'individual') {
+    showToast('请先切换到"单独设置"模式')
+    return
+  }
+  
+  const sizes = selectedSizes.value
+  const len = sizes.length
+  
+  let previewText = '预览分配结果：\n\n'
+  
+  if (len <= 2) {
+    // 尺码太少，统一设置为10
+    previewText += sizes.map(size => `${size}码：10件`).join('\n')
+  } else {
+    // 智能分配：两端少，中间多
+    const preview = sizes.map((size, index) => {
+      const position = index / (len - 1) // 0 到 1
+      // 使用抛物线函数：中间高，两端低
+      const ratio = 1 - Math.pow(2 * position - 1, 2)
+      const stock = Math.round(5 + ratio * 15) // 5-20之间
+      return `${size}码：${stock}件`
+    })
+    previewText += preview.join('\n')
+  }
+  
   showDialog({
     title: '智能填充',
-    message: '中间尺码数量多，两端尺码数量少\n适合热门尺码进货多的情况',
+    message: previewText + '\n\n中间尺码多，两端尺码少\n适合热门尺码进货多的情况',
     showCancelButton: true,
+    confirmButtonText: '确认填充',
   }).then(() => {
-    const sizes = selectedSizes.value
-    const len = sizes.length
-    
     if (len <= 2) {
       // 尺码太少，统一设置为10
       sizes.forEach(size => {
@@ -550,16 +577,33 @@ const smartFill = () => {
 
 // 快捷选择成人常用码
 const selectCommonSizes = (type) => {
+  let newSizes = []
   if (type === 'adult') {
-    selectedSizes.value = ['38', '39', '40', '41', '42', '43', '44']
+    newSizes = ['38', '39', '40', '41', '42', '43', '44']
   } else if (type === 'child') {
-    selectedSizes.value = ['28', '29', '30', '31', '32', '33', '34', '35', '36', '37']
+    newSizes = ['28', '29', '30', '31', '32', '33', '34', '35', '36', '37']
   }
+  
+  selectedSizes.value = newSizes
+  
+  // 初始化新尺码的库存
+  newSizes.forEach(size => {
+    if (!(size in sizeStocks.value)) {
+      sizeStocks.value[size] = parseInt(form.value.defaultStock) || 10
+    }
+  })
 }
 
 // 全选
 const selectAllSizes = () => {
   selectedSizes.value = [...availableSizes]
+  
+  // 初始化所有尺码的库存
+  availableSizes.forEach(size => {
+    if (!(size in sizeStocks.value)) {
+      sizeStocks.value[size] = parseInt(form.value.defaultStock) || 10
+    }
+  })
 }
 
 // 清空
@@ -585,6 +629,15 @@ const handleSubmit = async () => {
   if (selectedSizes.value.length === 0) {
     showToast('请至少选择一个尺码')
     return
+  }
+  
+  // 在单独设置模式下，确保所有尺码都有库存设置
+  if (stockMode.value === 'individual') {
+    for (const size of selectedSizes.value) {
+      if (!(size in sizeStocks.value) || sizeStocks.value[size] === undefined) {
+        sizeStocks.value[size] = parseInt(form.value.defaultStock) || 10
+      }
+    }
   }
 
   // 确认对话框
