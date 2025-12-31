@@ -615,7 +615,15 @@ const handlePayment = async (action) => {
       if (result.success) {
         // 如果是会员余额支付，扣减余额
         if (paymentMethod.value === '会员余额' && selectedMember.value) {
-          await memberStore.consumeMember(selectedMember.value.id, actualAmount.value)
+          const consumeResult = await memberStore.consumeMember(selectedMember.value.id, actualAmount.value)
+          if (consumeResult.success) {
+            console.log('✅ 会员余额已扣减，新余额:', consumeResult.balance)
+            // 更新本地会员信息显示
+            selectedMember.value = memberStore.getMemberById(selectedMember.value.id)
+          } else {
+            console.error('❌ 会员余额扣减失败:', consumeResult.message)
+            showToast('余额扣减失败: ' + consumeResult.message)
+          }
         }
 
         showSuccessToast({
@@ -625,10 +633,16 @@ const handlePayment = async (action) => {
 
         // 清空购物车和表单
         cart.value = []
-        memberPhone.value = ''
-        selectedMember.value = null
         remark.value = ''
         receivedAmount.value = ''
+        
+        // 如果不是会员余额支付，清除会员信息
+        // 如果是会员余额支付，保留会员信息以便查看更新后的余额
+        if (paymentMethod.value !== '会员余额') {
+          memberPhone.value = ''
+          memberName.value = ''
+          selectedMember.value = null
+        }
 
         resolve(true)
       } else {
