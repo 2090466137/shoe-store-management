@@ -78,7 +78,9 @@
                 :max="item.stock"
                 theme="round"
                 button-size="22"
+                :disable-input="false"
                 @change="updateCartItem(index)"
+                @blur="validateQuantity(index)"
               />
               <van-icon 
                 name="delete-o" 
@@ -94,33 +96,10 @@
       <!-- 会员选择 -->
       <div class="card member-card">
         <div class="section-title">👤 会员信息</div>
-        
-        <!-- 会员选择器 -->
-        <van-field
-          v-model="memberName"
-          label="选择会员"
-          placeholder="点击选择会员"
-          readonly
-          is-link
-          @click="showMemberPicker = true"
-        >
-          <template #button>
-            <van-button 
-              v-if="selectedMember" 
-              size="small" 
-              type="default" 
-              @click.stop="clearMember"
-            >
-              清除
-            </van-button>
-          </template>
-        </van-field>
-        
-        <!-- 或手机号查询 -->
         <van-field
           v-model="memberPhone"
-          label="手机号"
-          placeholder="或输入手机号查询"
+          label="会员手机"
+          placeholder="输入手机号查询会员"
           type="tel"
           maxlength="11"
           clearable
@@ -270,16 +249,6 @@
       />
     </van-popup>
 
-    <!-- 会员选择器 -->
-    <van-popup v-model:show="showMemberPicker" position="bottom" round>
-      <van-picker
-        :columns="memberColumns"
-        @confirm="onMemberConfirm"
-        @cancel="showMemberPicker = false"
-        title="选择会员"
-      />
-    </van-popup>
-
     <!-- 收款确认弹窗 -->
     <van-dialog
       v-model:show="showPaymentDialog"
@@ -338,9 +307,7 @@ const cart = ref([])
 
 // 会员相关
 const memberPhone = ref('')
-const memberName = ref('')
 const selectedMember = ref(null)
-const showMemberPicker = ref(false)
 
 // 销售员
 const salesperson = ref('')
@@ -357,18 +324,6 @@ const salespersonColumns = computed(() => {
   return userStore.activeUsers.map(u => ({
     text: u.name,
     value: u.name
-  }))
-})
-
-// 会员列表
-const memberColumns = computed(() => {
-  const members = memberStore.getAllMembers
-  if (members.length === 0) {
-    return [{ text: '暂无会员', value: null }]
-  }
-  return members.map(m => ({
-    text: `${m.name || '未命名'} (${m.phone})`,
-    value: m.id
   }))
 })
 
@@ -474,6 +429,24 @@ const updateCartItem = (index) => {
   // 数量变化时自动更新（通过 v-model 绑定）
 }
 
+// 验证数量输入（防止负数、0、超出库存等）
+const validateQuantity = (index) => {
+  const item = cart.value[index]
+  if (!item) return
+  
+  // 确保数量是正整数
+  if (!item.quantity || item.quantity < 1) {
+    item.quantity = 1
+    showToast('数量不能小于1')
+  } else if (item.quantity > item.stock) {
+    item.quantity = item.stock
+    showToast(`库存不足，最多只能购买${item.stock}件`)
+  } else if (!Number.isInteger(item.quantity)) {
+    item.quantity = Math.floor(item.quantity)
+    showToast('数量必须为整数')
+  }
+}
+
 // 从购物车移除
 const removeFromCart = (index) => {
   cart.value.splice(index, 1)
@@ -494,51 +467,20 @@ const clearCart = () => {
 const searchMember = () => {
   if (!memberPhone.value || memberPhone.value.length < 11) {
     selectedMember.value = null
-    memberName.value = ''
     return
   }
   
   const member = memberStore.getMemberByPhone(memberPhone.value)
   if (member) {
     selectedMember.value = member
-    memberName.value = `${member.name || '未命名'} (${member.phone})`
     showToast({
       message: `欢迎会员 ${member.name || member.phone}`,
       icon: 'user-o'
     })
   } else {
     selectedMember.value = null
-    memberName.value = ''
     showToast('未找到该会员')
   }
-}
-
-// 选择会员
-const onMemberConfirm = ({ selectedOptions }) => {
-  const memberId = selectedOptions[0].value
-  if (!memberId) {
-    return
-  }
-  
-  const member = memberStore.getMemberById(memberId)
-  if (member) {
-    selectedMember.value = member
-    memberName.value = selectedOptions[0].text
-    memberPhone.value = member.phone
-    showToast({
-      message: `已选择会员 ${member.name || member.phone}`,
-      icon: 'user-o'
-    })
-  }
-  showMemberPicker.value = false
-}
-
-// 清除会员选择
-const clearMember = () => {
-  selectedMember.value = null
-  memberName.value = ''
-  memberPhone.value = ''
-  showToast('已清除会员')
 }
 
 // 选择销售员
@@ -576,9 +518,9 @@ const handleCheckout = () => {
   showPaymentDialog.value = true
 }
 
-// 处理支付（异步函数）
-const handlePayment = async (action) => {
-  return new Promise(async (resolve) => {
+// 处理支付
+const handlePayment = (action) => {
+  return new Promise((resolve) => {
     if (action === 'confirm') {
       // 现金支付需要检查收款金额
       if (paymentMethod.value === '现金') {
@@ -610,24 +552,12 @@ const handlePayment = async (action) => {
       }
 
       // 提交销售
-      const result = await salesStore.addSale(saleData)
+      const result = salesStore.addSale(saleData)
       
       if (result.success) {
         // 如果是会员余额支付，扣减余额
         if (paymentMethod.value === '会员余额' && selectedMember.value) {
-          const consumeResult = await memberStore.consumeMember(selectedMember.value.id, actualAmount.value)
-          if (consumeResult.success) {
-            console.log('✅ 会员余额已扣减:', {
-              新余额: consumeResult.balance,
-              新累计消费: consumeResult.totalConsumption
-            })
-            // 更新本地会员信息显示
-            selectedMember.value = memberStore.getMemberById(selectedMember.value.id)
-            console.log('✅ 会员信息已刷新:', selectedMember.value)
-          } else {
-            console.error('❌ 会员余额扣减失败:', consumeResult.message)
-            showToast('余额扣减失败: ' + consumeResult.message)
-          }
+          memberStore.consumeMember(selectedMember.value.id, actualAmount.value)
         }
 
         showSuccessToast({
@@ -637,16 +567,10 @@ const handlePayment = async (action) => {
 
         // 清空购物车和表单
         cart.value = []
+        memberPhone.value = ''
+        selectedMember.value = null
         remark.value = ''
         receivedAmount.value = ''
-        
-        // 如果不是会员余额支付，清除会员信息
-        // 如果是会员余额支付，保留会员信息以便查看更新后的余额
-        if (paymentMethod.value !== '会员余额') {
-          memberPhone.value = ''
-          memberName.value = ''
-          selectedMember.value = null
-        }
 
         resolve(true)
       } else {

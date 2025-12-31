@@ -77,7 +77,11 @@
             type="number"
             label="成本价"
             placeholder="请输入成本价"
-            :rules="[{ required: true, message: '请输入成本价' }]"
+            :rules="[
+              { required: true, message: '请输入成本价' },
+              { validator: validatePositiveNumber, message: '成本价必须大于0' }
+            ]"
+            @blur="validateCostPrice"
           >
             <template #button>
               <span>元</span>
@@ -90,7 +94,11 @@
             type="number"
             label="销售价"
             placeholder="请输入销售价"
-            :rules="[{ required: true, message: '请输入销售价' }]"
+            :rules="[
+              { required: true, message: '请输入销售价' },
+              { validator: validatePositiveNumber, message: '销售价必须大于0' }
+            ]"
+            @blur="validateSalePrice"
           >
             <template #button>
               <span>元</span>
@@ -103,7 +111,11 @@
             type="number"
             label="库存数量"
             placeholder="请输入库存数量"
-            :rules="[{ required: true, message: '请输入库存数量' }]"
+            :rules="[
+              { required: true, message: '请输入库存数量' },
+              { validator: validateNonNegativeInteger, message: '库存必须为非负整数' }
+            ]"
+            @blur="validateStock"
           >
             <template #button>
               <span>件</span>
@@ -116,7 +128,11 @@
             type="number"
             label="最低库存"
             placeholder="请输入最低库存预警值"
-            :rules="[{ required: true, message: '请输入最低库存' }]"
+            :rules="[
+              { required: true, message: '请输入最低库存' },
+              { validator: validateNonNegativeInteger, message: '最低库存必须为非负整数' }
+            ]"
+            @blur="validateMinStock"
           >
             <template #button>
               <span>件</span>
@@ -245,23 +261,118 @@ const onCategoryConfirm = ({ selectedOptions }) => {
   showCategoryPicker.value = false
 }
 
-const onSubmit = async () => {
+// 验证正数（价格）
+const validatePositiveNumber = (value) => {
+  const num = parseFloat(value)
+  return !isNaN(num) && num > 0
+}
+
+// 验证非负整数（库存）
+const validateNonNegativeInteger = (value) => {
+  const num = parseInt(value)
+  return !isNaN(num) && num >= 0 && Number.isInteger(parseFloat(value))
+}
+
+// 成本价验证
+const validateCostPrice = () => {
+  const price = parseFloat(form.value.costPrice)
+  if (isNaN(price) || price < 0) {
+    form.value.costPrice = '0'
+    showToast('成本价不能为负数')
+  } else if (price < 0.01 && price !== 0) {
+    form.value.costPrice = '0.01'
+    showToast('成本价过小，已调整为0.01元')
+  } else if (price > 999999) {
+    form.value.costPrice = '999999'
+    showToast('成本价过大，已调整为999999元')
+  }
+}
+
+// 销售价验证
+const validateSalePrice = () => {
+  const price = parseFloat(form.value.salePrice)
+  if (isNaN(price) || price < 0) {
+    form.value.salePrice = '0'
+    showToast('销售价不能为负数')
+  } else if (price < 0.01 && price !== 0) {
+    form.value.salePrice = '0.01'
+    showToast('销售价过小，已调整为0.01元')
+  } else if (price > 999999) {
+    form.value.salePrice = '999999'
+    showToast('销售价过大，已调整为999999元')
+  }
+}
+
+// 库存验证
+const validateStock = () => {
+  const stock = parseInt(form.value.stock)
+  if (isNaN(stock) || stock < 0) {
+    form.value.stock = '0'
+    showToast('库存不能为负数')
+  } else if (!Number.isInteger(parseFloat(form.value.stock))) {
+    form.value.stock = Math.floor(stock).toString()
+    showToast('库存必须为整数')
+  } else if (stock > 9999999) {
+    form.value.stock = '9999999'
+    showToast('库存数量过大')
+  }
+}
+
+// 最低库存验证
+const validateMinStock = () => {
+  const minStock = parseInt(form.value.minStock)
+  if (isNaN(minStock) || minStock < 0) {
+    form.value.minStock = '0'
+    showToast('最低库存不能为负数')
+  } else if (!Number.isInteger(parseFloat(form.value.minStock))) {
+    form.value.minStock = Math.floor(minStock).toString()
+    showToast('最低库存必须为整数')
+  } else if (minStock > 9999) {
+    form.value.minStock = '9999'
+    showToast('最低库存预警值过大')
+  }
+}
+
+const onSubmit = () => {
+  // 最终验证
+  const costPrice = parseFloat(form.value.costPrice)
+  const salePrice = parseFloat(form.value.salePrice)
+  const stock = parseInt(form.value.stock)
+  const minStock = parseInt(form.value.minStock)
+
+  if (isNaN(costPrice) || costPrice < 0) {
+    showToast('请输入有效的成本价')
+    return
+  }
+  if (isNaN(salePrice) || salePrice < 0) {
+    showToast('请输入有效的销售价')
+    return
+  }
+  if (isNaN(stock) || stock < 0) {
+    showToast('请输入有效的库存数量')
+    return
+  }
+  if (isNaN(minStock) || minStock < 0) {
+    showToast('请输入有效的最低库存')
+    return
+  }
+
   const productData = {
     ...form.value,
-    costPrice: parseFloat(form.value.costPrice),
-    salePrice: parseFloat(form.value.salePrice),
-    stock: parseInt(form.value.stock),
-    minStock: parseInt(form.value.minStock)
+    costPrice,
+    salePrice,
+    stock,
+    minStock
   }
 
   if (isEdit.value) {
-    await productStore.updateProduct(route.params.id, productData)
+    productStore.updateProduct(route.params.id, productData)
     showToast({
       type: 'success',
       message: '修改成功'
     })
   } else {
-    await productStore.addProduct(productData)
+    productStore.addProduct(productData)
     showToast({
       type: 'success',
       message: '添加成功'

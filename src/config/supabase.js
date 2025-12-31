@@ -61,5 +61,7 @@ export const TABLES = {
   MEMBER_RECHARGES: 'member_recharges',
   USERS: 'users',
   BACKUPS: 'backups',
-  RETURNS: 'returns'  // 退换货记录表
+  RETURNS: 'returns',  // 退换货记录表
+  OPERATION_LOGS: 'operation_logs'  // 操作日志表
 }
+
