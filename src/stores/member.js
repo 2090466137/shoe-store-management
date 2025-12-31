@@ -56,6 +56,8 @@ export const useMemberStore = defineStore('member', () => {
       if (error) {
         console.error('❌ 云端加载失败:', error)
         console.log('⚠️ 使用 localStorage 数据')
+        // 修复缺失的字段
+        fixMemberData()
         return // 保持 localStorage 数据，不覆盖
       }
 
@@ -67,12 +69,38 @@ export const useMemberStore = defineStore('member', () => {
       } else {
         console.log('⚠️ 云端无数据，保持 localStorage 数据')
       }
+
+      // 修复缺失的字段
+      fixMemberData()
     } catch (error) {
       console.error('❌ 加载会员异常:', error)
       console.log('⚠️ 使用 localStorage 数据')
-      // 已经在开始时加载了 localStorage，无需再次加载
+      // 修复缺失的字段
+      fixMemberData()
     } finally {
       loading.value = false
+    }
+  }
+
+  // 修复会员数据中缺失的字段
+  const fixMemberData = () => {
+    let fixed = false
+    members.value = members.value.map(member => {
+      const needsFix = member.totalConsumption === undefined || member.totalConsumption === null
+      if (needsFix) {
+        console.log('🔧 修复会员数据:', member.name || member.phone, '- 添加 totalConsumption 字段')
+        fixed = true
+        return {
+          ...member,
+          totalConsumption: 0,
+          totalRecharge: member.totalRecharge || 0
+        }
+      }
+      return member
+    })
+    if (fixed) {
+      saveMembers()
+      console.log('✅ 会员数据已修复并保存')
     }
   }
 
@@ -128,7 +156,12 @@ export const useMemberStore = defineStore('member', () => {
       const newMember = {
         ...memberData,
         id: Date.now().toString(),
-        createTime: Date.now()
+        createTime: Date.now(),
+        balance: memberData.balance || 0,
+        totalRecharge: memberData.totalRecharge || 0,
+        totalConsumption: 0, // 🔧 确保初始化 totalConsumption
+        discount: memberData.discount || 1.0,
+        level: memberData.level || '普通会员'
       }
       members.value.push(newMember)
       saveMembers()
