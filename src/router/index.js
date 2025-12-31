@@ -25,6 +25,12 @@ const routes = [
     meta: { title: '商品管理', permission: PERMISSIONS.PRODUCT_VIEW }
   },
   {
+    path: '/product/query',
+    name: 'ProductQuery',
+    component: () => import('@/views/ProductQuery.vue'),
+    meta: { title: '商品查询' } // 所有员工都可以访问，不需要权限检查
+  },
+  {
     path: '/product/add',
     name: 'ProductAdd',
     component: () => import('@/views/ProductForm.vue'),

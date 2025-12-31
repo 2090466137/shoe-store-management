@@ -69,6 +69,16 @@
           </div>
         </div>
 
+        <div class="stat-card" @click="router.push('/product/query')">
+          <div class="stat-icon stat-icon-success">
+            🔍
+          </div>
+          <div class="stat-info">
+            <div class="stat-label">商品查询</div>
+            <div class="stat-value">库存/价格</div>
+          </div>
+        </div>
+
         <div 
           class="stat-card" 
           @click="router.push('/products')"
@@ -178,6 +188,17 @@
       <div class="card">
         <div class="section-title">🚀 快捷操作</div>
         <div class="quick-actions">
+          <van-button 
+            type="info" 
+            size="large" 
+            block
+            class="action-btn"
+            @click="router.push('/product/query')"
+          >
+            <van-icon name="search" />
+            商品查询
+          </van-button>
+          
           <van-button 
             v-if="userStore.hasPermission(PERMISSIONS.SALES_ADD)"
             type="primary" 
