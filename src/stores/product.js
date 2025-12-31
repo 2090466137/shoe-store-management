@@ -280,6 +280,7 @@ export const useProductStore = defineStore('product', () => {
   const deleteProduct = async (id) => {
     const index = products.value.findIndex(p => p.id === id)
     if (index === -1) {
+      console.error('❌ 商品不存在:', id)
       return false
     }
     
@@ -293,22 +294,33 @@ export const useProductStore = defineStore('product', () => {
       // 立即更新localStorage
       await saveProducts()
       
-      // 从云端删除
+      // 判断是否是本地商品（ID 以 'local_' 开头）
+      const isLocalProduct = String(id).startsWith('local_')
+      
+      if (isLocalProduct) {
+        // 本地商品，只需要从 localStorage 删除即可
+        console.log('✅ 本地商品已删除:', id)
+        return true
+      }
+      
+      // 云端商品，需要从 Supabase 删除
       const { error } = await supabase
         .from(TABLES.PRODUCTS)
         .delete()
         .eq('id', id)
 
       if (error) {
+        console.error('❌ 云端删除失败:', error)
         // 如果云端删除失败，恢复本地数据
         products.value.splice(index, 0, tempProduct)
         await saveProducts()
         throw error
       }
 
+      console.log('✅ 云端商品已删除:', id)
       return true
     } catch (error) {
-      console.error('删除商品失败:', error)
+      console.error('❌ 删除商品失败:', error)
       // 如果云端删除失败，检查是否需要恢复
       const currentIndex = products.value.findIndex(p => p.id === id)
       if (currentIndex === -1 && tempProduct) {
