@@ -57,7 +57,12 @@
 
     <!-- 版本信息 -->
     <div class="version-info">
-      v1.1.0 | © 2025 鞋店管理系统
+      v3.2 | © 2025 鞋店管理系统
+    </div>
+    
+    <!-- 版权信息 -->
+    <div class="copyright-info">
+      卢宏鹏设计，请勿改动
     </div>
   </div>
 </template>
@@ -314,9 +319,19 @@ onMounted(async () => {
 /* 版本信息 */
 .version-info {
   position: absolute;
-  bottom: 20px;
+  bottom: 45px;
   color: rgba(255, 255, 255, 0.8);
   font-size: 12px;
   z-index: 1;
+}
+
+.copyright-info {
+  position: absolute;
+  bottom: 20px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 11px;
+  font-weight: 500;
+  z-index: 1;
+  letter-spacing: 0.5px;
 }
 </style>

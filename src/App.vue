@@ -1,5 +1,5 @@
 <template>
-  <div id="app" :class="{ 'dark-mode': isDarkMode }">
+  <div id="app">
     <!-- 离线状态指示器 -->
     <OfflineIndicator />
     
@@ -27,9 +27,6 @@ const productStore = useProductStore()
 const salesStore = useSalesStore()
 const userStore = useUserStore()
 const memberStore = useMemberStore()
-
-// 暗黑模式
-const isDarkMode = ref(false)
 
 // 页面过渡动画
 const transitionName = ref('slide-left')
@@ -62,36 +59,6 @@ watch(
   { immediate: true }
 )
 
-// 检查暗黑模式设置
-const checkDarkMode = () => {
-  const saved = localStorage.getItem('darkMode')
-  if (saved !== null) {
-    isDarkMode.value = saved === 'true'
-  } else {
-    // 检查系统设置
-    isDarkMode.value = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
-  }
-  
-  // 应用暗黑模式
-  if (isDarkMode.value) {
-    document.documentElement.classList.add('dark')
-  } else {
-    document.documentElement.classList.remove('dark')
-  }
-}
-
-// 切换暗黑模式（导出供其他组件使用）
-window.toggleDarkMode = () => {
-  isDarkMode.value = !isDarkMode.value
-  localStorage.setItem('darkMode', isDarkMode.value.toString())
-  
-  if (isDarkMode.value) {
-    document.documentElement.classList.add('dark')
-  } else {
-    document.documentElement.classList.remove('dark')
-  }
-}
-
 onMounted(async () => {
   try {
     // 初始化用户数据（等待完成）
@@ -118,23 +85,6 @@ onMounted(async () => {
     if (queueSize > 0) {
       console.log(`📝 有 ${queueSize} 个操作待同步`)
     }
-    
-    // 检查暗黑模式
-    checkDarkMode()
-    
-    // 监听系统暗黑模式变化
-    if (window.matchMedia) {
-      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-        if (localStorage.getItem('darkMode') === null) {
-          isDarkMode.value = e.matches
-          if (e.matches) {
-            document.documentElement.classList.add('dark')
-          } else {
-            document.documentElement.classList.remove('dark')
-          }
-        }
-      })
-    }
   } catch (error) {
     console.error('应用初始化错误:', error)
   }
@@ -145,13 +95,6 @@ onMounted(async () => {
 #app {
   height: 100vh;
   background-color: #f7f8fa;
-  transition: background-color 0.3s ease;
-}
-
-/* 暗黑模式 */
-#app.dark-mode {
-  background-color: #1a1a1a;
-  color: #e0e0e0;
 }
 
 /* 淡入淡出动画 */
@@ -269,47 +212,5 @@ onMounted(async () => {
   .van-cell {
     padding: 8px 16px !important;
   }
-}
-
-/* 暗黑模式样式 */
-:root.dark {
-  --van-background: #1a1a1a;
-  --van-background-2: #2a2a2a;
-  --van-text-color: #e0e0e0;
-  --van-text-color-2: #b0b0b0;
-  --van-text-color-3: #808080;
-  --van-border-color: #3a3a3a;
-  --van-active-color: #4a4a4a;
-  --van-card-background: #2a2a2a;
-}
-
-.dark-mode .card {
-  background-color: #2a2a2a;
-  border-color: #3a3a3a;
-}
-
-.dark-mode .van-nav-bar {
-  background-color: #2a2a2a;
-}
-
-.dark-mode .van-tabbar {
-  background-color: #2a2a2a;
-}
-
-.dark-mode .page-container {
-  background-color: #1a1a1a;
-}
-
-.dark-mode .stat-card,
-.dark-mode .stats-card {
-  background: linear-gradient(135deg, #2a2a2a 0%, #3a3a3a 100%);
-}
-
-.dark-mode .section-title {
-  color: #e0e0e0;
-}
-
-.dark-mode .empty-state {
-  color: #808080;
 }
 </style>
