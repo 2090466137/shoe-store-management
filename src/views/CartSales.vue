@@ -498,7 +498,7 @@ const handleCheckout = () => {
   showPaymentDialog.value = true
 }
 
-// 处理支付
+// 处理支付（异步函数）
 const handlePayment = async (action) => {
   return new Promise(async (resolve) => {
     if (action === 'confirm') {
