@@ -174,57 +174,53 @@
         <template v-else>
           <div class="tips-text" style="margin-bottom: 12px;">
             <van-icon name="info-o" />
-            为每个尺码单独设置进货数量，减少工作量
+            点击尺码直接输入数量，快速完成设置
           </div>
 
-          <!-- 快捷批量设置 -->
-          <div class="batch-stock-actions">
-            <van-button size="small" @click="batchSetStock">
-              批量设置库存
-            </van-button>
-            <van-button size="small" @click="copyFirstStock">
-              复制首个尺码
-            </van-button>
-          </div>
-
-          <!-- 每个尺码的库存设置 -->
-          <div class="individual-stock-list">
+          <!-- 每个尺码的库存设置 - 简化版 -->
+          <div class="simple-stock-grid">
             <div 
               v-for="size in selectedSizes" 
               :key="size"
-              class="stock-item"
+              class="simple-stock-item"
+              @click="quickSetStock(size)"
             >
-              <div class="stock-item-label">
-                <span class="size-badge">{{ size }}码</span>
-              </div>
-              <div class="stock-item-inputs">
-                <van-stepper 
-                  v-model="sizeStocks[size]" 
-                  :min="0"
-                  :max="999"
-                  theme="round"
-                  button-size="22"
-                  input-width="50px"
-                />
-                <span class="unit">件</span>
-              </div>
+              <div class="size-label">{{ size }}码</div>
+              <div class="stock-value">{{ sizeStocks[size] || 0 }}件</div>
             </div>
           </div>
 
-          <div class="tips-text" style="margin-top: 12px;">
-            <van-icon name="info-o" />
-            预警值统一设置为：
-            <van-stepper 
-              v-model="form.minStock" 
-              :min="0"
-              :max="50"
-              theme="round"
-              button-size="18"
-              input-width="40px"
-              style="display: inline-flex; margin-left: 8px;"
-            />
-            件
+          <!-- 快捷操作 -->
+          <div class="quick-actions">
+            <van-button 
+              size="small" 
+              type="primary" 
+              plain
+              @click="quickBatchSet"
+            >
+              <van-icon name="edit" /> 快速批量
+            </van-button>
+            <van-button 
+              size="small" 
+              type="success" 
+              plain
+              @click="smartFill"
+            >
+              <van-icon name="star-o" /> 智能填充
+            </van-button>
           </div>
+
+          <van-field
+            v-model="form.minStock"
+            type="number"
+            label="预警值"
+            placeholder="库存预警值"
+            style="margin-top: 12px;"
+          >
+            <template #button>
+              <span>件</span>
+            </template>
+          </van-field>
         </template>
       </div>
 
@@ -371,40 +367,85 @@ const toggleSize = (size) => {
   }
 }
 
-// 批量设置库存
-const batchSetStock = async () => {
+// 快速设置单个尺码库存
+const quickSetStock = (size) => {
+  showDialog({
+    title: `设置 ${size}码 库存`,
+    message: '',
+    showCancelButton: true,
+    closeOnClickOverlay: false,
+    beforeClose: (action) => {
+      return new Promise((resolve) => {
+        if (action === 'confirm') {
+          const input = document.querySelector('.quick-stock-input')
+          const value = input ? parseInt(input.value) : 0
+          
+          if (!input || input.value === '') {
+            showToast('请输入库存数量')
+            resolve(false)
+            return
+          }
+          
+          if (isNaN(value) || value < 0 || value > 999) {
+            showToast('请输入0-999之间的数量')
+            resolve(false)
+            return
+          }
+          
+          sizeStocks.value[size] = value
+          showToast(`${size}码 已设置为 ${value} 件`)
+          resolve(true)
+        } else {
+          resolve(true)
+        }
+      })
+    }
+  })
+  
+  // 添加输入框
+  setTimeout(() => {
+    const messageEl = document.querySelector('.van-dialog__message')
+    if (messageEl && !messageEl.querySelector('.quick-stock-input')) {
+      const currentStock = sizeStocks.value[size] || 10
+      messageEl.innerHTML = `
+        <div style="padding: 16px 0;">
+          <input 
+            type="number" 
+            class="quick-stock-input"
+            value="${currentStock}"
+            min="0"
+            max="999"
+            placeholder="输入数量"
+            style="width: 100%; padding: 12px; border: 2px solid #1989fa; border-radius: 8px; font-size: 18px; text-align: center; font-weight: 600;"
+          />
+          <div style="margin-top: 12px; font-size: 12px; color: #969799;">
+            常用数量：
+            <span onclick="document.querySelector('.quick-stock-input').value=5" style="display: inline-block; padding: 4px 12px; margin: 4px; background: #f7f8fa; border-radius: 4px; cursor: pointer;">5</span>
+            <span onclick="document.querySelector('.quick-stock-input').value=10" style="display: inline-block; padding: 4px 12px; margin: 4px; background: #f7f8fa; border-radius: 4px; cursor: pointer;">10</span>
+            <span onclick="document.querySelector('.quick-stock-input').value=15" style="display: inline-block; padding: 4px 12px; margin: 4px; background: #f7f8fa; border-radius: 4px; cursor: pointer;">15</span>
+            <span onclick="document.querySelector('.quick-stock-input').value=20" style="display: inline-block; padding: 4px 12px; margin: 4px; background: #f7f8fa; border-radius: 4px; cursor: pointer;">20</span>
+          </div>
+        </div>
+      `
+      const input = messageEl.querySelector('.quick-stock-input')
+      if (input) {
+        input.focus()
+        input.select()
+      }
+    }
+  }, 50)
+}
+
+// 快速批量设置
+const quickBatchSet = () => {
   if (selectedSizes.value.length === 0) {
     showToast('请先选择尺码')
     return
   }
   
-  try {
-    await showDialog({
-      title: '批量设置库存',
-      message: '请输入要设置的库存数量（0-999）',
-      showCancelButton: true,
-      closeOnClickOverlay: false,
-    })
-    
-    // 用户点击确认后，再弹出输入框
-    const result = await showDialog({
-      title: '输入库存数量',
-      message: '',
-      showCancelButton: true,
-      closeOnClickOverlay: false,
-    })
-    
-  } catch (error) {
-    // 用户取消
-    return
-  }
-  
-  // 使用 Vant 的 Dialog 组件配合 Field
-  let inputValue = '10'
-  
   showDialog({
-    title: '批量设置库存',
-    message: '请输入库存数量',
+    title: '批量设置所有尺码',
+    message: '',
     showCancelButton: true,
     closeOnClickOverlay: false,
     beforeClose: (action) => {
@@ -420,17 +461,16 @@ const batchSetStock = async () => {
           }
           
           if (isNaN(value) || value < 0 || value > 999) {
-            showToast('请输入有效的数量（0-999）')
+            showToast('请输入0-999之间的数量')
             resolve(false)
             return
           }
           
-          // 设置所有尺码的库存
           selectedSizes.value.forEach(size => {
             sizeStocks.value[size] = value
           })
           
-          showToast(`已将所有尺码库存设置为 ${value} 件`)
+          showToast(`已将 ${selectedSizes.value.length} 个尺码设置为 ${value} 件`)
           resolve(true)
         } else {
           resolve(true)
@@ -444,16 +484,24 @@ const batchSetStock = async () => {
     const messageEl = document.querySelector('.van-dialog__message')
     if (messageEl && !messageEl.querySelector('.batch-stock-input')) {
       messageEl.innerHTML = `
-        <div style="padding: 12px 0;">
+        <div style="padding: 16px 0;">
           <input 
             type="number" 
             class="batch-stock-input"
             value="10"
             min="0"
             max="999"
-            placeholder="请输入库存数量"
-            style="width: 100%; padding: 10px; border: 1px solid #ebedf0; border-radius: 4px; font-size: 14px; text-align: center;"
+            placeholder="输入数量"
+            style="width: 100%; padding: 12px; border: 2px solid #1989fa; border-radius: 8px; font-size: 18px; text-align: center; font-weight: 600;"
           />
+          <div style="margin-top: 12px; font-size: 12px; color: #969799;">
+            常用数量：
+            <span onclick="document.querySelector('.batch-stock-input').value=5" style="display: inline-block; padding: 4px 12px; margin: 4px; background: #f7f8fa; border-radius: 4px; cursor: pointer;">5</span>
+            <span onclick="document.querySelector('.batch-stock-input').value=10" style="display: inline-block; padding: 4px 12px; margin: 4px; background: #f7f8fa; border-radius: 4px; cursor: pointer;">10</span>
+            <span onclick="document.querySelector('.batch-stock-input').value=15" style="display: inline-block; padding: 4px 12px; margin: 4px; background: #f7f8fa; border-radius: 4px; cursor: pointer;">15</span>
+            <span onclick="document.querySelector('.batch-stock-input').value=20" style="display: inline-block; padding: 4px 12px; margin: 4px; background: #f7f8fa; border-radius: 4px; cursor: pointer;">20</span>
+            <span onclick="document.querySelector('.batch-stock-input').value=30" style="display: inline-block; padding: 4px 12px; margin: 4px; background: #f7f8fa; border-radius: 4px; cursor: pointer;">30</span>
+          </div>
         </div>
       `
       const input = messageEl.querySelector('.batch-stock-input')
@@ -465,21 +513,39 @@ const batchSetStock = async () => {
   }, 50)
 }
 
-// 复制首个尺码的库存到所有尺码
-const copyFirstStock = () => {
+// 智能填充（中间尺码多，两端少）
+const smartFill = () => {
   if (selectedSizes.value.length === 0) {
     showToast('请先选择尺码')
     return
   }
   
-  const firstSize = selectedSizes.value[0]
-  const firstStock = sizeStocks.value[firstSize] || 10
-  
-  selectedSizes.value.forEach(size => {
-    sizeStocks.value[size] = firstStock
-  })
-  
-  showToast(`已将所有尺码库存设置为 ${firstStock} 件`)
+  showDialog({
+    title: '智能填充',
+    message: '中间尺码数量多，两端尺码数量少\n适合热门尺码进货多的情况',
+    showCancelButton: true,
+  }).then(() => {
+    const sizes = selectedSizes.value
+    const len = sizes.length
+    
+    if (len <= 2) {
+      // 尺码太少，统一设置为10
+      sizes.forEach(size => {
+        sizeStocks.value[size] = 10
+      })
+    } else {
+      // 智能分配：两端少，中间多
+      sizes.forEach((size, index) => {
+        const position = index / (len - 1) // 0 到 1
+        // 使用抛物线函数：中间高，两端低
+        const ratio = 1 - Math.pow(2 * position - 1, 2)
+        const stock = Math.round(5 + ratio * 15) // 5-20之间
+        sizeStocks.value[size] = stock
+      })
+    }
+    
+    showToast('智能填充完成！')
+  }).catch(() => {})
 }
 
 // 快捷选择成人常用码
@@ -717,60 +783,53 @@ const handleSubmit = async () => {
   gap: 24px;
 }
 
-.batch-stock-actions {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 16px;
+/* 简化版库存网格 */
+.simple-stock-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
   padding: 0 16px;
+  margin-bottom: 16px;
 }
 
-.individual-stock-list {
-  max-height: 400px;
-  overflow-y: auto;
-}
-
-.stock-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 16px;
-  border-bottom: 1px solid #ebedf0;
-}
-
-.stock-item:last-child {
-  border-bottom: none;
-}
-
-.stock-item-label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.size-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 50px;
-  padding: 4px 12px;
+.simple-stock-item {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
   border-radius: 12px;
-  font-size: 14px;
+  padding: 12px 8px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.simple-stock-item:active {
+  transform: scale(0.95);
+  box-shadow: 0 1px 4px rgba(102, 126, 234, 0.3);
+}
+
+.size-label {
+  font-size: 16px;
   font-weight: 600;
-  box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
+  color: white;
+  margin-bottom: 4px;
 }
 
-.stock-item-inputs {
+.stock-value {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+}
+
+/* 快捷操作按钮 */
+.quick-actions {
   display: flex;
-  align-items: center;
   gap: 8px;
+  padding: 0 16px;
+  margin-bottom: 8px;
 }
 
-.stock-item-inputs .unit {
-  font-size: 13px;
-  color: #969799;
-  min-width: 24px;
+.quick-actions .van-button {
+  flex: 1;
 }
 </style>
 
