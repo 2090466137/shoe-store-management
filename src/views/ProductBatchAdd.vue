@@ -132,37 +132,107 @@
       <div class="card">
         <div class="section-title">📦 库存设置</div>
         
-        <van-field
-          v-model="form.defaultStock"
-          type="number"
-          label="默认库存"
-          placeholder="每个尺码的默认库存"
-        >
-          <template #button>
-            <span>件</span>
-          </template>
-        </van-field>
-        
-        <van-field
-          v-model="form.minStock"
-          type="number"
-          label="最低库存"
-          placeholder="库存预警值"
-        >
-          <template #button>
-            <span>件</span>
-          </template>
-        </van-field>
-
-        <div class="tips-text">
-          <van-icon name="info-o" />
-          所有尺码将使用相同的库存和预警设置
+        <!-- 库存设置模式切换 -->
+        <div class="stock-mode-switch">
+          <van-radio-group v-model="stockMode" direction="horizontal">
+            <van-radio name="unified">统一库存</van-radio>
+            <van-radio name="individual">单独设置</van-radio>
+          </van-radio-group>
         </div>
+
+        <!-- 统一库存模式 -->
+        <template v-if="stockMode === 'unified'">
+          <van-field
+            v-model="form.defaultStock"
+            type="number"
+            label="默认库存"
+            placeholder="每个尺码的默认库存"
+          >
+            <template #button>
+              <span>件</span>
+            </template>
+          </van-field>
+          
+          <van-field
+            v-model="form.minStock"
+            type="number"
+            label="最低库存"
+            placeholder="库存预警值"
+          >
+            <template #button>
+              <span>件</span>
+            </template>
+          </van-field>
+
+          <div class="tips-text">
+            <van-icon name="info-o" />
+            所有尺码将使用相同的库存和预警设置
+          </div>
+        </template>
+
+        <!-- 单独设置模式 -->
+        <template v-else>
+          <div class="tips-text" style="margin-bottom: 12px;">
+            <van-icon name="info-o" />
+            为每个尺码单独设置进货数量，减少工作量
+          </div>
+
+          <!-- 快捷批量设置 -->
+          <div class="batch-stock-actions">
+            <van-button size="small" @click="batchSetStock">
+              批量设置库存
+            </van-button>
+            <van-button size="small" @click="copyFirstStock">
+              复制首个尺码
+            </van-button>
+          </div>
+
+          <!-- 每个尺码的库存设置 -->
+          <div class="individual-stock-list">
+            <div 
+              v-for="size in selectedSizes" 
+              :key="size"
+              class="stock-item"
+            >
+              <div class="stock-item-label">
+                <span class="size-badge">{{ size }}码</span>
+              </div>
+              <div class="stock-item-inputs">
+                <van-stepper 
+                  v-model="sizeStocks[size]" 
+                  :min="0"
+                  :max="999"
+                  theme="round"
+                  button-size="22"
+                  input-width="50px"
+                />
+                <span class="unit">件</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="tips-text" style="margin-top: 12px;">
+            <van-icon name="info-o" />
+            预警值统一设置为：
+            <van-stepper 
+              v-model="form.minStock" 
+              :min="0"
+              :max="50"
+              theme="round"
+              button-size="18"
+              input-width="40px"
+              style="display: inline-flex; margin-left: 8px;"
+            />
+            件
+          </div>
+        </template>
       </div>
 
       <!-- 预览 -->
       <div class="card" v-if="selectedSizes.length > 0">
-        <div class="section-title">👀 预览（将生成 {{ selectedSizes.length }} 个商品）</div>
+        <div class="section-title">
+          👀 预览（将生成 {{ selectedSizes.length }} 个商品，共 {{ totalStock }} 件）
+        </div>
         
         <div class="preview-list">
           <div 
@@ -172,7 +242,7 @@
           >
             <div class="preview-name">{{ form.name }} - {{ size }}码</div>
             <div class="preview-detail">
-              {{ form.brand }} | {{ form.color }} | 库存{{ form.defaultStock }}件
+              {{ form.brand }} | {{ form.color }} | 库存{{ getStockForSize(size) }}件
             </div>
             <div class="preview-price">
               成本¥{{ form.costPrice }} / 售价¥{{ form.salePrice }}
@@ -212,7 +282,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useProductStore } from '@/stores/product'
 import { showToast, showDialog } from 'vant'
@@ -251,15 +321,111 @@ const form = ref({
 
 const selectedSizes = ref([])
 
+// 库存设置模式：unified（统一）或 individual（单独）
+const stockMode = ref('unified')
+
+// 每个尺码的库存设置（单独模式）
+const sizeStocks = ref({})
+
+// 监听选中的尺码变化，初始化库存
+watch(selectedSizes, (newSizes) => {
+  newSizes.forEach(size => {
+    if (!(size in sizeStocks.value)) {
+      sizeStocks.value[size] = parseInt(form.value.defaultStock) || 10
+    }
+  })
+}, { deep: true })
+
+// 计算总库存
+const totalStock = computed(() => {
+  if (stockMode.value === 'unified') {
+    return selectedSizes.value.length * (parseInt(form.value.defaultStock) || 0)
+  } else {
+    return selectedSizes.value.reduce((sum, size) => {
+      return sum + (parseInt(sizeStocks.value[size]) || 0)
+    }, 0)
+  }
+})
+
+// 获取指定尺码的库存
+const getStockForSize = (size) => {
+  if (stockMode.value === 'unified') {
+    return form.value.defaultStock || 0
+  } else {
+    return sizeStocks.value[size] || 0
+  }
+}
+
 // 切换尺码选择
 const toggleSize = (size) => {
   const index = selectedSizes.value.indexOf(size)
   if (index > -1) {
     selectedSizes.value.splice(index, 1)
+    // 删除对应的库存设置
+    delete sizeStocks.value[size]
   } else {
     selectedSizes.value.push(size)
     selectedSizes.value.sort((a, b) => parseInt(a) - parseInt(b))
+    // 初始化库存
+    sizeStocks.value[size] = parseInt(form.value.defaultStock) || 10
   }
+}
+
+// 批量设置库存
+const batchSetStock = () => {
+  showDialog({
+    title: '批量设置库存',
+    message: '请输入库存数量',
+    showCancelButton: true,
+    beforeClose: (action, done) => {
+      if (action === 'confirm') {
+        const input = document.querySelector('.van-dialog__message input')
+        const value = input ? parseInt(input.value) : 10
+        if (isNaN(value) || value < 0) {
+          showToast('请输入有效的数量')
+          done(false)
+        } else {
+          selectedSizes.value.forEach(size => {
+            sizeStocks.value[size] = value
+          })
+          showToast('设置成功')
+          done()
+        }
+      } else {
+        done()
+      }
+    }
+  }).catch(() => {})
+  
+  // 添加输入框
+  setTimeout(() => {
+    const messageEl = document.querySelector('.van-dialog__message')
+    if (messageEl && !messageEl.querySelector('input')) {
+      const input = document.createElement('input')
+      input.type = 'number'
+      input.value = '10'
+      input.style.cssText = 'width: 100%; padding: 8px; margin-top: 12px; border: 1px solid #ebedf0; border-radius: 4px; font-size: 14px;'
+      messageEl.appendChild(input)
+      input.focus()
+    }
+  }, 50)
+}
+
+// 复制首个尺码的库存到所有尺码
+const copyFirstStock = () => {
+  if (selectedSizes.value.length === 0) {
+    showToast('请先选择尺码')
+    return
+  }
+  
+  const firstSize = selectedSizes.value[0]
+  const firstStock = sizeStocks.value[firstSize] || 10
+  
+  selectedSizes.value.forEach(size => {
+    sizeStocks.value[size] = firstStock
+  })
+  
+  showToast(`已将所有尺码库存设置为 ${firstStock} 件`)
 }
 
 // 快捷选择成人常用码
@@ -302,9 +468,13 @@ const handleSubmit = async () => {
   }
 
   // 确认对话框
+  const stockInfo = stockMode.value === 'unified' 
+    ? `统一库存：${form.value.defaultStock}件/尺码`
+    : `总库存：${totalStock.value}件`
+  
   showDialog({
     title: '确认批量添加',
-    message: `将添加 ${selectedSizes.value.length} 个商品\n\n${form.value.name}\n尺码：${selectedSizes.value.join(', ')}`,
+    message: `将添加 ${selectedSizes.value.length} 个商品\n\n${form.value.name}\n尺码：${selectedSizes.value.join(', ')}\n${stockInfo}`,
     showCancelButton: true,
   }).then(async () => {
     // 批量添加商品
@@ -313,6 +483,11 @@ const handleSubmit = async () => {
     
     for (const size of selectedSizes.value) {
       try {
+        // 根据模式获取库存
+        const stock = stockMode.value === 'unified' 
+          ? parseInt(form.value.defaultStock) || 0
+          : parseInt(sizeStocks.value[size]) || 0
+        
         const productData = {
           name: `${form.value.name} - ${size}码`,
           code: `${form.value.name}_${size}_${Date.now()}`,
@@ -322,7 +497,7 @@ const handleSubmit = async () => {
           size: size,
           costPrice: parseFloat(form.value.costPrice),
           salePrice: parseFloat(form.value.salePrice),
-          stock: parseInt(form.value.defaultStock) || 0,
+          stock: stock,
           minStock: parseInt(form.value.minStock) || 0,
           supplier: form.value.supplier,
           image: ''
@@ -338,8 +513,8 @@ const handleSubmit = async () => {
 
     // 成功提示
     const message = failCount > 0 
-      ? `成功添加 ${successCount} 个商品，失败 ${failCount} 个`
-      : `成功添加 ${successCount} 个商品！`
+      ? `成功添加 ${successCount} 个商品，失败 ${failCount} 个\n总库存：${totalStock.value}件`
+      : `成功添加 ${successCount} 个商品！\n总库存：${totalStock.value}件`
     
     showDialog({
       title: failCount > 0 ? '部分成功' : '添加成功',
@@ -477,4 +652,71 @@ const handleSubmit = async () => {
   padding: 16px;
   margin-top: 16px;
 }
+
+.stock-mode-switch {
+  padding: 12px 16px;
+  margin-bottom: 12px;
+}
+
+.stock-mode-switch :deep(.van-radio-group) {
+  display: flex;
+  gap: 24px;
+}
+
+.batch-stock-actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 0 16px;
+}
+
+.individual-stock-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.stock-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid #ebedf0;
+}
+
+.stock-item:last-child {
+  border-bottom: none;
+}
+
+.stock-item-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.size-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 50px;
+  padding: 4px 12px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
+}
+
+.stock-item-inputs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stock-item-inputs .unit {
+  font-size: 13px;
+  color: #969799;
+  min-width: 24px;
+}
 </style>
+
