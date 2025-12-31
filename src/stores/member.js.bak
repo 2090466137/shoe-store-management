@@ -40,37 +40,33 @@ export const useMemberStore = defineStore('member', () => {
   const loadMembers = async () => {
     loading.value = true
     try {
-      // 🔧 优先从 localStorage 加载，防止数据丢失
-      const stored = localStorage.getItem('members')
-      if (stored) {
-        members.value = JSON.parse(stored)
-        console.log('✅ 从 localStorage 加载了', members.value.length, '个会员')
-      }
-
-      // 尝试从云端加载并同步
       const { data, error } = await supabase
         .from(TABLES.MEMBERS)
         .select('*')
         .order('created_at', { ascending: false })
 
       if (error) {
-        console.error('❌ 云端加载失败:', error)
-        console.log('⚠️ 使用 localStorage 数据')
-        return // 保持 localStorage 数据，不覆盖
+        console.error('加载会员失败:', error)
+        // 如果云端加载失败，尝试从localStorage加载
+        const stored = localStorage.getItem('members')
+        if (stored) {
+          members.value = JSON.parse(stored)
+        }
+        return
       }
 
-      // 只有云端有数据时才更新
-      if (data && data.length > 0) {
-        members.value = data.map(dbToFrontend)
-        console.log('✅ 从云端加载了', members.value.length, '个会员')
-        await saveMembers() // 同步到 localStorage
-      } else {
-        console.log('⚠️ 云端无数据，保持 localStorage 数据')
-      }
+      // 转换数据格式
+      members.value = data.map(dbToFrontend)
+      
+      // 同步更新localStorage，确保与云端一致
+      await saveMembers()
     } catch (error) {
-      console.error('❌ 加载会员异常:', error)
-      console.log('⚠️ 使用 localStorage 数据')
-      // 已经在开始时加载了 localStorage，无需再次加载
+      console.error('加载会员异常:', error)
+      // 降级到localStorage
+      const stored = localStorage.getItem('members')
+      if (stored) {
+        members.value = JSON.parse(stored)
+      }
     } finally {
       loading.value = false
     }
@@ -268,30 +264,20 @@ export const useMemberStore = defineStore('member', () => {
         total_consumption: newTotalConsumption
       }
 
-      console.log('📤 正在更新云端会员数据:', {
-        memberId,
-        消费金额: amount,
-        新余额: newBalance,
-        新累计消费: newTotalConsumption
-      })
-
       const { error: updateError } = await supabase
         .from(TABLES.MEMBERS)
         .update(dbUpdates)
         .eq('id', memberId)
 
       if (updateError) {
-        console.error('❌ 更新云端余额失败:', updateError)
+        console.error('更新云端余额失败:', updateError)
         // 云端更新失败，但本地已更新，继续执行
-      } else {
-        console.log('✅ 云端会员数据已更新')
       }
 
       // 保存到 localStorage
       await saveMembers()
-      console.log('✅ 会员数据已保存到 localStorage')
 
-      return { success: true, balance: newBalance, totalConsumption: newTotalConsumption }
+      return { success: true, balance: newBalance }
     } catch (error) {
       console.error('消费失败:', error)
       return { success: false, message: '消费失败' }

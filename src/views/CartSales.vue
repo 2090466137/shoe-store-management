@@ -617,9 +617,13 @@ const handlePayment = async (action) => {
         if (paymentMethod.value === '会员余额' && selectedMember.value) {
           const consumeResult = await memberStore.consumeMember(selectedMember.value.id, actualAmount.value)
           if (consumeResult.success) {
-            console.log('✅ 会员余额已扣减，新余额:', consumeResult.balance)
+            console.log('✅ 会员余额已扣减:', {
+              新余额: consumeResult.balance,
+              新累计消费: consumeResult.totalConsumption
+            })
             // 更新本地会员信息显示
             selectedMember.value = memberStore.getMemberById(selectedMember.value.id)
+            console.log('✅ 会员信息已刷新:', selectedMember.value)
           } else {
             console.error('❌ 会员余额扣减失败:', consumeResult.message)
             showToast('余额扣减失败: ' + consumeResult.message)
