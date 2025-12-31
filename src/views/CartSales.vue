@@ -499,8 +499,8 @@ const handleCheckout = () => {
 }
 
 // 处理支付
-const handlePayment = (action) => {
-  return new Promise((resolve) => {
+const handlePayment = async (action) => {
+  return new Promise(async (resolve) => {
     if (action === 'confirm') {
       // 现金支付需要检查收款金额
       if (paymentMethod.value === '现金') {
