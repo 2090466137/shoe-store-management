@@ -94,10 +94,33 @@
       <!-- 会员选择 -->
       <div class="card member-card">
         <div class="section-title">👤 会员信息</div>
+        
+        <!-- 会员选择器 -->
+        <van-field
+          v-model="memberName"
+          label="选择会员"
+          placeholder="点击选择会员"
+          readonly
+          is-link
+          @click="showMemberPicker = true"
+        >
+          <template #button>
+            <van-button 
+              v-if="selectedMember" 
+              size="small" 
+              type="default" 
+              @click.stop="clearMember"
+            >
+              清除
+            </van-button>
+          </template>
+        </van-field>
+        
+        <!-- 或手机号查询 -->
         <van-field
           v-model="memberPhone"
-          label="会员手机"
-          placeholder="输入手机号查询会员"
+          label="手机号"
+          placeholder="或输入手机号查询"
           type="tel"
           maxlength="11"
           clearable
@@ -247,6 +270,16 @@
       />
     </van-popup>
 
+    <!-- 会员选择器 -->
+    <van-popup v-model:show="showMemberPicker" position="bottom" round>
+      <van-picker
+        :columns="memberColumns"
+        @confirm="onMemberConfirm"
+        @cancel="showMemberPicker = false"
+        title="选择会员"
+      />
+    </van-popup>
+
     <!-- 收款确认弹窗 -->
     <van-dialog
       v-model:show="showPaymentDialog"
@@ -305,7 +338,9 @@ const cart = ref([])
 
 // 会员相关
 const memberPhone = ref('')
+const memberName = ref('')
 const selectedMember = ref(null)
+const showMemberPicker = ref(false)
 
 // 销售员
 const salesperson = ref('')
@@ -322,6 +357,18 @@ const salespersonColumns = computed(() => {
   return userStore.activeUsers.map(u => ({
     text: u.name,
     value: u.name
+  }))
+})
+
+// 会员列表
+const memberColumns = computed(() => {
+  const members = memberStore.getAllMembers
+  if (members.length === 0) {
+    return [{ text: '暂无会员', value: null }]
+  }
+  return members.map(m => ({
+    text: `${m.name || '未命名'} (${m.phone})`,
+    value: m.id
   }))
 })
 
@@ -447,20 +494,51 @@ const clearCart = () => {
 const searchMember = () => {
   if (!memberPhone.value || memberPhone.value.length < 11) {
     selectedMember.value = null
+    memberName.value = ''
     return
   }
   
   const member = memberStore.getMemberByPhone(memberPhone.value)
   if (member) {
     selectedMember.value = member
+    memberName.value = `${member.name || '未命名'} (${member.phone})`
     showToast({
       message: `欢迎会员 ${member.name || member.phone}`,
       icon: 'user-o'
     })
   } else {
     selectedMember.value = null
+    memberName.value = ''
     showToast('未找到该会员')
   }
+}
+
+// 选择会员
+const onMemberConfirm = ({ selectedOptions }) => {
+  const memberId = selectedOptions[0].value
+  if (!memberId) {
+    return
+  }
+  
+  const member = memberStore.getMemberById(memberId)
+  if (member) {
+    selectedMember.value = member
+    memberName.value = selectedOptions[0].text
+    memberPhone.value = member.phone
+    showToast({
+      message: `已选择会员 ${member.name || member.phone}`,
+      icon: 'user-o'
+    })
+  }
+  showMemberPicker.value = false
+}
+
+// 清除会员选择
+const clearMember = () => {
+  selectedMember.value = null
+  memberName.value = ''
+  memberPhone.value = ''
+  showToast('已清除会员')
 }
 
 // 选择销售员
