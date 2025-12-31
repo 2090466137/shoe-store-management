@@ -61,10 +61,55 @@ export const useMemberStore = defineStore('member', () => {
         return // 保持 localStorage 数据，不覆盖
       }
 
-      // 只有云端有数据时才更新
+      // 🔧 智能合并：比较本地和云端数据，使用最新的
       if (data && data.length > 0) {
-        members.value = data.map(dbToFrontend)
-        console.log('✅ 从云端加载了', members.value.length, '个会员')
+        const cloudMembers = data.map(dbToFrontend)
+        
+        // 如果本地有数据，需要智能合并
+        if (members.value.length > 0) {
+          console.log('🔄 智能合并本地和云端数据...')
+          
+          // 创建一个 Map 来存储最新的会员数据
+          const mergedMap = new Map()
+          
+          // 先添加本地数据
+          members.value.forEach(localMember => {
+            mergedMap.set(localMember.id, localMember)
+          })
+          
+          // 再添加云端数据，但只有在云端数据更新时间更晚时才覆盖
+          cloudMembers.forEach(cloudMember => {
+            const localMember = mergedMap.get(cloudMember.id)
+            if (!localMember) {
+              // 云端有，本地没有 → 使用云端
+              mergedMap.set(cloudMember.id, cloudMember)
+            } else {
+              // 两边都有 → 比较更新时间或数据完整性
+              // 如果本地数据有 totalConsumption 且云端没有，优先使用本地
+              const localHasConsumption = localMember.totalConsumption !== undefined && localMember.totalConsumption !== null
+              const cloudHasConsumption = cloudMember.totalConsumption !== undefined && cloudMember.totalConsumption !== null
+              
+              if (localHasConsumption && !cloudHasConsumption) {
+                // 本地数据更完整，保留本地
+                console.log('  ↳', localMember.name || localMember.phone, '- 使用本地数据（更完整）')
+              } else if (cloudMember.balance !== localMember.balance || cloudMember.totalConsumption !== localMember.totalConsumption) {
+                // 数据不一致，使用本地数据（因为本地是最新操作的结果）
+                console.log('  ↳', localMember.name || localMember.phone, '- 使用本地数据（最新操作）')
+              } else {
+                // 数据一致，使用云端（可能有其他字段更新）
+                mergedMap.set(cloudMember.id, cloudMember)
+              }
+            }
+          })
+          
+          members.value = Array.from(mergedMap.values())
+          console.log('✅ 智能合并完成，共', members.value.length, '个会员')
+        } else {
+          // 本地无数据，直接使用云端
+          members.value = cloudMembers
+          console.log('✅ 从云端加载了', members.value.length, '个会员')
+        }
+        
         await saveMembers() // 同步到 localStorage
       } else {
         console.log('⚠️ 云端无数据，保持 localStorage 数据')

@@ -135,9 +135,28 @@ router.beforeEach(async (to, from, next) => {
   const { useUserStore } = await import('@/stores/user')
   const userStore = useUserStore()
   
-  // 确保用户数据已加载
+  // 🔧 优先从 localStorage 恢复登录状态（同步操作，避免闪烁）
+  if (!userStore.currentUser) {
+    const savedUser = localStorage.getItem('currentUser')
+    if (savedUser) {
+      try {
+        const userData = JSON.parse(savedUser)
+        // 临时设置 currentUser，避免跳转到登录页
+        userStore.currentUser = userData // Pinia 的 ref 可以直接赋值
+        console.log('🔧 路由守卫：从 localStorage 恢复登录状态')
+      } catch (error) {
+        console.error('❌ 恢复登录状态失败:', error)
+        localStorage.removeItem('currentUser')
+      }
+    }
+  }
+  
+  // 确保用户数据已加载（异步操作，但不阻塞路由）
   if (!userStore.users.length) {
-    await userStore.loadUsers()
+    // 不使用 await，让加载在后台进行
+    userStore.loadUsers().catch(err => {
+      console.error('加载用户数据失败:', err)
+    })
   }
   
   // 检查是否已登录
