@@ -306,31 +306,18 @@ export const useUserStore = defineStore('user', () => {
     if (savedUser && !currentUser.value) {
       try {
         const userData = JSON.parse(savedUser)
-        // 从用户列表中找到对应的用户（确保数据是最新的）
-        const user = users.value.find(u => u.id === userData.id)
+        // 从用户列表中找到对应的用户（确保数据是最新的且状态正常）
+        const user = users.value.find(u => u.id === userData.id && u.status === 'active')
         if (user) {
           currentUser.value = user
-          console.log('恢复登录状态:', user.name)
+          console.log('✅ 恢复登录状态:', user.name, '角色:', user.role)
         } else {
-          // 用户不存在，清除登录状态
+          // 用户不存在或已被禁用，清除登录状态
           localStorage.removeItem('currentUser')
-          console.warn('登录用户不存在，已清除登录状态')
+          console.warn('⚠️ 登录用户不存在或已被禁用，已清除登录状态')
         }
       } catch (error) {
-        console.error('恢复登录状态失败:', error)
-        localStorage.removeItem('currentUser')
-      }
-    }
-    
-    // 检查是否有已登录的用户
-    const loggedInUser = localStorage.getItem('currentUser')
-    if (loggedInUser) {
-      const userData = JSON.parse(loggedInUser)
-      // 验证用户是否仍然存在且状态正常
-      const user = users.value.find(u => u.id === userData.id && u.status === 'active')
-      if (user) {
-        currentUser.value = user
-      } else {
+        console.error('❌ 恢复登录状态失败:', error)
         localStorage.removeItem('currentUser')
       }
     }
