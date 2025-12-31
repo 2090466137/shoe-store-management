@@ -172,7 +172,7 @@ const onProductConfirm = ({ selectedOptions }) => {
   showProductPicker.value = false
 }
 
-const onSubmit = () => {
+const onSubmit = async () => {
   if (!form.value.productId) {
     showToast({
       type: 'fail',
@@ -188,7 +188,7 @@ const onSubmit = () => {
     supplier: form.value.supplier
   }
 
-  const result = salesStore.addPurchase(purchaseData)
+  const result = await salesStore.addPurchase(purchaseData)
   
   if (result.success) {
     showToast({

@@ -178,7 +178,7 @@ const calculateTotal = () => {
   // 自动计算总额和利润（通过 computed 实现）
 }
 
-const onSubmit = () => {
+const onSubmit = async () => {
   if (!form.value.productId) {
     showToast({
       type: 'fail',
@@ -203,7 +203,7 @@ const onSubmit = () => {
     salePrice: parseFloat(form.value.salePrice)
   }
 
-  const result = salesStore.addSale(saleData)
+  const result = await salesStore.addSale(saleData)
   
   if (result.success) {
     showDialog({

@@ -423,7 +423,7 @@ const handleToggleStatus = async (user) => {
       message: `确定要${action}用户 "${user.name}" 吗？`
     })
     
-    const result = userStore.toggleUserStatus(user.id)
+    const result = await userStore.toggleUserStatus(user.id)
     if (result.success) {
       showSuccessToast(result.message)
     } else {
@@ -444,7 +444,7 @@ const handleDelete = async () => {
       message: `确定要删除用户 "${editingUser.value.name}" 吗？此操作不可恢复。`
     })
     
-    const result = userStore.deleteUser(editingUser.value.id)
+    const result = await userStore.deleteUser(editingUser.value.id)
     if (result.success) {
       showSuccessToast('删除成功')
       closePopup()
@@ -466,7 +466,7 @@ const handleResetPassword = async () => {
       message: `确定要将用户 "${editingUser.value.name}" 的密码重置为 123456 吗？`
     })
     
-    const result = userStore.resetPassword(editingUser.value.id)
+    const result = await userStore.resetPassword(editingUser.value.id)
     if (result.success) {
       showSuccessToast(result.message)
     } else {

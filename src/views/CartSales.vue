@@ -532,12 +532,12 @@ const handlePayment = (action) => {
       }
 
       // 提交销售
-      const result = salesStore.addSale(saleData)
+      const result = await salesStore.addSale(saleData)
       
       if (result.success) {
         // 如果是会员余额支付，扣减余额
         if (paymentMethod.value === '会员余额' && selectedMember.value) {
-          memberStore.consumeMember(selectedMember.value.id, actualAmount.value)
+          await memberStore.consumeMember(selectedMember.value.id, actualAmount.value)
         }
 
         showSuccessToast({

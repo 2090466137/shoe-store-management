@@ -371,13 +371,13 @@ const completeCheck = async () => {
   }
 
   // 更新库存
-  checkItems.value.forEach(item => {
+  for (const item of checkItems.value) {
     if (item.checked) {
-      productStore.updateProduct(item.productId, {
+      await productStore.updateProduct(item.productId, {
         stock: item.actualStock
       })
     }
-  })
+  }
 
   // 保存盘点记录
   const record = {

@@ -245,7 +245,7 @@ const onCategoryConfirm = ({ selectedOptions }) => {
   showCategoryPicker.value = false
 }
 
-const onSubmit = () => {
+const onSubmit = async () => {
   const productData = {
     ...form.value,
     costPrice: parseFloat(form.value.costPrice),
@@ -255,13 +255,13 @@ const onSubmit = () => {
   }
 
   if (isEdit.value) {
-    productStore.updateProduct(route.params.id, productData)
+    await productStore.updateProduct(route.params.id, productData)
     showToast({
       type: 'success',
       message: '修改成功'
     })
   } else {
-    productStore.addProduct(productData)
+    await productStore.addProduct(productData)
     showToast({
       type: 'success',
       message: '添加成功'

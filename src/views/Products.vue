@@ -219,8 +219,8 @@ const deleteProduct = (product) => {
     title: '确认删除',
     message: `确定要删除商品"${product.name}"吗？`,
   })
-    .then(() => {
-      productStore.deleteProduct(product.id)
+    .then(async () => {
+      await productStore.deleteProduct(product.id)
       showToast({
         type: 'success',
         message: '删除成功'
