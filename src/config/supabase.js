@@ -60,6 +60,6 @@ export const TABLES = {
   MEMBERS: 'members',
   MEMBER_RECHARGES: 'member_recharges',
   USERS: 'users',
-  BACKUPS: 'backups'
+  BACKUPS: 'backups',
+  RETURNS: 'returns'  // 退换货记录表
 }
-
