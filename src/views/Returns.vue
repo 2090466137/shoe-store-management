@@ -206,11 +206,11 @@
 
           <!-- 退换货原因 -->
           <div class="form-section">
-            <div class="form-section-title">退换货原因</div>
+            <div class="form-section-title">退换货原因（可选）</div>
             <van-field
               v-model="returnReason"
               type="textarea"
-              placeholder="请输入退换货原因"
+              placeholder="请输入退换货原因（可选）"
               rows="3"
               maxlength="200"
               show-word-limit
@@ -414,14 +414,17 @@ const amountDiff = computed(() => {
 
 // 是否可以提交
 const canSubmit = computed(() => {
-  if (!selectedSale.value || !selectedProduct.value || !returnReason.value) {
+  // 必须选择订单和商品
+  if (!selectedSale.value || !selectedProduct.value) {
     return false
   }
   
+  // 换货时必须选择新商品
   if (returnType.value === 'exchange' && !newProduct.value) {
     return false
   }
   
+  // 退换货原因不是必填项，可以为空
   return true
 })
 
@@ -1022,4 +1025,3 @@ onMounted(() => {
   color: #969799;
 }
 </style>
-
