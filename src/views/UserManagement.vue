@@ -446,10 +446,16 @@ const handleDelete = async () => {
     
     const result = await userStore.deleteUser(editingUser.value.id)
     if (result.success) {
-      showSuccessToast('删除成功')
+      showSuccessToast({
+        message: '删除成功',
+        duration: 2000
+      })
       closePopup()
     } else {
-      showToast(result.message)
+      showToast({
+        message: result.message,
+        duration: 2000
+      })
     }
   } catch {
     // 用户取消
