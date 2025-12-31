@@ -197,30 +197,45 @@
             </van-button>
           </div>
 
-          <!-- 内联输入框列表 -->
-          <div class="inline-stock-list">
+          <!-- 内联输入框列表 - 优化版 -->
+          <div class="inline-stock-list-v2">
             <div 
               v-for="size in selectedSizes" 
               :key="size"
-              class="inline-stock-item"
+              class="stock-item-card"
             >
-              <div class="size-label">{{ size }}码</div>
-              <div class="stock-input-wrapper">
+              <div class="stock-item-header">
+                <span class="size-badge">{{ size }}码</span>
                 <van-stepper 
                   v-model="sizeStocks[size]" 
                   :min="0" 
                   :max="999"
                   :default-value="10"
-                  input-width="60px"
-                  button-size="28px"
+                  input-width="70px"
+                  button-size="32px"
+                  theme="round"
                 />
-                <span class="unit">件</span>
               </div>
-              <div class="quick-buttons">
-                <span class="quick-btn" @click="sizeStocks[size] = 5">5</span>
-                <span class="quick-btn" @click="sizeStocks[size] = 10">10</span>
-                <span class="quick-btn" @click="sizeStocks[size] = 15">15</span>
-                <span class="quick-btn" @click="sizeStocks[size] = 20">20</span>
+              <div class="stock-item-footer">
+                <div class="quick-set-label">快捷设置：</div>
+                <div class="quick-set-buttons">
+                  <button 
+                    class="quick-set-btn" 
+                    @click="sizeStocks[size] = 5"
+                  >5</button>
+                  <button 
+                    class="quick-set-btn" 
+                    @click="sizeStocks[size] = 10"
+                  >10</button>
+                  <button 
+                    class="quick-set-btn" 
+                    @click="sizeStocks[size] = 15"
+                  >15</button>
+                  <button 
+                    class="quick-set-btn" 
+                    @click="sizeStocks[size] = 20"
+                  >20</button>
+                </div>
               </div>
             </div>
           </div>
@@ -889,6 +904,107 @@ const handleSubmit = async () => {
 
 .quick-actions .van-button {
   flex: 1;
+}
+
+/* 新版内联输入框列表 - 卡片式设计 */
+.inline-stock-list-v2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+  padding: 0 16px;
+  margin-bottom: 16px;
+}
+
+.stock-item-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+  transition: all 0.3s ease;
+}
+
+.stock-item-card:active {
+  transform: scale(0.98);
+}
+
+.stock-item-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.size-badge {
+  display: inline-block;
+  padding: 6px 16px;
+  background: rgba(255, 255, 255, 0.95);
+  color: #667eea;
+  font-size: 16px;
+  font-weight: 700;
+  border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.stock-item-card :deep(.van-stepper) {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 8px;
+  padding: 4px;
+}
+
+.stock-item-card :deep(.van-stepper__input) {
+  background: transparent;
+  color: #323233;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.stock-item-card :deep(.van-stepper__minus),
+.stock-item-card :deep(.van-stepper__plus) {
+  background: #667eea;
+  color: #fff;
+  border-radius: 6px;
+}
+
+.stock-item-card :deep(.van-stepper__minus:active),
+.stock-item-card :deep(.van-stepper__plus:active) {
+  background: #5568d3;
+}
+
+.stock-item-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.quick-set-label {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+}
+
+.quick-set-buttons {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.quick-set-btn {
+  padding: 8px 0;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 6px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  backdrop-filter: blur(10px);
+}
+
+.quick-set-btn:active {
+  background: rgba(255, 255, 255, 0.4);
+  transform: scale(0.95);
 }
 </style>
 
