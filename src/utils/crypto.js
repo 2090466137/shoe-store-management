@@ -57,4 +57,3 @@ export async function migratePassword(password) {
   // 明文密码，进行加密
   return await hashPassword(password)
 }
-

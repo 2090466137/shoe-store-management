@@ -1,6 +1,7 @@
 ﻿import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { supabase, TABLES } from '@/config/supabase'
+import { hashPassword, verifyPassword, migratePassword } from '@/utils/crypto'
 
 // 角色定义
 export const ROLES = {
@@ -102,11 +103,12 @@ const ROLE_PERMISSIONS = {
 }
 
 // 默认用户数据
+// 注意：密码将在首次加载时自动加密
 const DEFAULT_USERS = [
   {
     id: '1',
     username: 'luhongpeng',
-    password: 'lu17303838326',
+    password: 'lu17303838326',  // 将自动加密
     name: '店长',
     role: ROLES.MANAGER,
     phone: '17303838326',
@@ -118,7 +120,7 @@ const DEFAULT_USERS = [
   {
     id: '2',
     username: 'lhp',
-    password: '123456',
+    password: '123456',  // 将自动加密
     name: '店员',
     role: ROLES.STAFF,
     phone: '',
@@ -390,11 +392,17 @@ export const useUserStore = defineStore('user', () => {
   
   // 登录
   const login = async (username, password) => {
-    const user = users.value.find(
-      u => u.username === username && u.password === password
-    )
+    // 查找用户
+    const user = users.value.find(u => u.username === username)
     
     if (!user) {
+      return { success: false, message: '用户名或密码错误' }
+    }
+    
+    // 验证密码（支持加密密码）
+    const isPasswordValid = await verifyPassword(password, user.password)
+    
+    if (!isPasswordValid) {
       return { success: false, message: '用户名或密码错误' }
     }
     
@@ -432,10 +440,13 @@ export const useUserStore = defineStore('user', () => {
       return { success: false, message: '用户名已存在' }
     }
     
+    // 加密密码
+    const hashedPassword = await hashPassword(userData.password || '123456')
+    
     const newUser = {
       id: Date.now().toString(),
       username: userData.username,
-      password: userData.password || '123456',
+      password: hashedPassword,  // 使用加密后的密码
       name: userData.name,
       role: userData.role || ROLES.STAFF,
       phone: userData.phone || '',
@@ -596,7 +607,9 @@ export const useUserStore = defineStore('user', () => {
       return { success: false, message: '用户不存在' }
     }
     
-    users.value[index].password = newPassword
+    // 加密新密码
+    const hashedPassword = await hashPassword(newPassword)
+    users.value[index].password = hashedPassword
     
     // 保存到云端
     const cloudSuccess = await saveUserToCloud(users.value[index])

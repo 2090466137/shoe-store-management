@@ -317,14 +317,15 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useProductStore } from '@/stores/product'
 import { useSalesStore } from '@/stores/sales'
+import { useReturnsStore } from '@/stores/returns'
 import { showToast, showConfirmDialog } from 'vant'
 
 const router = useRouter()
 const productStore = useProductStore()
 const salesStore = useSalesStore()
+const returnsStore = useReturnsStore()
 
-// 退换货记录
-const returns = ref([])
+// UI 状态
 const activeTab = ref('all')
 const showTypeSelect = ref(false)
 const showReturnForm = ref(false)
@@ -347,37 +348,18 @@ const typeActions = [
   { name: '换货', type: 'exchange' }
 ]
 
-// 统计数据
-const todayReturns = computed(() => {
-  const today = new Date().setHours(0, 0, 0, 0)
-  return returns.value.filter(r => r.type === 'return' && r.time >= today).length
-})
-
-const todayExchanges = computed(() => {
-  const today = new Date().setHours(0, 0, 0, 0)
-  return returns.value.filter(r => r.type === 'exchange' && r.time >= today).length
-})
-
-const todayReturnAmount = computed(() => {
-  const today = new Date().setHours(0, 0, 0, 0)
-  return returns.value
-    .filter(r => r.type === 'return' && r.time >= today)
-    .reduce((sum, r) => sum + r.amount, 0)
-})
-
-const todayExchangeAmount = computed(() => {
-  const today = new Date().setHours(0, 0, 0, 0)
-  return returns.value
-    .filter(r => r.type === 'exchange' && r.time >= today)
-    .reduce((sum, r) => sum + Math.abs(r.amount), 0)
-})
+// 统计数据（从 store 获取）
+const todayReturns = computed(() => returnsStore.todayReturns.length)
+const todayExchanges = computed(() => returnsStore.todayExchanges.length)
+const todayReturnAmount = computed(() => returnsStore.todayReturnAmount)
+const todayExchangeAmount = computed(() => returnsStore.todayExchangeAmount)
 
 // 筛选后的退换货记录
 const filteredReturns = computed(() => {
   if (activeTab.value === 'all') {
-    return returns.value
+    return returnsStore.getAllReturns
   }
-  return returns.value.filter(r => r.type === activeTab.value)
+  return returnsStore.getAllReturns.filter(r => r.type === activeTab.value)
 })
 
 // 最近订单（过滤掉已完全退货的订单）
@@ -386,7 +368,7 @@ const recentSales = computed(() => {
     .filter(sale => {
       // 检查订单中是否还有可退货的商品
       return sale.products.some(product => {
-        const returnedQty = getReturnedQuantity(sale.id, product.productId)
+        const returnedQty = returnsStore.getReturnedQuantity(sale.id, product.productId)
         return product.quantity > returnedQty
       })
     })
@@ -394,17 +376,10 @@ const recentSales = computed(() => {
     .slice(0, 20)
 })
 
-// 获取某个商品在某个订单中已退货的数量
-const getReturnedQuantity = (saleId, productId) => {
-  return returns.value
-    .filter(r => r.originalSaleId === saleId && r.originalProduct.productId === productId)
-    .reduce((sum, r) => sum + r.originalProduct.quantity, 0)
-}
-
 // 获取商品的可退数量
 const getAvailableReturnQuantity = (product) => {
   if (!selectedSale.value) return 0
-  const returnedQty = getReturnedQuantity(selectedSale.value.id, product.productId)
+  const returnedQty = returnsStore.getReturnedQuantity(selectedSale.value.id, product.productId)
   return product.quantity - returnedQty
 }
 
@@ -527,22 +502,21 @@ const submitReturn = async () => {
     amount: Math.abs(amountDiff.value)
   }
 
-  returns.value.unshift(returnRecord)
-  saveReturns()
-
-  // 更新库存
-  await productStore.updateStock(selectedProduct.value.productId, returnQuantity.value, 'add')
+  // 使用 store 添加记录（自动处理云端同步和库存更新）
+  const result = await returnsStore.addReturn(returnRecord)
   
-  if (returnType.value === 'exchange' && newProduct.value) {
-    await productStore.updateStock(newProduct.value.id, exchangeQuantity.value, 'subtract')
+  if (result.success) {
+    showToast({
+      type: 'success',
+      message: returnType.value === 'return' ? '退货成功' : '换货成功'
+    })
+    closeForm()
+  } else {
+    showToast({
+      type: 'fail',
+      message: result.message || '操作失败'
+    })
   }
-
-  showToast({
-    type: 'success',
-    message: returnType.value === 'return' ? '退货成功' : '换货成功'
-  })
-
-  closeForm()
 }
 
 const closeForm = () => {
@@ -570,21 +544,18 @@ const handleDeleteReturn = async (item) => {
       confirmButtonColor: '#ee0a24'
     })
     
-    // 恢复库存：退货时减少库存，换货时恢复两边的库存
-    await productStore.updateStock(item.originalProduct.productId, item.originalProduct.quantity, 'subtract')
+    // 使用 store 删除记录（自动处理云端同步和库存恢复）
+    const result = await returnsStore.deleteReturn(item.id)
     
-    if (item.type === 'exchange' && item.newProduct) {
-      await productStore.updateStock(item.newProduct.productId, item.newProduct.quantity, 'add')
-    }
-    
-    // 从记录中删除
-    const index = returns.value.findIndex(r => r.id === item.id)
-    if (index !== -1) {
-      returns.value.splice(index, 1)
-      saveReturns()
+    if (result.success) {
       showToast({
         type: 'success',
         message: '已撤销退换货记录'
+      })
+    } else {
+      showToast({
+        type: 'fail',
+        message: result.message || '撤销失败'
       })
     }
   } catch {
@@ -597,23 +568,13 @@ const formatDate = (timestamp) => {
   return `${date.getMonth() + 1}/${date.getDate()} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`
 }
 
-// 加载退换货记录
-const loadReturns = () => {
-  const stored = localStorage.getItem('returns')
-  if (stored) {
-    returns.value = JSON.parse(stored)
-  }
-}
-
-// 保存退换货记录
-const saveReturns = () => {
-  localStorage.setItem('returns', JSON.stringify(returns.value))
-}
-
-onMounted(() => {
-  productStore.loadProducts()
-  salesStore.loadSales()
-  loadReturns()
+onMounted(async () => {
+  // 加载所有必要的数据
+  await Promise.all([
+    productStore.loadProducts(),
+    salesStore.loadSales(),
+    returnsStore.loadReturns()
+  ])
 })
 </script>
 

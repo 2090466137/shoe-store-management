@@ -92,101 +92,42 @@ export const useSalesStore = defineStore('sales', () => {
   const loadSales = async () => {
     loading.value = true
     try {
-      // 🔧 优先从 localStorage 加载，防止数据丢失
-      const storedSales = localStorage.getItem('sales')
-      if (storedSales) {
-        sales.value = JSON.parse(storedSales)
-        console.log('✅ 从 localStorage 加载了', sales.value.length, '条销售记录')
-      }
-
-      const storedPurchases = localStorage.getItem('purchases')
-      if (storedPurchases) {
-        purchases.value = JSON.parse(storedPurchases)
-        console.log('✅ 从 localStorage 加载了', purchases.value.length, '条进货记录')
-      }
-
-      // 尝试从云端加载销售数据并同步
+      // 加载销售数据
       const { data: salesData, error: salesError } = await supabase
         .from(TABLES.SALES)
         .select('*')
         .order('created_at', { ascending: false })
 
       if (salesError) {
-        console.error('❌ 云端加载销售数据失败:', salesError)
-        console.log('⚠️ 使用 localStorage 销售数据')
-      } else if (salesData && salesData.length > 0) {
-        const cloudSales = salesData.map(dbToFrontendSale)
-        
-        // 🔧 智能合并：销售记录通常不修改，只新增
-        if (sales.value.length > 0) {
-          console.log('🔄 智能合并本地和云端销售数据...')
-          
-          const mergedMap = new Map()
-          
-          // 先添加本地数据
-          sales.value.forEach(localSale => {
-            mergedMap.set(localSale.id, localSale)
-          })
-          
-          // 再添加云端数据（只添加本地没有的）
-          cloudSales.forEach(cloudSale => {
-            if (!mergedMap.has(cloudSale.id)) {
-              mergedMap.set(cloudSale.id, cloudSale)
-            }
-          })
-          
-          sales.value = Array.from(mergedMap.values())
-          console.log('✅ 智能合并完成，共', sales.value.length, '条销售记录')
-        } else {
-          sales.value = cloudSales
-          console.log('✅ 从云端加载了', sales.value.length, '条销售记录')
+        console.error('加载销售数据失败:', salesError)
+        // 降级到 localStorage
+        const stored = localStorage.getItem('sales')
+        if (stored) {
+          sales.value = JSON.parse(stored)
         }
-        
-        localStorage.setItem('sales', JSON.stringify(sales.value))
       } else {
-        console.log('⚠️ 云端无销售数据，保持 localStorage 数据')
+        sales.value = salesData.map(dbToFrontendSale)
+        // 同步到 localStorage 作为备份
+        localStorage.setItem('sales', JSON.stringify(sales.value))
       }
 
-      // 尝试从云端加载进货数据并同步
+      // 加载进货数据
       const { data: purchasesData, error: purchasesError } = await supabase
         .from(TABLES.PURCHASES)
         .select('*')
         .order('created_at', { ascending: false })
 
       if (purchasesError) {
-        console.error('❌ 云端加载进货数据失败:', purchasesError)
-        console.log('⚠️ 使用 localStorage 进货数据')
-      } else if (purchasesData && purchasesData.length > 0) {
-        const cloudPurchases = purchasesData.map(dbToFrontendPurchase)
-        
-        // 🔧 智能合并：进货记录通常不修改，只新增
-        if (purchases.value.length > 0) {
-          console.log('🔄 智能合并本地和云端进货数据...')
-          
-          const mergedMap = new Map()
-          
-          // 先添加本地数据
-          purchases.value.forEach(localPurchase => {
-            mergedMap.set(localPurchase.id, localPurchase)
-          })
-          
-          // 再添加云端数据（只添加本地没有的）
-          cloudPurchases.forEach(cloudPurchase => {
-            if (!mergedMap.has(cloudPurchase.id)) {
-              mergedMap.set(cloudPurchase.id, cloudPurchase)
-            }
-          })
-          
-          purchases.value = Array.from(mergedMap.values())
-          console.log('✅ 智能合并完成，共', purchases.value.length, '条进货记录')
-        } else {
-          purchases.value = cloudPurchases
-          console.log('✅ 从云端加载了', purchases.value.length, '条进货记录')
+        console.error('加载进货数据失败:', purchasesError)
+        // 降级到 localStorage
+        const stored = localStorage.getItem('purchases')
+        if (stored) {
+          purchases.value = JSON.parse(stored)
         }
-        
-        localStorage.setItem('purchases', JSON.stringify(purchases.value))
       } else {
-        console.log('⚠️ 云端无进货数据，保持 localStorage 数据')
+        purchases.value = purchasesData.map(dbToFrontendPurchase)
+        // 同步到 localStorage 作为备份
+        localStorage.setItem('purchases', JSON.stringify(purchases.value))
       }
     } catch (error) {
       console.error('加载数据异常:', error)
@@ -375,6 +316,7 @@ export const useSalesStore = defineStore('sales', () => {
 
   // 删除销售记录
   const deleteSale = async (id) => {
+    const productStore = useProductStore()
     const index = sales.value.findIndex(s => s.id === id)
     if (index === -1) {
       console.error('❌ 销售记录不存在:', id)
@@ -384,11 +326,24 @@ export const useSalesStore = defineStore('sales', () => {
     const tempSale = sales.value[index]
     
     try {
-      // 先从本地删除
+      // 1. 恢复库存（销售记录删除 = 库存增加）
+      if (tempSale.products && Array.isArray(tempSale.products)) {
+        // 多商品模式
+        for (const item of tempSale.products) {
+          await productStore.updateStock(item.productId, item.quantity, 'add')
+          console.log(`✅ 已恢复商品 ${item.productName} 库存 +${item.quantity}`)
+        }
+      } else if (tempSale.productId) {
+        // 单商品模式（兼容旧版本）
+        await productStore.updateStock(tempSale.productId, tempSale.quantity, 'add')
+        console.log(`✅ 已恢复商品库存 +${tempSale.quantity}`)
+      }
+      
+      // 2. 从本地删除
       sales.value.splice(index, 1)
       saveSales()
 
-      // 判断是否是本地记录（UUID 格式: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx）
+      // 3. 判断是否是本地记录（UUID 格式: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx）
       const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
       const isCloudRecord = uuidRegex.test(id)
       
@@ -398,7 +353,7 @@ export const useSalesStore = defineStore('sales', () => {
         return true
       }
 
-      // 云端记录，需要从 Supabase 删除
+      // 4. 云端记录，需要从 Supabase 删除
       const { error } = await supabase
         .from(TABLES.SALES)
         .delete()
@@ -406,9 +361,19 @@ export const useSalesStore = defineStore('sales', () => {
 
       if (error) {
         console.error('❌ 云端删除失败:', error)
-        // 恢复本地数据
+        // 恢复本地数据和库存
         sales.value.splice(index, 0, tempSale)
         saveSales()
+        
+        // 回滚库存
+        if (tempSale.products && Array.isArray(tempSale.products)) {
+          for (const item of tempSale.products) {
+            await productStore.updateStock(item.productId, item.quantity, 'subtract')
+          }
+        } else if (tempSale.productId) {
+          await productStore.updateStock(tempSale.productId, tempSale.quantity, 'subtract')
+        }
+        
         throw error
       }
 
@@ -443,11 +408,32 @@ export const useSalesStore = defineStore('sales', () => {
       const savedPurchase = dbToFrontendPurchase(data)
       purchases.value.unshift(savedPurchase)
       
-      // 更新商品库存和成本价
+      // 更新商品库存
       await productStore.updateStock(purchase.productId, purchase.quantity, 'add')
-      await productStore.updateProduct(purchase.productId, { 
-        costPrice: purchase.costPrice 
-      })
+      
+      // 使用加权平均法更新成本价
+      const currentProduct = productStore.getProductById(purchase.productId)
+      if (currentProduct) {
+        const oldStock = currentProduct.stock - purchase.quantity  // 进货前的库存
+        const oldCost = currentProduct.costPrice
+        const newCost = purchase.costPrice
+        const newQuantity = purchase.quantity
+        
+        // 加权平均成本价 = (原库存 × 原成本价 + 新进货量 × 新成本价) / (原库存 + 新进货量)
+        let weightedAvgCost
+        if (oldStock <= 0) {
+          // 如果原库存为0或负数，直接使用新成本价
+          weightedAvgCost = newCost
+        } else {
+          weightedAvgCost = (oldStock * oldCost + newQuantity * newCost) / (oldStock + newQuantity)
+        }
+        
+        await productStore.updateProduct(purchase.productId, { 
+          costPrice: Math.round(weightedAvgCost * 100) / 100  // 保留两位小数
+        })
+        
+        console.log(`✅ 成本价更新: ${oldCost} → ${Math.round(weightedAvgCost * 100) / 100} (加权平均)`)
+      }
       
       savePurchases()
       
@@ -472,8 +458,29 @@ export const useSalesStore = defineStore('sales', () => {
       }
 
       purchases.value.unshift(localPurchase)
-      productStore.updateStock(purchase.productId, purchase.quantity, 'add')
-      productStore.updateProduct(purchase.productId, { costPrice: purchase.costPrice })
+      
+      // 更新库存和成本价（使用加权平均）
+      await productStore.updateStock(purchase.productId, purchase.quantity, 'add')
+      
+      const currentProduct = productStore.getProductById(purchase.productId)
+      if (currentProduct) {
+        const oldStock = currentProduct.stock - purchase.quantity
+        const oldCost = currentProduct.costPrice
+        const newCost = purchase.costPrice
+        const newQuantity = purchase.quantity
+        
+        let weightedAvgCost
+        if (oldStock <= 0) {
+          weightedAvgCost = newCost
+        } else {
+          weightedAvgCost = (oldStock * oldCost + newQuantity * newCost) / (oldStock + newQuantity)
+        }
+        
+        await productStore.updateProduct(purchase.productId, { 
+          costPrice: Math.round(weightedAvgCost * 100) / 100
+        })
+      }
+      
       savePurchases()
       
       return { success: true, data: localPurchase }

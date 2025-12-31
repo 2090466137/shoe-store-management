@@ -13,6 +13,7 @@ export async function autoCloudBackup() {
     const sales = localStorage.getItem('sales')
     const purchases = localStorage.getItem('purchases')
     const members = localStorage.getItem('members')
+    const returns = localStorage.getItem('returns')
     
     // 准备备份数据
     const backupData = {
@@ -23,13 +24,15 @@ export async function autoCloudBackup() {
         products: products ? JSON.parse(products) : [],
         sales: sales ? JSON.parse(sales) : [],
         purchases: purchases ? JSON.parse(purchases) : [],
-        members: members ? JSON.parse(members) : []
+        members: members ? JSON.parse(members) : [],
+        returns: returns ? JSON.parse(returns) : []
       },
       stats: {
         products_count: products ? JSON.parse(products).length : 0,
         sales_count: sales ? JSON.parse(sales).length : 0,
         purchases_count: purchases ? JSON.parse(purchases).length : 0,
-        members_count: members ? JSON.parse(members).length : 0
+        members_count: members ? JSON.parse(members).length : 0,
+        returns_count: returns ? JSON.parse(returns).length : 0
       }
     }
     
@@ -75,6 +78,7 @@ export async function manualCloudBackup() {
     const sales = localStorage.getItem('sales')
     const purchases = localStorage.getItem('purchases')
     const members = localStorage.getItem('members')
+    const returns = localStorage.getItem('returns')
     
     // 准备备份数据
     const backupData = {
@@ -85,13 +89,15 @@ export async function manualCloudBackup() {
         products: products ? JSON.parse(products) : [],
         sales: sales ? JSON.parse(sales) : [],
         purchases: purchases ? JSON.parse(purchases) : [],
-        members: members ? JSON.parse(members) : []
+        members: members ? JSON.parse(members) : [],
+        returns: returns ? JSON.parse(returns) : []
       },
       stats: {
         products_count: products ? JSON.parse(products).length : 0,
         sales_count: sales ? JSON.parse(sales).length : 0,
         purchases_count: purchases ? JSON.parse(purchases).length : 0,
-        members_count: members ? JSON.parse(members).length : 0
+        members_count: members ? JSON.parse(members).length : 0,
+        returns_count: returns ? JSON.parse(returns).length : 0
       }
     }
     
@@ -286,4 +292,3 @@ export function getBackupStats() {
     needBackup: shouldAutoBackup()
   }
 }
-
