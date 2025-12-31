@@ -523,10 +523,10 @@ const submitReturn = async () => {
   saveReturns()
 
   // 更新库存
-  productStore.updateStock(selectedProduct.value.productId, returnQuantity.value, 'add')
+  await productStore.updateStock(selectedProduct.value.productId, returnQuantity.value, 'add')
   
   if (returnType.value === 'exchange' && newProduct.value) {
-    productStore.updateStock(newProduct.value.id, exchangeQuantity.value, 'subtract')
+    await productStore.updateStock(newProduct.value.id, exchangeQuantity.value, 'subtract')
   }
 
   showToast({

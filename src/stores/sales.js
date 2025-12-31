@@ -239,9 +239,9 @@ export const useSalesStore = defineStore('sales', () => {
         sales.value.unshift(localSale)
         
         // 更新库存（本地）
-        productsWithDetails.forEach(item => {
-          productStore.updateStock(item.productId, item.quantity, 'subtract')
-        })
+        for (const item of productsWithDetails) {
+          await productStore.updateStock(item.productId, item.quantity, 'subtract')
+        }
         
         saveSales()
         return { success: true, data: localSale }
