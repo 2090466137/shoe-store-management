@@ -172,33 +172,20 @@
 
         <!-- 单独设置模式 -->
         <template v-else>
-          <div class="tips-text" style="margin-bottom: 12px;">
+          <div class="tips-text" style="margin-bottom: 16px;">
             <van-icon name="info-o" />
-            点击尺码直接输入数量，快速完成设置
+            直接在下方输入框中设置每个尺码的库存数量
           </div>
 
-          <!-- 每个尺码的库存设置 - 简化版 -->
-          <div class="simple-stock-grid">
-            <div 
-              v-for="size in selectedSizes" 
-              :key="size"
-              class="simple-stock-item"
-              @click="quickSetStock(size)"
-            >
-              <div class="size-label">{{ size }}码</div>
-              <div class="stock-value">{{ sizeStocks[size] || 0 }}件</div>
-            </div>
-          </div>
-
-          <!-- 快捷操作 -->
-          <div class="quick-actions">
+          <!-- 快捷操作按钮 -->
+          <div class="quick-actions-top">
             <van-button 
               size="small" 
               type="primary" 
               plain
               @click="quickBatchSet"
             >
-              <van-icon name="edit" /> 快速批量
+              <van-icon name="edit" /> 全部设为
             </van-button>
             <van-button 
               size="small" 
@@ -210,12 +197,40 @@
             </van-button>
           </div>
 
+          <!-- 内联输入框列表 -->
+          <div class="inline-stock-list">
+            <div 
+              v-for="size in selectedSizes" 
+              :key="size"
+              class="inline-stock-item"
+            >
+              <div class="size-label">{{ size }}码</div>
+              <div class="stock-input-wrapper">
+                <van-stepper 
+                  v-model="sizeStocks[size]" 
+                  :min="0" 
+                  :max="999"
+                  :default-value="10"
+                  input-width="60px"
+                  button-size="28px"
+                />
+                <span class="unit">件</span>
+              </div>
+              <div class="quick-buttons">
+                <span class="quick-btn" @click="sizeStocks[size] = 5">5</span>
+                <span class="quick-btn" @click="sizeStocks[size] = 10">10</span>
+                <span class="quick-btn" @click="sizeStocks[size] = 15">15</span>
+                <span class="quick-btn" @click="sizeStocks[size] = 20">20</span>
+              </div>
+            </div>
+          </div>
+
           <van-field
             v-model="form.minStock"
             type="number"
             label="预警值"
             placeholder="库存预警值"
-            style="margin-top: 12px;"
+            style="margin-top: 16px;"
           >
             <template #button>
               <span>件</span>
@@ -369,93 +384,6 @@ const toggleSize = (size) => {
     // 初始化库存
     sizeStocks.value[size] = parseInt(form.value.defaultStock) || 10
   }
-}
-
-// 快速设置单个尺码库存
-const quickSetStock = (size) => {
-  const currentStock = sizeStocks.value[size] || 10
-  
-  showDialog({
-    title: `设置 ${size}码 库存`,
-    message: ' ', // 必须有内容，否则 message 元素不会渲染
-    showCancelButton: true,
-    closeOnClickOverlay: false,
-    confirmButtonText: '确认',
-    cancelButtonText: '取消',
-    beforeClose: (action) => {
-      return new Promise((resolve) => {
-        if (action === 'confirm') {
-          const input = document.querySelector('.quick-stock-input')
-          const value = input ? parseInt(input.value) : 0
-          
-          if (!input || input.value === '') {
-            showToast('请输入库存数量')
-            resolve(false)
-            return
-          }
-          
-          if (isNaN(value) || value < 0 || value > 999) {
-            showToast('请输入0-999之间的数量')
-            resolve(false)
-            return
-          }
-          
-          sizeStocks.value[size] = value
-          showToast(`${size}码 已设置为 ${value} 件`)
-          resolve(true)
-        } else {
-          resolve(true)
-        }
-      })
-    }
-  })
-  
-  // 添加输入框 - 增加延迟时间并添加重试机制
-  const addInputField = (retryCount = 0) => {
-    const messageEl = document.querySelector('.van-dialog__message')
-    
-    if (!messageEl && retryCount < 5) {
-      // 如果找不到元素，重试
-      setTimeout(() => addInputField(retryCount + 1), 100)
-      return
-    }
-    
-    if (messageEl && !messageEl.querySelector('.quick-stock-input')) {
-      messageEl.innerHTML = `
-        <div style="padding: 16px 0;">
-          <input 
-            type="number" 
-            class="quick-stock-input"
-            value="${currentStock}"
-            min="0"
-            max="999"
-            placeholder="输入数量"
-            style="width: 100%; padding: 12px; border: 2px solid #1989fa; border-radius: 8px; font-size: 18px; text-align: center; font-weight: 600;"
-          />
-          <div style="margin-top: 12px; font-size: 12px; color: #969799;">
-            常用数量：
-            <span onclick="document.querySelector('.quick-stock-input').value=5" style="display: inline-block; padding: 4px 12px; margin: 4px; background: #f7f8fa; border-radius: 4px; cursor: pointer;">5</span>
-            <span onclick="document.querySelector('.quick-stock-input').value=10" style="display: inline-block; padding: 4px 12px; margin: 4px; background: #f7f8fa; border-radius: 4px; cursor: pointer;">10</span>
-            <span onclick="document.querySelector('.quick-stock-input').value=15" style="display: inline-block; padding: 4px 12px; margin: 4px; background: #f7f8fa; border-radius: 4px; cursor: pointer;">15</span>
-            <span onclick="document.querySelector('.quick-stock-input').value=20" style="display: inline-block; padding: 4px 12px; margin: 4px; background: #f7f8fa; border-radius: 4px; cursor: pointer;">20</span>
-            <span onclick="document.querySelector('.quick-stock-input').value=30" style="display: inline-block; padding: 4px 12px; margin: 4px; background: #f7f8fa; border-radius: 4px; cursor: pointer;">30</span>
-          </div>
-        </div>
-      `
-      
-      // 聚焦输入框
-      setTimeout(() => {
-        const input = document.querySelector('.quick-stock-input')
-        if (input) {
-          input.focus()
-          input.select()
-        }
-      }, 100)
-    }
-  }
-  
-  // 延迟 150ms 后添加输入框
-  setTimeout(() => addInputField(), 150)
 }
 
 // 快速批量设置
@@ -870,41 +798,85 @@ const handleSubmit = async () => {
   gap: 24px;
 }
 
-/* 简化版库存网格 */
-.simple-stock-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
+
+/* 快捷操作按钮 - 顶部 */
+.quick-actions-top {
+  display: flex;
+  gap: 8px;
   padding: 0 16px;
   margin-bottom: 16px;
 }
 
-.simple-stock-item {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 12px;
-  padding: 12px 8px;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.3s;
-  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+/* 内联输入框列表 */
+.inline-stock-list {
+  padding: 0 16px;
+  margin-bottom: 16px;
 }
 
-.simple-stock-item:active {
-  transform: scale(0.95);
-  box-shadow: 0 1px 4px rgba(102, 126, 234, 0.3);
+.inline-stock-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: #fff;
+  border: 1px solid #ebedf0;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  transition: all 0.2s;
 }
 
-.size-label {
-  font-size: 16px;
+.inline-stock-item:hover {
+  border-color: #1989fa;
+  box-shadow: 0 2px 8px rgba(25, 137, 250, 0.1);
+}
+
+.inline-stock-item .size-label {
+  font-size: 15px;
   font-weight: 600;
-  color: white;
-  margin-bottom: 4px;
+  color: #323233;
+  min-width: 50px;
 }
 
-.stock-value {
+.stock-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  justify-content: center;
+}
+
+.stock-input-wrapper .unit {
   font-size: 14px;
-  color: rgba(255, 255, 255, 0.9);
-  font-weight: 500;
+  color: #969799;
+}
+
+.quick-buttons {
+  display: flex;
+  gap: 4px;
+}
+
+.quick-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 28px;
+  padding: 0 8px;
+  background: #f7f8fa;
+  border: 1px solid #ebedf0;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #646566;
+  cursor: pointer;
+  transition: all 0.2s;
+  user-select: none;
+}
+
+.quick-btn:active {
+  transform: scale(0.95);
+  background: #1989fa;
+  border-color: #1989fa;
+  color: white;
 }
 
 /* 快捷操作按钮 */
