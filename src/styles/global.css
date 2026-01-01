@@ -436,8 +436,6 @@ body {
   box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.2) !important;
   border: 1px solid rgba(74, 144, 226, 0.15);
   border-bottom: none;
-  max-height: 80vh !important;
-  overflow: visible !important;
 }
 
 /* 底部弹窗定位优化 */
@@ -834,21 +832,26 @@ body {
 /* 时间选择器 */
 .van-picker {
   background: #ffffff !important;
+  min-height: 300px !important;
 }
 
 .van-picker__toolbar {
   background: linear-gradient(135deg, #F8F9FA 0%, #FFFFFF 100%);
   border-bottom: 1px solid var(--color-border);
+  height: 44px;
+  line-height: 44px;
 }
 
 .van-picker__cancel {
   color: var(--color-text-secondary);
   font-weight: 500;
+  padding: 0 16px;
 }
 
 .van-picker__confirm {
   color: var(--color-primary);
   font-weight: 600;
+  padding: 0 16px;
 }
 
 .van-picker__title {
@@ -856,8 +859,20 @@ body {
   font-weight: 600;
 }
 
+.van-picker__columns {
+  height: 260px !important;
+  min-height: 260px !important;
+}
+
+.van-picker-column {
+  height: 260px !important;
+}
+
 .van-picker-column__item {
   color: var(--color-text-body);
+  height: 44px;
+  line-height: 44px;
+  font-size: 16px;
 }
 
 .van-picker-column__item--selected {
@@ -1195,14 +1210,22 @@ body {
 /* 确保所有弹窗在白色背景上可见 */
 .van-popup,
 .van-dialog,
-.van-action-sheet,
-.van-picker {
-  position: relative;
+.van-action-sheet {
+  position: fixed !important;
   z-index: 3000 !important;
+}
+
+/* Picker 组件特殊处理 */
+.van-picker {
+  position: relative !important;
+  z-index: 1 !important;
+  width: 100%;
+  background: #ffffff !important;
 }
 
 /* 弹窗遮罩层 */
 .van-overlay {
+  position: fixed !important;
   z-index: 2999 !important;
 }
 
