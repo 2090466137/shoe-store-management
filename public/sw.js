@@ -1,6 +1,8 @@
 // Service Worker for PWA - Enhanced Offline Mode
-const CACHE_NAME = 'shoe-store-v3.2';
-const RUNTIME_CACHE = 'shoe-store-runtime-v3.2';
+// 每次更新时修改版本号以清除旧缓存
+const CACHE_VERSION = '1.0.1';
+const CACHE_NAME = `shoe-store-v${CACHE_VERSION}`;
+const RUNTIME_CACHE = `shoe-store-runtime-v${CACHE_VERSION}`;
 
 // 需要缓存的静态资源
 const STATIC_CACHE_URLS = [
@@ -88,46 +90,36 @@ self.addEventListener('fetch', event => {
     return;
   }
   
-  // 静态资源策略：缓存优先，失败时使用网络
+  // 静态资源策略：网络优先（确保总是获取最新版本）
   event.respondWith(
-    caches.match(request)
-      .then(cachedResponse => {
-        if (cachedResponse) {
-          // 缓存命中，后台更新缓存
-          fetch(request)
-            .then(response => {
-              if (response && response.status === 200) {
-                caches.open(RUNTIME_CACHE).then(cache => {
-                  cache.put(request, response.clone());
-                });
-              }
-            })
-            .catch(() => {
-              // 网络失败，忽略
-            });
-          
-          return cachedResponse;
+    fetch(request)
+      .then(response => {
+        // 检查是否是有效响应
+        if (!response || response.status !== 200 || response.type === 'error') {
+          // 网络请求失败，尝试使用缓存
+          return caches.match(request).then(cachedResponse => {
+            return cachedResponse || response;
+          });
         }
         
-        // 缓存未命中，使用网络
-        return fetch(request)
-          .then(response => {
-            // 检查是否是有效响应
-            if (!response || response.status !== 200 || response.type === 'error') {
-              return response;
+        // 克隆响应并缓存
+        const responseToCache = response.clone();
+        caches.open(RUNTIME_CACHE)
+          .then(cache => {
+            cache.put(request, responseToCache);
+          });
+        
+        return response;
+      })
+      .catch(() => {
+        // 网络失败，使用缓存
+        return caches.match(request)
+          .then(cachedResponse => {
+            if (cachedResponse) {
+              return cachedResponse;
             }
             
-            // 克隆响应并缓存
-            const responseToCache = response.clone();
-            caches.open(RUNTIME_CACHE)
-              .then(cache => {
-                cache.put(request, responseToCache);
-              });
-            
-            return response;
-          })
-          .catch(() => {
-            // 网络失败，返回离线页面
+            // 缓存也没有，返回离线页面
             if (request.destination === 'document') {
               return caches.match('/index.html');
             }

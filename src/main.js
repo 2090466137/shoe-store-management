@@ -14,6 +14,9 @@ import './styles/mobile-optimize.css'
 // 引入页面样式修复
 import './styles/page-fix.css'
 
+// 引入版本检查工具
+import { initVersionCheck } from './utils/version'
+
 const app = createApp(App)
 const pinia = createPinia()
 
@@ -22,4 +25,7 @@ app.use(router)
 app.use(Vant)
 
 app.mount('#app')
+
+// 初始化版本检查
+initVersionCheck()
 

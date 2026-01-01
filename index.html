@@ -4,6 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   
+  <!-- 禁用缓存，确保始终加载最新版本 -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  
   <!-- PWA 配置 -->
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#1989fa">
@@ -28,17 +33,45 @@
   
   <title>鞋店仓库管理系统</title>
   
-  <!-- Service Worker 注册 -->
+  <!-- Service Worker 注册和版本检查 -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('/sw.js')
           .then(registration => {
             console.log('SW registered:', registration);
+            
+            // 每小时检查一次更新
+            setInterval(() => {
+              registration.update();
+            }, 60 * 60 * 1000);
+            
+            // 监听更新
+            registration.addEventListener('updatefound', () => {
+              const newWorker = registration.installing;
+              newWorker.addEventListener('statechange', () => {
+                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                  // 发现新版本，提示用户刷新
+                  if (confirm('发现新版本，是否立即更新？')) {
+                    newWorker.postMessage({ type: 'SKIP_WAITING' });
+                    window.location.reload();
+                  }
+                }
+              });
+            });
           })
           .catch(error => {
             console.log('SW registration failed:', error);
           });
+      });
+      
+      // 监听 Service Worker 控制器变化
+      let refreshing = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!refreshing) {
+          refreshing = true;
+          window.location.reload();
+        }
       });
     }
   </script>

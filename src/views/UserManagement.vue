@@ -101,17 +101,15 @@
         
         <div class="user-actions">
           <van-button 
-            size="small" 
-            type="primary" 
-            plain
+            type="primary"
+            size="small"
             @click="editUser(user)"
           >
             编辑
           </van-button>
           <van-button 
-            size="small" 
-            :type="user.status === 'active' ? 'warning' : 'success'" 
-            plain
+            :type="user.status === 'active' ? 'warning' : 'success'"
+            size="small"
             @click="handleToggleStatus(user)"
             v-if="user.id !== '1'"
           >
@@ -779,19 +777,31 @@ onMounted(() => {
   flex-direction: column;
   gap: 8px;
   flex-shrink: 0;
-  min-width: 70px;
 }
 
 .user-actions :deep(.van-button) {
-  padding: 0 16px;
-  height: 32px;
-  font-size: 13px;
-  min-width: 70px;
-  white-space: nowrap;
+  padding: 0 14px !important;
+  height: 34px !important;
+  font-size: 13px !important;
+  border-radius: 8px !important;
 }
 
-.user-actions :deep(.van-button__text) {
-  font-size: 13px;
+.user-actions :deep(.van-button--primary) {
+  background: #4A90E2 !important;
+  border-color: #4A90E2 !important;
+  color: #fff !important;
+}
+
+.user-actions :deep(.van-button--warning) {
+  background: #FF9F43 !important;
+  border-color: #FF9F43 !important;
+  color: #fff !important;
+}
+
+.user-actions :deep(.van-button--success) {
+  background: #26C281 !important;
+  border-color: #26C281 !important;
+  color: #fff !important;
 }
 
 /* 弹窗 */
