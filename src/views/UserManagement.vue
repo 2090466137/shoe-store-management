@@ -165,14 +165,14 @@
                 <van-radio-group v-model="form.role" direction="horizontal">
                   <van-radio 
                     name="manager" 
-                    icon-size="20px"
+                    icon-size="10px"
                     :disabled="editingUser?.role === 'admin'"
                   >
                     店长
                   </van-radio>
                   <van-radio 
                     name="staff"
-                    icon-size="20px"
+                    icon-size="10px"
                     :disabled="editingUser?.role === 'admin'"
                   >
                     店员
@@ -840,12 +840,15 @@ onMounted(() => {
 }
 
 .user-form :deep(.van-radio__icon) {
-  font-size: 20px;
+  width: 16px !important;
+  height: 16px !important;
+  font-size: 10px !important;
   line-height: 1;
   flex-shrink: 0;
 }
 
 .user-form :deep(.van-radio__icon .van-icon) {
+  font-size: 10px !important;
   display: flex;
   align-items: center;
   justify-content: center;

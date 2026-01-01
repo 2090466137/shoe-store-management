@@ -373,8 +373,15 @@ const onCategoryConfirm = ({ selectedOptions }) => {
   customCategory.value = ''
 }
 
-const onSizeConfirm = ({ selectedOptions }) => {
-  form.value.size = selectedOptions[0].text || selectedOptions[0]
+const onSizeConfirm = (value) => {
+  // value 可能是对象或字符串
+  if (typeof value === 'object' && value.selectedOptions) {
+    form.value.size = value.selectedOptions[0]?.text || value.selectedOptions[0] || value.selectedValues[0]
+  } else if (typeof value === 'object' && value.selectedValues) {
+    form.value.size = value.selectedValues[0]
+  } else {
+    form.value.size = value
+  }
   showSizePicker.value = false
 }
 

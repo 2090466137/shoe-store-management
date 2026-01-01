@@ -449,9 +449,12 @@ body {
   background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
 }
 
-/* 复选框和单选框 */
+/* 复选框和单选框 - 使用更小的尺寸 */
 .van-checkbox__icon,
 .van-radio__icon {
+  width: 16px !important;
+  height: 16px !important;
+  font-size: 10px !important;
   flex-shrink: 0 !important;
   display: flex !important;
   align-items: center !important;
@@ -461,6 +464,7 @@ body {
 
 .van-checkbox__icon .van-icon,
 .van-radio__icon .van-icon {
+  font-size: 10px !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
