@@ -167,29 +167,17 @@
             收银台
           </van-button>
           
-          <div class="action-row" v-if="userStore.hasPermission(PERMISSIONS.PURCHASE_ADD) || userStore.hasPermission(PERMISSIONS.PRODUCT_ADD)">
-            <van-button 
-              v-if="userStore.hasPermission(PERMISSIONS.PURCHASE_ADD)"
-              type="success" 
-              size="large" 
-              class="action-btn half"
-              @click="router.push('/purchase')"
-            >
-              <van-icon name="add-o" />
-              进货
-            </van-button>
-            
-            <van-button 
-              v-if="userStore.hasPermission(PERMISSIONS.PRODUCT_ADD)"
-              type="warning" 
-              size="large" 
-              class="action-btn half"
-              @click="router.push('/product/batch-add')"
-            >
-              <van-icon name="apps-o" />
-              批量添加
-            </van-button>
-          </div>
+          <van-button 
+            v-if="userStore.hasPermission(PERMISSIONS.PURCHASE_ADD)"
+            type="success" 
+            size="large" 
+            block
+            class="action-btn"
+            @click="router.push('/purchase')"
+          >
+            <van-icon name="add-o" />
+            进货
+          </van-button>
           
           <div class="action-row" v-if="userStore.hasPermission(PERMISSIONS.STATS_REPORT) || userStore.hasPermission(PERMISSIONS.STAFF_STATS_VIEW)">
             <van-button 
