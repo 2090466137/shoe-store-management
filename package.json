@@ -1,6 +1,6 @@
 {
   "name": "shoe-store-management",
-  "version": "1.0.0",
+  "version": "1.1.3",
   "type": "module",
   "description": "鞋店仓库管理系统 - 移动端应用",
   "main": "index.html",
@@ -10,19 +10,19 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "vue": "^3.3.4",
-    "vue-router": "^4.2.5",
+    "@supabase/supabase-js": "^2.89.0",
+    "axios": "^1.6.2",
+    "echarts": "^5.4.3",
     "pinia": "^2.1.7",
     "vant": "^4.8.0",
-    "axios": "^1.6.2",
-    "@supabase/supabase-js": "^2.39.0",
-    "echarts": "^5.4.3",
-    "vue-echarts": "^6.6.1"
+    "vue": "^3.3.4",
+    "vue-echarts": "^6.6.1",
+    "vue-router": "^4.2.5"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.5.0",
-    "vite": "^5.0.0",
     "autoprefixer": "^10.4.16",
-    "postcss": "^8.4.32"
+    "postcss": "^8.4.32",
+    "vite": "^5.0.0"
   }
 }

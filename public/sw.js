@@ -1,6 +1,6 @@
 // Service Worker for PWA - Enhanced Offline Mode
 // 每次更新时修改版本号以清除旧缓存
-const CACHE_VERSION = '1.1.0';
+const CACHE_VERSION = '1.1.1';
 const CACHE_NAME = `shoe-store-v${CACHE_VERSION}`;
 const RUNTIME_CACHE = `shoe-store-runtime-v${CACHE_VERSION}`;
 
