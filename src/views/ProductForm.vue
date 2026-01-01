@@ -278,10 +278,13 @@ const categories = computed(() => {
   return Array.from(allCategories).sort()
 })
 
-// 鞋码范围（30-42码，整数）
-const sizes = [
-  '30', '31', '32', '33', '34', '35', '36', '37', '38', '39', '40', '41', '42'
-]
+// 鞋码范围（30-42码，整数）- 转换为 Picker 需要的格式
+const sizes = computed(() => {
+  return ['30', '31', '32', '33', '34', '35', '36', '37', '38', '39', '40', '41', '42'].map(size => ({
+    text: size,
+    value: size
+  }))
+})
 
 const form = ref({
   code: '',        // 货号
@@ -373,27 +376,19 @@ const onCategoryConfirm = ({ selectedOptions }) => {
   customCategory.value = ''
 }
 
-const onSizeConfirm = (value) => {
-  console.log('尺码选择值:', value)
+const onSizeConfirm = ({ selectedOptions }) => {
+  console.log('尺码选择:', selectedOptions)
   
-  // 处理不同格式的返回值
-  if (value && typeof value === 'object') {
-    // 如果是对象，尝试获取 selectedOptions 或 selectedValues
-    if (value.selectedOptions && value.selectedOptions.length > 0) {
-      const selectedOption = value.selectedOptions[0]
-      form.value.size = selectedOption.text || selectedOption.value || selectedOption
-    } else if (value.selectedValues && value.selectedValues.length > 0) {
-      form.value.size = value.selectedValues[0]
-    } else {
-      // 如果都没有，尝试直接使用 value
-      form.value.size = String(value)
-    }
-  } else {
-    // 如果是字符串或数字，直接使用
-    form.value.size = String(value)
+  if (selectedOptions && selectedOptions.length > 0) {
+    // 获取选中的尺码
+    form.value.size = selectedOptions[0].text || selectedOptions[0].value
+    console.log('已选择尺码:', form.value.size)
+    showToast({
+      type: 'success',
+      message: `已选择 ${form.value.size} 码`
+    })
   }
   
-  console.log('最终尺码:', form.value.size)
   showSizePicker.value = false
 }
 

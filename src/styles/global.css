@@ -379,10 +379,13 @@ body {
   border: 1px solid var(--color-danger);
 }
 
-/* 对话框 */
+/* 对话框 - 增强可见性 */
 .van-dialog {
   border-radius: var(--radius-xl);
   overflow: hidden;
+  background: #ffffff !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2) !important;
+  border: 1px solid rgba(74, 144, 226, 0.15);
 }
 
 .van-dialog__header {
@@ -390,36 +393,103 @@ body {
   font-size: 18px;
   padding-top: var(--spacing-xxl);
   color: var(--color-text-title);
+  background: linear-gradient(135deg, #F8F9FA 0%, #FFFFFF 100%);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.van-dialog__content {
+  background: #ffffff;
+  color: var(--color-text-body);
+  padding: var(--spacing-xl);
+}
+
+.van-dialog__message {
+  color: var(--color-text-body) !important;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.van-dialog__footer {
+  background: #F8F9FA;
+  border-top: 1px solid var(--color-border);
 }
 
 .van-dialog__button {
   font-weight: 500;
+  color: var(--color-text-body);
+}
+
+.van-dialog__button--primary {
+  color: var(--color-primary) !important;
+  font-weight: 600;
+}
+
+.van-dialog__button--danger {
+  color: var(--color-danger) !important;
+  font-weight: 600;
 }
 
 /* 弹出层 - 添加背景色和阴影，确保在白色背景上可见 */
 .van-popup {
   border-radius: var(--radius-xl) var(--radius-xl) 0 0;
   background: #ffffff !important;
-  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15) !important;
+  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.2) !important;
+  border: 1px solid rgba(74, 144, 226, 0.15);
+  border-bottom: none;
 }
 
-/* 弹窗遮罩层 - 增加透明度 */
+/* 弹窗遮罩层 - 增加透明度，确保背景变暗 */
 .van-overlay {
-  background-color: rgba(0, 0, 0, 0.6) !important;
+  background-color: rgba(0, 0, 0, 0.65) !important;
 }
 
+/* 操作面板 */
 .van-action-sheet {
   border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  background: #ffffff !important;
+  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.2) !important;
+  border: 1px solid rgba(74, 144, 226, 0.15);
+  border-bottom: none;
+}
+
+.van-action-sheet__header {
+  background: linear-gradient(135deg, #F8F9FA 0%, #FFFFFF 100%);
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text-title);
+  font-weight: 600;
+}
+
+.van-action-sheet__description {
+  color: var(--color-text-secondary);
+  padding: var(--spacing-lg);
+  background: #F8F9FA;
 }
 
 .van-action-sheet__item {
   font-size: 16px;
   padding: var(--spacing-lg);
   transition: background 0.2s ease;
+  color: var(--color-text-body);
+  background: #ffffff;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .van-action-sheet__item:active {
-  background: var(--color-bg-page);
+  background: rgba(74, 144, 226, 0.08);
+}
+
+.van-action-sheet__item--disabled {
+  color: var(--color-text-disabled);
+}
+
+.van-action-sheet__cancel {
+  background: #F8F9FA;
+  color: var(--color-text-body);
+  border-top: 8px solid var(--color-bg-page);
+}
+
+.van-action-sheet__cancel:active {
+  background: var(--color-border);
 }
 
 /* 步进器 */
@@ -456,16 +526,120 @@ body {
   background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
 }
 
-/* 复选框和单选框 - 完全隐藏圆形图标 */
-.van-checkbox__icon,
-.van-radio__icon {
-  display: none !important;
+/* 复选框和单选框 - 重新设计 */
+.van-checkbox,
+.van-radio {
+  display: flex;
+  align-items: center;
+  padding: 12px 0;
 }
 
+/* 复选框图标 - 方形设计 */
+.van-checkbox__icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  border: 2px solid var(--color-border);
+  background: var(--color-bg-card);
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.van-checkbox__icon--checked {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  border-color: var(--color-primary);
+  box-shadow: 0 2px 8px rgba(74, 144, 226, 0.3);
+}
+
+/* 复选框对勾 */
+.van-checkbox__icon--checked::after {
+  content: '✓';
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+/* 单选框图标 - 圆形设计 */
+.van-radio__icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid var(--color-border);
+  background: var(--color-bg-card);
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.van-radio__icon--checked {
+  border-color: var(--color-primary);
+  background: var(--color-bg-card);
+  box-shadow: 0 2px 8px rgba(74, 144, 226, 0.2);
+}
+
+/* 单选框内部圆点 */
+.van-radio__icon--checked::after {
+  content: '';
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* 标签文字 */
 .van-checkbox__label,
 .van-radio__label {
-  margin-left: 0 !important;
-  padding-left: 0 !important;
+  margin-left: 12px;
+  color: var(--color-text-body);
+  font-size: 15px;
+  line-height: 1.5;
+  flex: 1;
+}
+
+/* 禁用状态 */
+.van-checkbox--disabled .van-checkbox__icon,
+.van-radio--disabled .van-radio__icon {
+  background: var(--color-bg-disabled);
+  border-color: var(--color-border);
+  opacity: 0.5;
+}
+
+.van-checkbox--disabled .van-checkbox__label,
+.van-radio--disabled .van-radio__label {
+  color: var(--color-text-disabled);
+}
+
+/* 点击反馈 */
+.van-checkbox:active .van-checkbox__icon,
+.van-radio:active .van-radio__icon {
+  transform: scale(0.95);
+}
+
+/* 复选框组和单选框组 */
+.van-checkbox-group,
+.van-radio-group {
+  padding: var(--spacing-sm) 0;
+}
+
+/* 横向排列时的样式 */
+.van-checkbox-group--horizontal .van-checkbox,
+.van-radio-group--horizontal .van-radio {
+  margin-right: var(--spacing-lg);
+}
+
+.van-checkbox-group--horizontal .van-checkbox:last-child,
+.van-radio-group--horizontal .van-radio:last-child {
+  margin-right: 0;
 }
 
 /* 加载动画 */
@@ -473,15 +647,59 @@ body {
   color: var(--color-primary);
 }
 
-/* Toast */
+/* Toast - 增强可见性 */
 .van-toast {
   border-radius: var(--radius-md);
   backdrop-filter: blur(10px);
+  background: rgba(50, 50, 50, 0.95) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* 通知 */
+.van-toast__text {
+  color: #ffffff !important;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.van-toast--success {
+  background: rgba(38, 194, 129, 0.95) !important;
+}
+
+.van-toast--fail {
+  background: rgba(238, 90, 82, 0.95) !important;
+}
+
+.van-toast--loading {
+  background: rgba(74, 144, 226, 0.95) !important;
+}
+
+/* 通知 - 增强可见性 */
 .van-notify {
   border-radius: 0 0 var(--radius-md) var(--radius-md);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.van-notify--primary {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  color: #ffffff !important;
+}
+
+.van-notify--success {
+  background: linear-gradient(135deg, var(--color-success) 0%, var(--color-success-dark) 100%);
+  color: #ffffff !important;
+}
+
+.van-notify--warning {
+  background: linear-gradient(135deg, var(--color-secondary) 0%, var(--color-secondary-dark) 100%);
+  color: #ffffff !important;
+}
+
+.van-notify--danger {
+  background: linear-gradient(135deg, var(--color-danger) 0%, var(--color-danger-dark) 100%);
+  color: #ffffff !important;
 }
 
 /* 下拉刷新 */
@@ -586,8 +804,36 @@ body {
 }
 
 /* 时间选择器 */
+.van-picker {
+  background: #ffffff !important;
+}
+
+.van-picker__toolbar {
+  background: linear-gradient(135deg, #F8F9FA 0%, #FFFFFF 100%);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.van-picker__cancel {
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
 .van-picker__confirm {
   color: var(--color-primary);
+  font-weight: 600;
+}
+
+.van-picker__title {
+  color: var(--color-text-title);
+  font-weight: 600;
+}
+
+.van-picker-column__item {
+  color: var(--color-text-body);
+}
+
+.van-picker-column__item--selected {
+  color: var(--color-text-title);
   font-weight: 600;
 }
 
@@ -916,11 +1162,209 @@ body {
   }
 }
 
+/* ==================== 弹窗组件增强样式 ==================== */
+
+/* 确保所有弹窗在白色背景上可见 */
+.van-popup,
+.van-dialog,
+.van-action-sheet,
+.van-picker {
+  position: relative;
+  z-index: 2000;
+}
+
+/* 弹窗内的输入框 */
+.van-popup .van-field,
+.van-dialog .van-field {
+  background: #F8F9FA;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-sm);
+}
+
+.van-popup .van-field__control,
+.van-dialog .van-field__control {
+  color: var(--color-text-body);
+}
+
+.van-popup .van-field__label,
+.van-dialog .van-field__label {
+  color: var(--color-text-title);
+}
+
+/* 弹窗内的按钮 */
+.van-popup .van-button,
+.van-dialog .van-button,
+.van-action-sheet .van-button {
+  margin: var(--spacing-sm) 0;
+}
+
+/* 下拉菜单 */
+.van-dropdown-menu {
+  background: #ffffff;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+}
+
+.van-dropdown-menu__bar {
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(74, 144, 226, 0.08);
+}
+
+.van-dropdown-menu__title {
+  color: var(--color-text-body);
+}
+
+.van-dropdown-menu__title--active {
+  color: var(--color-primary);
+}
+
+.van-dropdown-item {
+  background: #ffffff;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* 日历弹窗 */
+.van-calendar {
+  background: #ffffff !important;
+  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.van-calendar__header {
+  background: linear-gradient(135deg, #F8F9FA 0%, #FFFFFF 100%);
+  border-bottom: 1px solid var(--color-border);
+  box-shadow: none;
+}
+
+.van-calendar__header-title {
+  color: var(--color-text-title);
+  font-weight: 600;
+}
+
+.van-calendar__weekdays {
+  background: #F8F9FA;
+}
+
+.van-calendar__weekday {
+  color: var(--color-text-secondary);
+}
+
+.van-calendar__day {
+  color: var(--color-text-body);
+}
+
+.van-calendar__day--disabled {
+  color: var(--color-text-disabled);
+}
+
+.van-calendar__selected-day {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  color: #ffffff !important;
+}
+
+.van-calendar__bottom-info {
+  color: var(--color-primary);
+  font-size: 12px;
+}
+
+/* 图片预览 */
+.van-image-preview {
+  background: rgba(0, 0, 0, 0.9);
+}
+
+.van-image-preview__index {
+  background: rgba(0, 0, 0, 0.7);
+  color: #ffffff;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 20px;
+}
+
+/* 分享面板 */
+.van-share-sheet {
+  background: #ffffff !important;
+  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.van-share-sheet__header {
+  background: linear-gradient(135deg, #F8F9FA 0%, #FFFFFF 100%);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.van-share-sheet__title {
+  color: var(--color-text-title);
+  font-weight: 600;
+}
+
+.van-share-sheet__description {
+  color: var(--color-text-secondary);
+}
+
+.van-share-sheet__option-name {
+  color: var(--color-text-body);
+}
+
+.van-share-sheet__option-description {
+  color: var(--color-text-secondary);
+}
+
+.van-share-sheet__cancel {
+  background: #F8F9FA;
+  color: var(--color-text-body);
+  border-top: 8px solid var(--color-bg-page);
+}
+
+/* 密码输入框 */
+.van-password-input {
+  background: #ffffff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.van-password-input__security li {
+  background: #F8F9FA;
+  border-right: 1px solid var(--color-border);
+}
+
+.van-password-input__security i {
+  background: var(--color-text-title);
+}
+
+/* 数字键盘 */
+.van-number-keyboard {
+  background: #F8F9FA;
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.van-key {
+  background: #ffffff;
+  color: var(--color-text-title);
+  border: 1px solid var(--color-border);
+  font-weight: 500;
+}
+
+.van-key:active {
+  background: var(--color-border);
+}
+
+.van-key--blue {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  color: #ffffff;
+}
+
+.van-key--delete {
+  background: #ffffff;
+  color: var(--color-text-secondary);
+}
+
 /* ==================== 打印样式 ==================== */
 @media print {
   .van-nav-bar,
   .van-tabbar,
-  .van-button {
+  .van-button,
+  .van-overlay,
+  .van-popup,
+  .van-dialog,
+  .van-action-sheet {
     display: none !important;
   }
   

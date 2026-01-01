@@ -339,7 +339,25 @@ export const useSalesStore = defineStore('sales', () => {
         console.log(`✅ 已恢复商品库存 +${tempSale.quantity}`)
       }
       
-      // 2. 从本地删除
+      // 🆕 2. 如果是会员余额支付，退回余额
+      if (tempSale.paymentMethod === '会员余额' && tempSale.memberId) {
+        const { useMemberStore } = await import('./member')
+        const memberStore = useMemberStore()
+        const refundResult = await memberStore.rechargeMember(
+          tempSale.memberId,
+          tempSale.actualAmount || tempSale.totalAmount,
+          '删除订单退款',
+          `订单号：${tempSale.orderId}`
+        )
+        
+        if (refundResult.success) {
+          console.log('✅ 会员余额已退回:', tempSale.actualAmount || tempSale.totalAmount, '元')
+        } else {
+          console.error('❌ 会员余额退回失败:', refundResult.message)
+        }
+      }
+      
+      // 3. 从本地删除
       sales.value.splice(index, 1)
       saveSales()
 

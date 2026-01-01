@@ -160,7 +160,40 @@ export const useReturnsStore = defineStore('returns', () => {
         )
       }
       
-      // 3. 保存到 localStorage
+      // 🆕 3. 如果是会员余额支付，退回余额
+      if (returnRecord.paymentMethod === '会员余额' && returnRecord.memberId) {
+        const { useMemberStore } = await import('./member')
+        const memberStore = useMemberStore()
+        
+        // 计算退款金额
+        let refundAmount = 0
+        if (returnRecord.type === 'return') {
+          // 退货：退全款
+          refundAmount = returnRecord.refundAmount || returnRecord.amount
+        } else if (returnRecord.type === 'exchange' && returnRecord.newProduct) {
+          // 换货：如果新商品更便宜，退差价
+          const oldTotal = returnRecord.originalProduct.salePrice * returnRecord.originalProduct.quantity
+          const newTotal = returnRecord.newProduct.salePrice * returnRecord.newProduct.quantity
+          refundAmount = oldTotal > newTotal ? (oldTotal - newTotal) : 0
+        }
+        
+        if (refundAmount > 0) {
+          const refundResult = await memberStore.rechargeMember(
+            returnRecord.memberId,
+            refundAmount,
+            '退货退款',
+            `退货单号：${returnRecord.id || Date.now()}`
+          )
+          
+          if (refundResult.success) {
+            console.log('✅ 会员余额已退回:', refundAmount, '元')
+          } else {
+            console.error('❌ 会员余额退回失败:', refundResult.message)
+          }
+        }
+      }
+      
+      // 4. 保存到 localStorage
       saveReturns()
       
       console.log('✅ 退换货记录已保存到云端')
@@ -177,6 +210,30 @@ export const useReturnsStore = defineStore('returns', () => {
         returnRecord.originalProduct.quantity, 
         'add'
       )
+      
+      // 🆕 会员余额退回（本地）
+      if (returnRecord.paymentMethod === '会员余额' && returnRecord.memberId) {
+        const { useMemberStore } = await import('./member')
+        const memberStore = useMemberStore()
+        let refundAmount = 0
+        
+        if (returnRecord.type === 'return') {
+          refundAmount = returnRecord.refundAmount || returnRecord.amount
+        } else if (returnRecord.type === 'exchange' && returnRecord.newProduct) {
+          const oldTotal = returnRecord.originalProduct.salePrice * returnRecord.originalProduct.quantity
+          const newTotal = returnRecord.newProduct.salePrice * returnRecord.newProduct.quantity
+          refundAmount = oldTotal > newTotal ? (oldTotal - newTotal) : 0
+        }
+        
+        if (refundAmount > 0) {
+          await memberStore.rechargeMember(
+            returnRecord.memberId,
+            refundAmount,
+            '退货退款',
+            `退货单号：${returnRecord.id || Date.now()}`
+          )
+        }
+      }
       
       if (returnRecord.type === 'exchange' && returnRecord.newProduct) {
         await productStore.updateStock(

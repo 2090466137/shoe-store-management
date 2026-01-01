@@ -47,6 +47,27 @@
         </div>
       </div>
 
+      <!-- 🆕 热销商品快捷选择 -->
+      <div class="card quick-products-card" v-if="hotProducts.length > 0 && cart.length === 0">
+        <div class="section-title">🔥 热销商品</div>
+        <div class="quick-products-grid">
+          <div 
+            v-for="product in hotProducts" 
+            :key="product.id"
+            class="quick-product-item"
+            @click="quickAddToCart(product)"
+            :class="{ 'out-of-stock': product.stock === 0 }"
+          >
+            <div class="quick-product-name">{{ product.name }}</div>
+            <div class="quick-product-size">{{ product.size }}码</div>
+            <div class="quick-product-price">¥{{ product.salePrice }}</div>
+            <div class="quick-product-stock" :class="{ 'low-stock': product.stock <= product.minStock }">
+              库存{{ product.stock }}
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- 购物车列表 -->
       <div class="card cart-card">
         <div class="section-title">🛒 购物车</div>
@@ -372,6 +393,32 @@ const changeAmount = computed(() => {
   return Math.max(0, received - actualAmount.value)
 })
 
+// 🆕 热销商品（根据销售记录统计）
+const hotProducts = computed(() => {
+  // 统计每个商品的销售次数
+  const productSales = {}
+  salesStore.sales.forEach(sale => {
+    if (sale.products && Array.isArray(sale.products)) {
+      sale.products.forEach(item => {
+        if (!productSales[item.productId]) {
+          productSales[item.productId] = 0
+        }
+        productSales[item.productId] += item.quantity
+      })
+    }
+  })
+  
+  // 获取销量前6的商品
+  const topProductIds = Object.entries(productSales)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 6)
+    .map(([id]) => id)
+  
+  return topProductIds
+    .map(id => productStore.getProductById(id))
+    .filter(p => p && p.stock > 0) // 只显示有库存的商品
+})
+
 // 搜索商品
 const onSearch = () => {
   if (!searchKeyword.value) {
@@ -430,6 +477,11 @@ const addToCart = (product) => {
     message: '已添加到购物车',
     icon: 'cart-o'
   })
+}
+
+// 🆕 快捷添加到购物车
+const quickAddToCart = (product) => {
+  addToCart(product)
 }
 
 // 更新购物车商品
@@ -530,6 +582,37 @@ const handleCheckout = () => {
 const handlePayment = (action) => {
   return new Promise((resolve) => {
     if (action === 'confirm') {
+      // 🆕 1. 检查购物车中的商品是否都存在
+      const invalidItems = []
+      for (const item of cart.value) {
+        const product = productStore.getProductById(item.productId)
+        if (!product) {
+          invalidItems.push(item)
+        } else if (product.stock < item.quantity) {
+          showToast(`${item.productName} 库存不足，当前库存：${product.stock}`)
+          resolve(false)
+          return
+        }
+      }
+
+      // 如果有不存在的商品，自动移除
+      if (invalidItems.length > 0) {
+        for (const item of invalidItems) {
+          const index = cart.value.findIndex(c => c.productId === item.productId)
+          if (index !== -1) {
+            cart.value.splice(index, 1)
+          }
+        }
+        
+        showDialog({
+          title: '商品已下架',
+          message: `以下商品已不存在，已自动移除：\n${invalidItems.map(i => i.productName).join('、')}`,
+          confirmButtonText: '知道了'
+        })
+        resolve(false)
+        return
+      }
+      
       // 现金支付需要检查收款金额
       if (paymentMethod.value === '现金') {
         const received = parseFloat(receivedAmount.value) || 0
@@ -679,6 +762,88 @@ onMounted(() => {
   font-size: 16px;
   font-weight: 600;
   color: #ee0a24;
+}
+
+/* 🆕 热销商品快捷选择 */
+.quick-products-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.quick-product-item {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 8px;
+  padding: 12px 8px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.quick-product-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.quick-product-item:active::before {
+  opacity: 1;
+}
+
+.quick-product-item:active {
+  transform: scale(0.95);
+}
+
+.quick-product-item.out-of-stock {
+  background: linear-gradient(135deg, #bbb 0%, #999 100%);
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.quick-product-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: white;
+  margin-bottom: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.quick-product-size {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 6px;
+}
+
+.quick-product-price {
+  font-size: 15px;
+  font-weight: 700;
+  color: #FFD700;
+  margin-bottom: 4px;
+}
+
+.quick-product-stock {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.8);
+  padding: 2px 6px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  display: inline-block;
+}
+
+.quick-product-stock.low-stock {
+  background: rgba(255, 165, 0, 0.3);
+  color: #FFD700;
 }
 
 /* 购物车 */
