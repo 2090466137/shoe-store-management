@@ -312,25 +312,6 @@ img {
   -webkit-transform: translateZ(0);
 }
 
-/* ==================== 暗黑模式适配（可选） ==================== */
-
-@media (prefers-color-scheme: dark) {
-  /* 暗黑模式下的优化 */
-  body {
-    background-color: #1a1a1a;
-    color: #ffffff;
-  }
-  
-  .card {
-    background-color: #2a2a2a;
-    color: #ffffff;
-  }
-  
-  .van-nav-bar {
-    background-color: #2a2a2a;
-  }
-}
-
 /* ==================== 加载状态优化 ==================== */
 
 /* 骨架屏动画 */

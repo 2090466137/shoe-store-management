@@ -444,7 +444,7 @@ const currentDate = computed(() => {
 <style scoped>
 .home-page {
   min-height: 100vh;
-  background: linear-gradient(180deg, #5B8FF9 0%, #5B8FF9 200px, #F5F7FA 200px);
+  background: linear-gradient(180deg, #4A90E2 0%, #4A90E2 200px, #F8F9FA 200px);
   padding-bottom: 60px;
 }
 
@@ -469,18 +469,24 @@ const currentDate = computed(() => {
   align-items: center;
   gap: 10px;
   cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.user-info:active {
+  opacity: 0.8;
 }
 
 .user-avatar {
   width: 40px;
   height: 40px;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.25);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 18px;
-  font-weight: bold;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .user-detail {
@@ -490,11 +496,12 @@ const currentDate = computed(() => {
 .user-name {
   font-size: 15px;
   font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .user-role {
   font-size: 12px;
-  opacity: 0.8;
+  opacity: 0.9;
 }
 
 .header-actions {
@@ -504,17 +511,21 @@ const currentDate = computed(() => {
 
 .header-actions .van-icon {
   cursor: pointer;
-  opacity: 0.9;
+  opacity: 0.95;
+  transition: all 0.2s;
+  padding: 4px;
 }
 
 .header-actions .van-icon:active {
-  opacity: 0.6;
+  opacity: 0.7;
+  transform: scale(0.9);
 }
 
 .title {
   font-size: 24px;
   font-weight: 600;
   margin-bottom: 8px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .subtitle {
@@ -528,16 +539,23 @@ const currentDate = computed(() => {
 
 .card {
   background: white;
-  border-radius: 12px;
+  border-radius: 14px;
   padding: 16px;
   margin-bottom: 12px;
-  box-shadow: 0 2px 12px rgba(91, 143, 249, 0.08);
+  box-shadow: 0 2px 8px rgba(74, 144, 226, 0.12);
+  transition: all 0.3s ease;
+}
+
+.card:active {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(74, 144, 226, 0.16);
 }
 
 .section-title {
   font-size: 16px;
   font-weight: 600;
-  color: #323233;
+  color: #2C3E50;
+  margin-bottom: 12px;
 }
 
 .stats-grid {
@@ -550,28 +568,31 @@ const currentDate = computed(() => {
 
 .stat-card {
   background: white;
-  border-radius: 12px;
+  border-radius: 14px;
   padding: 16px;
-  min-height: 88px; /* 确保足够的触摸区域 */
+  min-height: 92px;
   display: flex;
   align-items: center;
-  box-shadow: 0 2px 12px rgba(91, 143, 249, 0.1);
+  box-shadow: 0 2px 8px rgba(74, 144, 226, 0.12);
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: all 0.3s ease;
+  border: 1px solid transparent;
 }
 
 .stat-card:active {
-  transform: scale(0.98);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(74, 144, 226, 0.16);
+  border-color: #4A90E2;
 }
 
 .stat-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
+  font-size: 22px;
   margin-right: 12px;
   flex-shrink: 0;
 }
@@ -589,7 +610,7 @@ const currentDate = computed(() => {
 }
 
 .stat-icon-warning {
-  background: #FFF7E8;
+  background: #FFF4E6;
 }
 
 .stat-info {
@@ -599,25 +620,26 @@ const currentDate = computed(() => {
 
 .stat-label {
   font-size: 12px;
-  color: #969799;
-  margin-bottom: 4px;
+  color: #868E96;
+  margin-bottom: 6px;
+  font-weight: 500;
 }
 
 .stat-value {
   font-size: 18px;
   font-weight: 600;
-  color: #323233;
+  color: #2C3E50;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .stat-value-primary {
-  color: #5B8FF9;
+  color: #4A90E2;
 }
 
 .stat-value-success {
-  color: #5AD8A6;
+  color: #26C281;
 }
 
 .warning-list {
@@ -629,11 +651,12 @@ const currentDate = computed(() => {
   justify-content: space-between;
   align-items: center;
   padding: 12px;
-  background: #fff7e6;
-  border-radius: 8px;
+  background: #FFF4E6;
+  border-radius: 10px;
   margin-bottom: 8px;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.2s;
+  border: 1px solid #FFE8C3;
 }
 
 .warning-item:last-child {
@@ -641,7 +664,8 @@ const currentDate = computed(() => {
 }
 
 .warning-item:active {
-  background: #ffe7ba;
+  background: #FFE8C3;
+  transform: scale(0.98);
 }
 
 .warning-info {
@@ -651,13 +675,13 @@ const currentDate = computed(() => {
 .warning-name {
   font-size: 14px;
   font-weight: 500;
-  color: #323233;
+  color: #2C3E50;
   margin-bottom: 4px;
 }
 
 .warning-detail {
   font-size: 12px;
-  color: #969799;
+  color: #868E96;
 }
 
 .stock-badge {
@@ -668,29 +692,33 @@ const currentDate = computed(() => {
 }
 
 .stock-badge.low {
-  background: #ff4d4f;
+  background: #EE5A52;
   color: white;
+  box-shadow: 0 2px 6px rgba(238, 90, 82, 0.3);
 }
 
 .quick-action {
   display: flex;
   align-items: center;
-  padding: 12px;
-  background: #5B8FF9;
-  border-radius: 8px;
+  padding: 14px;
+  background: linear-gradient(135deg, #4A90E2 0%, #3A7BC8 100%);
+  border-radius: 10px;
   color: white;
   cursor: pointer;
-  transition: transform 0.2s;
+  transition: all 0.2s;
   margin-top: 12px;
+  box-shadow: 0 2px 8px rgba(74, 144, 226, 0.25);
 }
 
 .quick-action:active {
   transform: scale(0.98);
+  box-shadow: 0 1px 4px rgba(74, 144, 226, 0.25);
 }
 
 .action-icon {
   font-size: 32px;
   margin-right: 12px;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
 }
 
 .action-text {
@@ -701,7 +729,7 @@ const currentDate = computed(() => {
 
 .action-arrow {
   font-size: 18px;
-  opacity: 0.8;
+  opacity: 0.9;
 }
 
 .quick-actions {
@@ -712,12 +740,17 @@ const currentDate = computed(() => {
 }
 
 .action-btn {
-  min-height: 52px; /* 增加到52px，更容易点击 */
+  min-height: 52px;
   height: 52px;
   font-size: 16px;
   font-weight: 500;
-  border-radius: 12px; /* 增大圆角，更现代 */
+  border-radius: 10px;
   padding: 0 20px;
+  transition: all 0.2s ease;
+}
+
+.action-btn:active {
+  transform: scale(0.98);
 }
 
 .action-btn :deep(.van-icon) {
@@ -727,7 +760,7 @@ const currentDate = computed(() => {
 
 .action-row {
   display: flex;
-  gap: 16px; /* 增加间距，防止误触 */
+  gap: 12px;
 }
 
 .action-btn.half {
@@ -735,15 +768,17 @@ const currentDate = computed(() => {
 }
 
 .backup-btn {
-  background: #5B8FF9;
+  background: linear-gradient(135deg, #4A90E2 0%, #3A7BC8 100%);
   color: white;
   border: none;
+  box-shadow: 0 2px 8px rgba(74, 144, 226, 0.25);
 }
 
 .stats-btn {
-  background: #FF9845;
+  background: linear-gradient(135deg, #FF9F43 0%, #FF8C1A 100%);
   color: white;
   border: none;
+  box-shadow: 0 2px 8px rgba(255, 159, 67, 0.25);
 }
 
 .staff-stats {
@@ -754,14 +789,21 @@ const currentDate = computed(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px;
-  background: #f7f8fa;
-  border-radius: 8px;
+  padding: 14px;
+  background: #F8F9FA;
+  border-radius: 10px;
   margin-bottom: 8px;
+  border: 1px solid #E9ECEF;
+  transition: all 0.2s;
 }
 
 .staff-item:last-child {
   margin-bottom: 0;
+}
+
+.staff-item:active {
+  background: #E9ECEF;
+  transform: scale(0.99);
 }
 
 .staff-info {
@@ -771,13 +813,13 @@ const currentDate = computed(() => {
 .staff-name {
   font-size: 15px;
   font-weight: 600;
-  color: #323233;
+  color: #2C3E50;
   margin-bottom: 4px;
 }
 
 .staff-detail {
   font-size: 12px;
-  color: #969799;
+  color: #868E96;
 }
 
 .staff-amount {
@@ -787,19 +829,21 @@ const currentDate = computed(() => {
 .staff-sales {
   font-size: 16px;
   font-weight: 600;
-  color: #5B8FF9;
+  color: #4A90E2;
   margin-bottom: 4px;
 }
 
 .staff-profit {
   font-size: 12px;
-  color: #5AD8A6;
+  color: #26C281;
+  font-weight: 500;
 }
 
 .month-stats {
   display: flex;
   align-items: center;
   margin-top: 12px;
+  padding: 12px 0;
 }
 
 .month-stat-item {
@@ -809,27 +853,28 @@ const currentDate = computed(() => {
 
 .month-stat-label {
   font-size: 13px;
-  color: #969799;
+  color: #868E96;
   margin-bottom: 8px;
+  font-weight: 500;
 }
 
 .month-stat-value {
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 600;
 }
 
 .month-stat-value.primary {
-  color: #5B8FF9;
+  color: #4A90E2;
 }
 
 .month-stat-value.success {
-  color: #5AD8A6;
+  color: #26C281;
 }
 
 .month-stat-divider {
   width: 1px;
-  height: 40px;
-  background: #ebedf0;
+  height: 50px;
+  background: #E9ECEF;
 }
 
 /* 用户菜单样式 */
@@ -838,22 +883,23 @@ const currentDate = computed(() => {
   align-items: center;
   gap: 12px;
   padding: 20px;
-  background: #5B8FF9;
+  background: linear-gradient(135deg, #4A90E2 0%, #3A7BC8 100%);
   margin: -10px -16px 10px;
-  border-radius: 16px 16px 0 0;
+  border-radius: 20px 20px 0 0;
 }
 
 .menu-avatar {
   width: 50px;
   height: 50px;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.25);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 22px;
-  font-weight: bold;
+  font-weight: 600;
   color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .menu-info {
@@ -864,6 +910,7 @@ const currentDate = computed(() => {
   font-size: 18px;
   font-weight: 600;
   margin-bottom: 4px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .menu-role {
