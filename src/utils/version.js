@@ -4,7 +4,7 @@
  */
 
 // 当前版本号（每次更新时修改此版本号）
-export const APP_VERSION = '1.0.6'
+export const APP_VERSION = '1.0.8'
 
 // 版本存储键
 const VERSION_KEY = 'app_version'

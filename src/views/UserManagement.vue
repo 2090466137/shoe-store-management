@@ -125,6 +125,9 @@
       position="bottom"
       round
       :style="{ height: '70%' }"
+      teleport="body"
+      :z-index="3000"
+      safe-area-inset-bottom
     >
       <div class="popup-content">
         <div class="popup-header">
@@ -225,6 +228,9 @@
       position="bottom"
       round
       :style="{ height: '60%' }"
+      teleport="body"
+      :z-index="3000"
+      safe-area-inset-bottom
     >
       <div class="popup-content">
         <div class="popup-header">

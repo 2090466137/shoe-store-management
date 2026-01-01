@@ -143,6 +143,9 @@
       v-model:show="showCategoryPicker" 
       position="bottom" 
       round
+      teleport="body"
+      :z-index="3000"
+      safe-area-inset-bottom
     >
       <div class="popup-header">
         <span></span>

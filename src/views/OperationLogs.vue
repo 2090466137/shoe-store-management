@@ -118,6 +118,9 @@
       position="bottom"
       :style="{ height: '60%' }"
       round
+      teleport="body"
+      :z-index="3000"
+      safe-area-inset-bottom
     >
       <div class="filter-popup">
         <div class="popup-header">
@@ -207,6 +210,9 @@
       position="bottom"
       :style="{ height: '70%' }"
       round
+      teleport="body"
+      :z-index="3000"
+      safe-area-inset-bottom
     >
       <div class="detail-popup" v-if="selectedLog">
         <div class="popup-header">

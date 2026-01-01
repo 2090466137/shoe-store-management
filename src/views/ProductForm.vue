@@ -176,7 +176,10 @@
       v-model:show="showCategoryPicker" 
       position="bottom" 
       round
-      :style="{ height: '60%' }"
+      :style="{ height: '65%', maxHeight: '500px' }"
+      teleport="body"
+      :z-index="3000"
+      safe-area-inset-bottom
     >
       <div class="category-popup-content">
         <div class="popup-header">
@@ -220,6 +223,9 @@
       v-model:show="showSizePicker" 
       position="bottom" 
       round
+      teleport="body"
+      :z-index="3000"
+      safe-area-inset-bottom
     >
       <van-picker
         :columns="sizes"
@@ -598,11 +604,15 @@ const onSubmit = () => {
   display: flex;
   flex-direction: column;
   background: #ffffff;
+  position: relative;
+  z-index: 1;
 }
 
 .popup-body {
   flex: 1;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 20px;
 }
 
 /* 弹窗头部 */
@@ -614,16 +624,21 @@ const onSubmit = () => {
   border-bottom: 1px solid #f0f0f0;
   background: #ffffff;
   flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .popup-title {
   font-size: 16px;
   font-weight: 600;
   color: #323233;
+  flex: 1;
+  text-align: center;
 }
 
 .popup-close {
-  font-size: 20px;
+  font-size: 22px;
   color: #969799;
   cursor: pointer;
   padding: 8px;
@@ -632,12 +647,23 @@ const onSubmit = () => {
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: all 0.2s ease;
 }
 
 .popup-close:active {
   opacity: 0.7;
   background: rgba(0, 0, 0, 0.05);
   border-radius: 50%;
+  transform: scale(0.95);
+}
+
+/* 确保弹窗在最上层 */
+:deep(.van-popup) {
+  z-index: 3000 !important;
+}
+
+:deep(.van-overlay) {
+  z-index: 2999 !important;
 }
 </style>
 

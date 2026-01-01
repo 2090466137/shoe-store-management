@@ -131,7 +131,7 @@
     </van-popup>
 
     <!-- 会员选择器 -->
-    <van-popup v-model:show="showMemberPicker" position="bottom" :style="{ height: '50%' }">
+    <van-popup v-model:show="showMemberPicker" position="bottom" :style="{ height: '50%' }" teleport="body" :z-index="3000" safe-area-inset-bottom>
       <div class="picker-popup">
         <div class="picker-header">
           <span class="picker-title">选择会员</span>
@@ -164,6 +164,9 @@
       v-model:show="showDatePicker" 
       position="bottom"
       round
+      teleport="body"
+      :z-index="3000"
+      safe-area-inset-bottom
     >
       <div class="popup-header">
         <span></span>

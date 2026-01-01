@@ -131,6 +131,9 @@
       v-model:show="showReturnForm" 
       position="bottom" 
       :style="{ height: '90%' }"
+      teleport="body"
+      :z-index="3000"
+      safe-area-inset-bottom
     >
       <div class="return-form">
         <div class="form-header">
@@ -258,7 +261,7 @@
     </van-popup>
 
     <!-- 订单选择器 -->
-    <van-popup v-model:show="showSalesPicker" position="bottom" :style="{ height: '60%' }">
+    <van-popup v-model:show="showSalesPicker" position="bottom" :style="{ height: '60%' }" teleport="body" :z-index="3000" safe-area-inset-bottom>
       <div class="picker-popup">
         <div class="picker-header">
           <span class="picker-title">选择订单</span>
@@ -284,7 +287,7 @@
     </van-popup>
 
     <!-- 商品选择器 -->
-    <van-popup v-model:show="showProductPicker" position="bottom" :style="{ height: '60%' }">
+    <van-popup v-model:show="showProductPicker" position="bottom" :style="{ height: '60%' }" teleport="body" :z-index="3000" safe-area-inset-bottom>
       <div class="picker-popup">
         <div class="picker-header">
           <span class="picker-title">选择新商品</span>

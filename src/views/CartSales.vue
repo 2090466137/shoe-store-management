@@ -224,6 +224,9 @@
       position="bottom" 
       :style="{ height: '70%' }"
       round
+      teleport="body"
+      :z-index="3000"
+      safe-area-inset-bottom
     >
       <div class="product-popup">
         <div class="popup-header">
@@ -265,6 +268,9 @@
       v-model:show="showSalespersonPicker" 
       position="bottom" 
       round
+      teleport="body"
+      :z-index="3000"
+      safe-area-inset-bottom
     >
       <div class="popup-header">
         <span></span>

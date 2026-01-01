@@ -215,6 +215,9 @@
       v-model:show="showHistory" 
       position="bottom" 
       :style="{ height: '80%' }"
+      teleport="body"
+      :z-index="3000"
+      safe-area-inset-bottom
     >
       <div class="history-popup">
         <div class="history-header">

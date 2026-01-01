@@ -157,6 +157,9 @@
       position="bottom"
       :style="{ height: '50%' }"
       round
+      teleport="body"
+      :z-index="3000"
+      safe-area-inset-bottom
     >
       <div class="filter-popup">
         <div class="popup-header">
