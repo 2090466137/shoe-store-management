@@ -260,24 +260,28 @@ body {
   background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
   border: none;
   box-shadow: 0 2px 8px rgba(74, 144, 226, 0.25);
+  color: #ffffff !important;
 }
 
 .van-button--success {
   background: linear-gradient(135deg, var(--color-success) 0%, var(--color-success-dark) 100%);
   border: none;
   box-shadow: 0 2px 8px rgba(38, 194, 129, 0.25);
+  color: #ffffff !important;
 }
 
 .van-button--warning {
   background: linear-gradient(135deg, var(--color-secondary) 0%, var(--color-secondary-dark) 100%);
   border: none;
   box-shadow: 0 2px 8px rgba(255, 159, 67, 0.25);
+  color: #ffffff !important;
 }
 
 .van-button--danger {
   background: linear-gradient(135deg, var(--color-danger) 0%, var(--color-danger-dark) 100%);
   border: none;
   box-shadow: 0 2px 8px rgba(238, 90, 82, 0.25);
+  color: #ffffff !important;
 }
 
 .van-button--default {
@@ -446,6 +450,22 @@ body {
 }
 
 /* 复选框和单选框 */
+.van-checkbox__icon,
+.van-radio__icon {
+  flex-shrink: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: visible !important;
+}
+
+.van-checkbox__icon .van-icon,
+.van-radio__icon .van-icon {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
 .van-checkbox__icon--checked,
 .van-radio__icon--checked {
   background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);

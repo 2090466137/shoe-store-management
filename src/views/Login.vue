@@ -37,7 +37,7 @@
         </van-cell-group>
 
         <div class="remember-section">
-          <van-checkbox v-model="rememberMe" icon-size="18px">记住密码</van-checkbox>
+          <van-checkbox v-model="rememberMe" icon-size="20px">记住密码</van-checkbox>
         </div>
 
         <div class="login-btn-wrapper">
@@ -315,8 +315,15 @@ onMounted(async () => {
 }
 
 .remember-section :deep(.van-checkbox__icon) {
-  font-size: 18px;
+  font-size: 20px;
   line-height: 1;
+  flex-shrink: 0;
+}
+
+.remember-section :deep(.van-checkbox__icon .van-icon) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .remember-section :deep(.van-checkbox__label) {

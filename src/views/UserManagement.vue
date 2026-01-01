@@ -165,14 +165,14 @@
                 <van-radio-group v-model="form.role" direction="horizontal">
                   <van-radio 
                     name="manager" 
-                    icon-size="18px"
+                    icon-size="20px"
                     :disabled="editingUser?.role === 'admin'"
                   >
                     店长
                   </van-radio>
                   <van-radio 
                     name="staff"
-                    icon-size="18px"
+                    icon-size="20px"
                     :disabled="editingUser?.role === 'admin'"
                   >
                     店员
@@ -198,7 +198,6 @@
               round 
               block 
               type="danger" 
-              plain
               @click="handleDelete"
               style="margin-top: 10px"
             >
@@ -213,7 +212,6 @@
           <van-button 
             size="small" 
             type="warning" 
-            plain 
             block
             @click="handleResetPassword"
           >
@@ -839,6 +837,18 @@ onMounted(() => {
 .user-form :deep(.van-radio) {
   display: flex;
   align-items: center;
+}
+
+.user-form :deep(.van-radio__icon) {
+  font-size: 20px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.user-form :deep(.van-radio__icon .van-icon) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .user-form :deep(.van-radio__label) {

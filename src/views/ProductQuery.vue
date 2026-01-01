@@ -63,7 +63,6 @@
       <van-button
         size="small"
         type="danger"
-        plain
         @click="clearFilters"
       >
         清除全部
@@ -177,7 +176,7 @@
                 @click="tempFilterCategory = ''"
               >
                 <template #right-icon>
-                  <van-radio name="" />
+                  <van-radio name="" icon-size="20px" />
                 </template>
               </van-cell>
               <van-cell
@@ -188,7 +187,7 @@
                 @click="tempFilterCategory = category"
               >
                 <template #right-icon>
-                  <van-radio :name="category" />
+                  <van-radio :name="category" icon-size="20px" />
                 </template>
               </van-cell>
             </van-radio-group>
@@ -203,7 +202,7 @@
                 @click="tempFilterStockStatus = ''"
               >
                 <template #right-icon>
-                  <van-radio name="" />
+                  <van-radio name="" icon-size="20px" />
                 </template>
               </van-cell>
               <van-cell
@@ -212,7 +211,7 @@
                 @click="tempFilterStockStatus = 'inStock'"
               >
                 <template #right-icon>
-                  <van-radio name="inStock" />
+                  <van-radio name="inStock" icon-size="20px" />
                 </template>
               </van-cell>
               <van-cell
@@ -221,7 +220,7 @@
                 @click="tempFilterStockStatus = 'outOfStock'"
               >
                 <template #right-icon>
-                  <van-radio name="outOfStock" />
+                  <van-radio name="outOfStock" icon-size="20px" />
                 </template>
               </van-cell>
               <van-cell
@@ -230,7 +229,7 @@
                 @click="tempFilterStockStatus = 'lowStock'"
               >
                 <template #right-icon>
-                  <van-radio name="lowStock" />
+                  <van-radio name="lowStock" icon-size="20px" />
                 </template>
               </van-cell>
             </van-radio-group>

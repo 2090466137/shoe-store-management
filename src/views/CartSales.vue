@@ -144,10 +144,10 @@
       <div class="card">
         <div class="section-title">💳 支付方式</div>
         <van-radio-group v-model="paymentMethod" direction="horizontal" class="payment-group">
-          <van-radio name="现金" icon-size="18px">现金</van-radio>
-          <van-radio name="微信" icon-size="18px">微信</van-radio>
-          <van-radio name="支付宝" icon-size="18px">支付宝</van-radio>
-          <van-radio name="会员余额" icon-size="18px" :disabled="!selectedMember || selectedMember.balance < actualAmount">
+          <van-radio name="现金" icon-size="20px">现金</van-radio>
+          <van-radio name="微信" icon-size="20px">微信</van-radio>
+          <van-radio name="支付宝" icon-size="20px">支付宝</van-radio>
+          <van-radio name="会员余额" icon-size="20px" :disabled="!selectedMember || selectedMember.balance < actualAmount">
             会员余额
           </van-radio>
         </van-radio-group>
@@ -810,8 +810,15 @@ onMounted(() => {
 }
 
 .payment-group :deep(.van-radio__icon) {
-  font-size: 18px;
+  font-size: 20px;
   line-height: 1;
+  flex-shrink: 0;
+}
+
+.payment-group :deep(.van-radio__icon .van-icon) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .payment-group :deep(.van-radio__label) {

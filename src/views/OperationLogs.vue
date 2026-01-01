@@ -137,7 +137,7 @@
                 @click="tempFilterType = ''"
               >
                 <template #right-icon>
-                  <van-radio name="" />
+                  <van-radio name="" icon-size="20px" />
                 </template>
               </van-cell>
               <van-cell
@@ -148,7 +148,7 @@
                 @click="tempFilterType = type"
               >
                 <template #right-icon>
-                  <van-radio :name="type" />
+                  <van-radio :name="type" icon-size="20px" />
                 </template>
               </van-cell>
             </van-radio-group>
