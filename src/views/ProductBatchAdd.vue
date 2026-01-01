@@ -147,13 +147,9 @@
       :z-index="3000"
       safe-area-inset-bottom
     >
-      <div class="popup-header">
-        <span></span>
-        <span class="popup-title">选择分类</span>
-        <van-icon name="cross" class="popup-close" @click="showCategoryPicker = false" />
-      </div>
       <van-picker
         :columns="categories"
+        title="选择分类"
         @confirm="onCategoryConfirm"
         @cancel="showCategoryPicker = false"
       />

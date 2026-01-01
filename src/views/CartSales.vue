@@ -272,13 +272,9 @@
       :z-index="3000"
       safe-area-inset-bottom
     >
-      <div class="popup-header">
-        <span></span>
-        <span class="popup-title">选择销售员</span>
-        <van-icon name="cross" class="popup-close" @click="showSalespersonPicker = false" />
-      </div>
       <van-picker
         :columns="salespersonColumns"
+        title="选择销售员"
         @confirm="onSalespersonConfirm"
         @cancel="showSalespersonPicker = false"
       />

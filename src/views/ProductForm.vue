@@ -176,47 +176,40 @@
       v-model:show="showCategoryPicker" 
       position="bottom" 
       round
-      :style="{ height: '65%', maxHeight: '500px' }"
       teleport="body"
       :z-index="3000"
       safe-area-inset-bottom
     >
-      <div class="category-popup-content">
-        <div class="popup-header">
-          <span></span>
-          <span class="popup-title">选择或输入分类</span>
-          <van-icon name="cross" class="popup-close" @click="showCategoryPicker = false" />
-        </div>
-        
-        <div class="popup-body">
-          <!-- 自定义输入 -->
-          <van-field
-            v-model="customCategory"
-            placeholder="输入自定义分类"
-            clearable
-            style="margin: 12px 16px;"
-          />
-          
-          <van-button 
-            type="primary" 
-            block 
-            size="small"
-            style="margin: 0 16px 16px 16px;"
-            @click="onCustomCategoryConfirm"
-          >
-            使用自定义分类
-          </van-button>
-          
-          <van-divider style="margin: 12px 0;">或选择常用分类</van-divider>
-        
-          <van-picker
-            :columns="categories"
-            @confirm="onCategoryConfirm"
-            @cancel="showCategoryPicker = false"
-          />
-        </div>
-      </div>
+      <van-picker
+        :columns="categories"
+        title="选择分类"
+        @confirm="onCategoryConfirm"
+        @cancel="showCategoryPicker = false"
+      >
+        <template #toolbar>
+          <div class="custom-picker-toolbar">
+            <van-button size="small" @click="showCategoryPicker = false">取消</van-button>
+            <div class="picker-title">选择分类</div>
+            <van-button size="small" type="primary" @click="showCustomInput = true">自定义</van-button>
+          </div>
+        </template>
+      </van-picker>
     </van-popup>
+
+    <!-- 自定义分类输入 -->
+    <van-dialog
+      v-model:show="showCustomInput"
+      title="自定义分类"
+      show-cancel-button
+      @confirm="onCustomCategoryConfirm"
+    >
+      <van-field
+        v-model="customCategory"
+        placeholder="请输入分类名称"
+        clearable
+        style="margin: 16px;"
+      />
+    </van-dialog>
 
     <!-- 尺码选择器 -->
     <van-popup 
@@ -250,6 +243,7 @@ const productStore = useProductStore()
 const isEdit = ref(false)
 const showCategoryPicker = ref(false)
 const showSizePicker = ref(false)
+const showCustomInput = ref(false)
 const fileList = ref([])
 const customCategory = ref('')
 
@@ -371,18 +365,25 @@ const beforeDelete = () => {
 const onCustomCategoryConfirm = () => {
   if (customCategory.value && customCategory.value.trim()) {
     form.value.category = customCategory.value.trim()
+    showCustomInput.value = false
     showCategoryPicker.value = false
-    customCategory.value = ''
     showToast('已使用自定义分类')
+    customCategory.value = ''
   } else {
     showToast('请输入分类名称')
+    return false
   }
 }
 
 const onCategoryConfirm = ({ selectedOptions }) => {
-  form.value.category = selectedOptions[0].text || selectedOptions[0]
+  if (selectedOptions && selectedOptions.length > 0) {
+    form.value.category = selectedOptions[0].text || selectedOptions[0].value
+    showToast({
+      type: 'success',
+      message: `已选择分类：${form.value.category}`
+    })
+  }
   showCategoryPicker.value = false
-  customCategory.value = ''
 }
 
 const onSizeConfirm = ({ selectedOptions }) => {
@@ -598,63 +599,22 @@ const onSubmit = () => {
   background-color: #f7f8fa;
 }
 
-/* 分类弹窗内容 */
-.category-popup-content {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  background: #ffffff;
-  position: relative;
-  z-index: 1;
-}
-
-.popup-body {
-  flex: 1;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  padding-bottom: 20px;
-}
-
-/* 弹窗头部 */
-.popup-header {
+/* 自定义 Picker 工具栏 */
+.custom-picker-toolbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px;
-  border-bottom: 1px solid #f0f0f0;
+  padding: 12px 16px;
   background: #ffffff;
-  flex-shrink: 0;
-  position: sticky;
-  top: 0;
-  z-index: 10;
+  border-bottom: 1px solid #f0f0f0;
 }
 
-.popup-title {
+.picker-title {
   font-size: 16px;
   font-weight: 600;
   color: #323233;
   flex: 1;
   text-align: center;
-}
-
-.popup-close {
-  font-size: 22px;
-  color: #969799;
-  cursor: pointer;
-  padding: 8px;
-  min-width: 44px;
-  min-height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-}
-
-.popup-close:active {
-  opacity: 0.7;
-  background: rgba(0, 0, 0, 0.05);
-  border-radius: 50%;
-  transform: scale(0.95);
 }
 
 /* 确保弹窗在最上层 */
@@ -664,6 +624,24 @@ const onSubmit = () => {
 
 :deep(.van-overlay) {
   z-index: 2999 !important;
+}
+
+/* 确保 Picker 正常显示 */
+:deep(.van-picker) {
+  background: #ffffff;
+}
+
+:deep(.van-picker__toolbar) {
+  padding: 0;
+}
+
+:deep(.van-picker__columns) {
+  height: 260px;
+}
+
+/* Dialog 样式优化 */
+:deep(.van-dialog) {
+  z-index: 3001 !important;
 }
 </style>
 

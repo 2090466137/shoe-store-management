@@ -110,13 +110,9 @@
       :z-index="3000"
       safe-area-inset-bottom
     >
-      <div class="popup-header">
-        <span></span>
-        <span class="popup-title">选择支付方式</span>
-        <van-icon name="cross" class="popup-close" @click="showPaymentPicker = false" />
-      </div>
       <van-picker
         :columns="paymentMethods"
+        title="选择支付方式"
         @confirm="onPaymentConfirm"
         @cancel="showPaymentPicker = false"
       />
