@@ -270,7 +270,7 @@
       round
       teleport="body"
       :z-index="3000"
-      safe-area-inset-bottom
+      :style="{ paddingBottom: 'env(safe-area-inset-bottom)' }"
     >
       <van-picker
         :columns="salespersonColumns"
