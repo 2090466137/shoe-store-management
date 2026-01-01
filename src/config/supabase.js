@@ -1,30 +1,43 @@
 import { createClient } from '@supabase/supabase-js'
 
 // Supabase配置信息
-// 支持环境变量配置，方便在不同环境使用不同配置
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://xmuyxqfukqqvyoyyeypb.supabase.co'
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhtdXl4cWZ1a3FxdnlveXlleXBiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwODA5ODYsImV4cCI6MjA4MjY1Njk4Nn0.PKSLwORB81xqhn-8-ANDFrjwvNoU8wZesXShcvEHMmI'
+// ⚠️ 重要：请使用环境变量配置，不要在代码中硬编码密钥
+// 1. 复制 .env.example 为 .env.local
+// 2. 填入你的 Supabase URL 和 Anon Key
+// 3. .env.local 文件已在 .gitignore 中，不会被提交到 Git
+
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || ''
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || ''
 
 // 验证配置
 const validateConfig = () => {
   const warnings = []
   
-  // 检查 Anon Key 格式
-  if (supabaseAnonKey === 'PLEASE_SET_YOUR_ANON_KEY_HERE') {
+  // 检查 URL
+  if (!supabaseUrl) {
+    warnings.push('⚠️ Supabase URL 未设置！')
+    warnings.push('请按照以下步骤配置：')
+    warnings.push('1. 复制 env.example 为 .env.local')
+    warnings.push('2. 访问 https://app.supabase.com/')
+    warnings.push('3. 选择你的项目')
+    warnings.push('4. Settings → API → 复制 Project URL')
+    warnings.push('5. 粘贴到 .env.local 的 VITE_SUPABASE_URL')
+  }
+  
+  // 检查 Anon Key
+  if (!supabaseAnonKey) {
     warnings.push('⚠️ Supabase Anon Key 未设置！')
-    warnings.push('请按照以下步骤获取正确的密钥：')
+    warnings.push('请按照以下步骤配置：')
     warnings.push('1. 访问 https://app.supabase.com/')
-    warnings.push('2. 选择项目 xmuyxqfukqqvyoyyeypb')
+    warnings.push('2. 选择你的项目')
     warnings.push('3. Settings → API → 复制 anon public key')
-    warnings.push('4. 更新 src/config/supabase.js 或创建 .env 文件')
-    warnings.push('详细步骤请查看：获取Supabase密钥指南.md')
+    warnings.push('4. 粘贴到 .env.local 的 VITE_SUPABASE_ANON_KEY')
   } else if (!supabaseAnonKey.startsWith('eyJ')) {
     warnings.push('⚠️ Supabase Anon Key 格式错误！')
     warnings.push('正确的 Anon Key 应该：')
     warnings.push('- 以 eyJ 开头')
     warnings.push('- 包含两个点号 .')
     warnings.push('- 长度约 200-300 字符')
-    warnings.push('当前的 key: ' + supabaseAnonKey)
   }
   
   if (warnings.length > 0) {

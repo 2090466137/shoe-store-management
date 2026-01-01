@@ -125,7 +125,11 @@ const memberStore = useMemberStore()
 const userStore = useUserStore()
 
 // 权限检查
-const canViewBalance = computed(() => userStore.hasPermission(PERMISSIONS.STATS_PROFIT))
+// 店员有充值权限时也能看到余额（充值时需要知道余额）
+const canViewBalance = computed(() => 
+  userStore.hasPermission(PERMISSIONS.STATS_PROFIT) || 
+  userStore.hasPermission(PERMISSIONS.MEMBER_RECHARGE)
+)
 const canRecharge = computed(() => userStore.hasPermission(PERMISSIONS.MEMBER_RECHARGE))
 const canDeleteMember = computed(() => userStore.hasPermission(PERMISSIONS.MEMBER_DELETE))
 const canEditMember = computed(() => userStore.hasPermission(PERMISSIONS.MEMBER_EDIT))
