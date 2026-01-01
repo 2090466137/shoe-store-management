@@ -478,7 +478,7 @@ onMounted(async () => {
   flex-shrink: 0;
   border-radius: 8px;
   overflow: hidden;
-  background: #f7f8fa;
+  background: #f0f2f5;
 }
 
 .product-image img {
@@ -494,7 +494,7 @@ onMounted(async () => {
   align-items: center;
   justify-content: center;
   color: #c8c9cc;
-  background: #f7f8fa;
+  background: #f0f2f5;
 }
 
 .stock-badge {

@@ -565,7 +565,7 @@ onMounted(() => {
   flex-shrink: 0;
   border-radius: 8px;
   overflow: hidden;
-  background: #f7f8fa;
+  background: #f0f2f5;
 }
 
 .item-image img {
@@ -637,7 +637,7 @@ onMounted(() => {
   font-weight: 600;
   padding: 8px 12px;
   border-radius: 8px;
-  background: #f7f8fa;
+  background: #f0f2f5;
 }
 
 .difference-badge .plus {
@@ -761,7 +761,8 @@ onMounted(() => {
 }
 
 .history-item:active {
-  background: #f7f8fa;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .history-info {

@@ -266,14 +266,21 @@ onMounted(() => {
 
 .member-item {
   padding: 16px;
-  background: #f7f8fa;
-  border-radius: 8px;
+  background: white;
+  border-radius: 12px;
   margin-bottom: 12px;
   cursor: pointer;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
 }
 
 .member-item:last-child {
   margin-bottom: 0;
+}
+
+.member-item:active {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 }
 
 .member-header {

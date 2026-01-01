@@ -275,7 +275,7 @@ const deleteProduct = async (product) => {
   flex-shrink: 0;
   border-radius: 8px;
   overflow: hidden;
-  background: #f7f8fa;
+  background: #f0f2f5;
 }
 
 .product-image img {

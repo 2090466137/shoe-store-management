@@ -598,9 +598,11 @@ onMounted(async () => {
 
 .stats-item {
   text-align: center;
-  padding: 12px;
-  background: #f7f8fa;
-  border-radius: 8px;
+  padding: 16px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e5e7eb;
 }
 
 .stats-label {
@@ -641,7 +643,8 @@ onMounted(async () => {
 }
 
 .return-item:active {
-  background: #f7f8fa;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .return-header {
@@ -714,9 +717,10 @@ onMounted(async () => {
   display: flex;
   gap: 12px;
   align-items: center;
-  padding: 8px;
-  background: #f7f8fa;
-  border-radius: 8px;
+  padding: 12px;
+  background: #f0f9ff;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
 }
 
 .product-image {

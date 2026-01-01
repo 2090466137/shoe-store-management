@@ -640,16 +640,19 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px;
-  background: #f7f8fa;
-  border-radius: 8px;
-  margin-bottom: 8px;
+  padding: 16px;
+  background: white;
+  border-radius: 12px;
+  margin-bottom: 12px;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e5e7eb;
 }
 
 .search-item:active {
-  background: #e8e8e8;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .search-item-name {
@@ -693,10 +696,12 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px;
-  background: #f7f8fa;
-  border-radius: 8px;
-  margin-bottom: 8px;
+  padding: 16px;
+  background: white;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e5e7eb;
 }
 
 .cart-item:last-child {
@@ -879,16 +884,19 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px;
-  background: #f7f8fa;
-  border-radius: 8px;
-  margin-bottom: 8px;
+  padding: 16px;
+  background: white;
+  border-radius: 12px;
+  margin-bottom: 12px;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e5e7eb;
 }
 
 .product-item:active {
-  background: #e8e8e8;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .product-item.out-of-stock {
@@ -925,10 +933,11 @@ onMounted(() => {
 }
 
 .payment-summary {
-  background: #f7f8fa;
+  background: #f0f9ff;
   padding: 16px;
-  border-radius: 8px;
+  border-radius: 12px;
   margin-bottom: 16px;
+  border: 1px solid #e5e7eb;
 }
 
 .payment-row {

@@ -11,6 +11,8 @@ import 'vant/lib/index.css'
 import './styles/global.css'
 // 引入移动端优化样式
 import './styles/mobile-optimize.css'
+// 引入页面样式修复
+import './styles/page-fix.css'
 
 const app = createApp(App)
 const pinia = createPinia()

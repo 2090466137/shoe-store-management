@@ -603,8 +603,8 @@ onMounted(async () => {
   color: #646566;
   margin-top: 4px;
   padding: 8px;
-  background: #f7f8fa;
-  border-radius: 4px;
+  background: #f0f2f5;
+  border-radius: 8px;
 }
 
 .filter-popup,

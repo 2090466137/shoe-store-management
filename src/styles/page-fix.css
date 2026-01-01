@@ -1,0 +1,284 @@
+/**
+ * 全局页面样式修复
+ * 统一所有页面的背景色、卡片样式、间距等
+ */
+
+/* ========== 页面背景统一 ========== */
+/* 所有页面使用浅色背景 */
+.products-page,
+.sales-page,
+.members-page,
+.cart-sales-page,
+.daily-report-page,
+.product-query-page,
+.purchase-page,
+.returns-page,
+.inventory-page,
+.member-recharge-page,
+.statistics-page,
+.staff-stats-page,
+.sales-form-page,
+.operation-logs-page,
+.member-history-page,
+.data-management-page,
+.data-visualization-page,
+.product-form-page,
+.user-management-page {
+  background-color: #f5f7fa !important; /* 更浅的灰色，更清爽 */
+}
+
+/* ========== 卡片样式统一 ========== */
+/* 所有卡片使用白色背景 + 阴影 */
+.product-card,
+.sale-item,
+.member-item,
+.search-item,
+.summary-item,
+.staff-card,
+.log-item,
+.history-item,
+.purchase-item,
+.return-item,
+.inventory-item {
+  background: white !important;
+  border-radius: 12px !important;
+  padding: 16px !important;
+  margin-bottom: 12px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+  transition: all 0.3s ease !important;
+}
+
+/* 卡片点击效果 */
+.product-card:active,
+.sale-item:active,
+.member-item:active,
+.search-item:active,
+.staff-card:active {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* ========== 图片占位符统一 ========== */
+/* 所有图片占位符使用浅灰色 */
+.product-image,
+.member-avatar,
+.product-placeholder {
+  background: #f0f2f5 !important; /* 更浅的灰色 */
+}
+
+/* ========== 分隔线统一 ========== */
+.today-stat-divider,
+.divider,
+.separator {
+  background: #e5e7eb !important;
+}
+
+/* ========== 搜索框容器统一 ========== */
+.search-wrapper {
+  background: white !important;
+  padding: 8px 0 !important;
+}
+
+/* ========== 标签页容器统一 ========== */
+.filter-tabs {
+  background: white !important;
+  margin-bottom: 12px !important;
+}
+
+/* ========== 内容容器统一 ========== */
+.content-wrapper {
+  padding: 12px !important;
+}
+
+/* ========== 统计卡片优化 ========== */
+.summary-item,
+.stat-card,
+.total-stat-card {
+  background: white !important;
+  border-radius: 12px !important;
+  padding: 16px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* ========== 表单容器优化 ========== */
+.form-container,
+.user-form {
+  background: white !important;
+  border-radius: 12px !important;
+  margin: 12px !important;
+  padding: 16px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* ========== 空状态优化 ========== */
+.empty-state {
+  background: white !important;
+  border-radius: 12px !important;
+  padding: 40px 20px !important;
+  text-align: center !important;
+  margin: 12px !important;
+}
+
+/* ========== 列表项间距优化 ========== */
+.product-list,
+.sale-list,
+.member-list,
+.log-list,
+.history-list {
+  padding: 0 12px !important;
+}
+
+/* ========== 底部操作栏优化 ========== */
+.bottom-action-bar,
+.cart-footer {
+  background: white !important;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* ========== 警告提示优化 ========== */
+.warning-section,
+.alert-box {
+  background: #fff7e6 !important; /* 浅黄色 */
+  border-radius: 12px !important;
+  padding: 16px !important;
+  margin: 12px !important;
+  border-left: 4px solid #ff9800 !important;
+}
+
+/* ========== 成功提示优化 ========== */
+.success-section,
+.success-box {
+  background: #f0f9ff !important; /* 浅蓝色 */
+  border-radius: 12px !important;
+  padding: 16px !important;
+  margin: 12px !important;
+  border-left: 4px solid #1989fa !important;
+}
+
+/* ========== 错误提示优化 ========== */
+.error-section,
+.error-box {
+  background: #fff1f0 !important; /* 浅红色 */
+  border-radius: 12px !important;
+  padding: 16px !important;
+  margin: 12px !important;
+  border-left: 4px solid #ff4d4f !important;
+}
+
+/* ========== 信息卡片优化 ========== */
+.info-card {
+  background: white !important;
+  border-radius: 12px !important;
+  padding: 16px !important;
+  margin: 12px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* ========== 渐变背景优化（保留必要的渐变） ========== */
+/* 会员充值卡片 */
+.balance-card,
+.recharge-info-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  border-radius: 12px !important;
+  color: white !important;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
+}
+
+/* 盘点操作卡片 */
+.inventory-action-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  border-radius: 12px !important;
+  color: white !important;
+}
+
+/* 提交按钮渐变 */
+.submit-button {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  border-radius: 12px !important;
+  color: white !important;
+}
+
+/* ========== 响应式优化 ========== */
+@media (max-width: 375px) {
+  .product-card,
+  .sale-item,
+  .member-item {
+    padding: 12px !important;
+  }
+  
+  .content-wrapper {
+    padding: 8px !important;
+  }
+}
+
+/* ========== 移除不必要的灰色背景 ========== */
+/* 强制移除所有 #f7f8fa 背景 */
+*[style*="background: #f7f8fa"],
+*[style*="background-color: #f7f8fa"] {
+  background: white !important;
+}
+
+/* ========== 卡片边框优化 ========== */
+/* 为白色卡片添加细边框，增强层次感 */
+.product-card,
+.sale-item,
+.member-item,
+.info-card,
+.stat-card {
+  border: 1px solid #e5e7eb !important;
+}
+
+/* ========== 间距统一 ========== */
+/* 统一所有页面的内边距 */
+.page-container {
+  padding-bottom: 60px !important; /* 为底部导航留出空间 */
+}
+
+/* ========== 阴影层次优化 ========== */
+/* 浮起效果 */
+.card-elevated {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* 深层阴影 */
+.card-deep {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12) !important;
+}
+
+/* ========== 交互反馈优化 ========== */
+/* 所有可点击元素添加光标指示 */
+.product-card,
+.sale-item,
+.member-item,
+.search-item,
+.staff-card,
+.log-item,
+.history-item {
+  cursor: pointer !important;
+}
+
+/* 禁用状态 */
+.disabled {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+}
+
+/* ========== 文字颜色优化 ========== */
+/* 确保所有文字在白色背景上清晰可读 */
+.product-card,
+.sale-item,
+.member-item,
+.info-card {
+  color: #323233 !important;
+}
+
+/* 次要文字 */
+.secondary-text {
+  color: #646566 !important;
+}
+
+/* 提示文字 */
+.hint-text {
+  color: #969799 !important;
+}
+

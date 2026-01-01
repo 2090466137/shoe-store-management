@@ -161,9 +161,11 @@ const activeTab = ref(0)
   display: flex;
   align-items: center;
   padding: 16px;
-  background: #f7f8fa;
-  border-radius: 8px;
+  background: white;
+  border-radius: 12px;
   margin-bottom: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e5e7eb;
 }
 
 .total-stat-item:last-child {
@@ -236,10 +238,12 @@ const activeTab = ref(0)
 .rank-item {
   display: flex;
   align-items: center;
-  padding: 12px;
-  background: #f7f8fa;
-  border-radius: 8px;
-  margin-bottom: 8px;
+  padding: 16px;
+  background: white;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e5e7eb;
 }
 
 .rank-item:last-child {
@@ -307,8 +311,10 @@ const activeTab = ref(0)
 .inventory-item {
   text-align: center;
   padding: 16px;
-  background: #f7f8fa;
-  border-radius: 8px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e5e7eb;
 }
 
 .inventory-item.warning {

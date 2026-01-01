@@ -227,10 +227,12 @@ const onSubmit = async () => {
 }
 
 .product-detail {
-  padding: 12px 16px;
-  background: #f7f8fa;
-  margin: 8px 16px;
-  border-radius: 8px;
+  padding: 16px;
+  background: white;
+  margin: 12px 16px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e5e7eb;
 }
 
 .detail-row {
