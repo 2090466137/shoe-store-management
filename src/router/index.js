@@ -43,6 +43,12 @@ const routes = [
     meta: { title: '编辑商品', permission: PERMISSIONS.PRODUCT_EDIT }
   },
   {
+    path: '/product/batch-add',
+    name: 'ProductBatchAdd',
+    component: () => import('@/views/ProductBatchAdd.vue'),
+    meta: { title: '批量添加商品', permission: PERMISSIONS.PRODUCT_ADD }
+  },
+  {
     path: '/purchase',
     name: 'Purchase',
     component: () => import('@/views/Purchase.vue'),

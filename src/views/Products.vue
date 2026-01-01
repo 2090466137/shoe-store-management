@@ -9,6 +9,13 @@
       <template #right>
         <van-icon 
           v-if="canAddProduct"
+          name="apps-o" 
+          size="20" 
+          style="margin-right: 16px"
+          @click="router.push('/product/batch-add')" 
+        />
+        <van-icon 
+          v-if="canAddProduct"
           name="plus" 
           size="20" 
           @click="router.push('/product/add')" 

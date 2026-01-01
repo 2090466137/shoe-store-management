@@ -172,8 +172,8 @@
     </div>
 
     <!-- 分类选择器 -->
-    <van-popup v-model:show="showCategoryPicker" position="bottom" round>
-      <div style="padding: 16px;">
+    <van-popup v-model:show="showCategoryPicker" position="bottom" round closeable>
+      <div style="padding: 16px; padding-top: 40px;">
         <div style="font-size: 16px; font-weight: 600; margin-bottom: 12px; text-align: center;">
           选择或输入分类
         </div>
