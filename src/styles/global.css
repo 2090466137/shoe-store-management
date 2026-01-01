@@ -396,9 +396,16 @@ body {
   font-weight: 500;
 }
 
-/* 弹出层 */
+/* 弹出层 - 添加背景色和阴影，确保在白色背景上可见 */
 .van-popup {
   border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  background: #ffffff !important;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* 弹窗遮罩层 - 增加透明度 */
+.van-overlay {
+  background-color: rgba(0, 0, 0, 0.6) !important;
 }
 
 .van-action-sheet {
@@ -449,31 +456,16 @@ body {
   background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
 }
 
-/* 复选框和单选框 - 使用更小的尺寸 */
+/* 复选框和单选框 - 完全隐藏圆形图标 */
 .van-checkbox__icon,
 .van-radio__icon {
-  width: 16px !important;
-  height: 16px !important;
-  font-size: 10px !important;
-  flex-shrink: 0 !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  overflow: visible !important;
+  display: none !important;
 }
 
-.van-checkbox__icon .van-icon,
-.van-radio__icon .van-icon {
-  font-size: 10px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-}
-
-.van-checkbox__icon--checked,
-.van-radio__icon--checked {
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
-  border-color: var(--color-primary);
+.van-checkbox__label,
+.van-radio__label {
+  margin-left: 0 !important;
+  padding-left: 0 !important;
 }
 
 /* 加载动画 */

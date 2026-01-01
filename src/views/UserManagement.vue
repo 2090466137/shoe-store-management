@@ -101,14 +101,14 @@
         
         <div class="user-actions">
           <van-button 
-            type="primary"
+            type="primary" 
             size="small"
             @click="editUser(user)"
           >
             编辑
           </van-button>
           <van-button 
-            :type="user.status === 'active' ? 'warning' : 'success'"
+            :type="user.status === 'active' ? 'warning' : 'success'" 
             size="small"
             @click="handleToggleStatus(user)"
             v-if="user.id !== '1'"

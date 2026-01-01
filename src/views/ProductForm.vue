@@ -374,14 +374,26 @@ const onCategoryConfirm = ({ selectedOptions }) => {
 }
 
 const onSizeConfirm = (value) => {
-  // value 可能是对象或字符串
-  if (typeof value === 'object' && value.selectedOptions) {
-    form.value.size = value.selectedOptions[0]?.text || value.selectedOptions[0] || value.selectedValues[0]
-  } else if (typeof value === 'object' && value.selectedValues) {
-    form.value.size = value.selectedValues[0]
+  console.log('尺码选择值:', value)
+  
+  // 处理不同格式的返回值
+  if (value && typeof value === 'object') {
+    // 如果是对象，尝试获取 selectedOptions 或 selectedValues
+    if (value.selectedOptions && value.selectedOptions.length > 0) {
+      const selectedOption = value.selectedOptions[0]
+      form.value.size = selectedOption.text || selectedOption.value || selectedOption
+    } else if (value.selectedValues && value.selectedValues.length > 0) {
+      form.value.size = value.selectedValues[0]
+    } else {
+      // 如果都没有，尝试直接使用 value
+      form.value.size = String(value)
+    }
   } else {
-    form.value.size = value
+    // 如果是字符串或数字，直接使用
+    form.value.size = String(value)
   }
+  
+  console.log('最终尺码:', form.value.size)
   showSizePicker.value = false
 }
 
