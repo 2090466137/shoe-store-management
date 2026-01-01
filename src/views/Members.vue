@@ -128,6 +128,7 @@ const userStore = useUserStore()
 const canViewBalance = computed(() => userStore.hasPermission(PERMISSIONS.STATS_PROFIT))
 const canRecharge = computed(() => userStore.hasPermission(PERMISSIONS.MEMBER_RECHARGE))
 const canDeleteMember = computed(() => userStore.hasPermission(PERMISSIONS.MEMBER_DELETE))
+const canEditMember = computed(() => userStore.hasPermission(PERMISSIONS.MEMBER_EDIT))
 
 const searchKeyword = ref('')
 const showAddDialog = ref(false)
@@ -155,25 +156,34 @@ const selectMember = (member, event) => {
     return
   }
   
-  // 如果有充值权限，显示充值选项
+  // 如果有充值权限
   if (canRecharge.value) {
-    showConfirmDialog({
-      title: '选择操作',
-      message: `会员：${member.name || member.phone}`,
-      confirmButtonText: '充值',
-      cancelButtonText: '查看详情'
-    }).then(() => {
-      // 跳转到充值页面
+    // 判断是否有编辑权限（店长）
+    if (canEditMember.value) {
+      // 店长：显示操作菜单
+      showConfirmDialog({
+        title: '选择操作',
+        message: `会员：${member.name || member.phone}\n手机号：${member.phone}\n当前余额：¥${member.balance.toFixed(2)}`,
+        confirmButtonText: '充值',
+        cancelButtonText: '取消'
+      }).then(() => {
+        // 跳转到充值页面
+        router.push({
+          name: 'MemberRecharge',
+          params: { memberId: member.id }
+        })
+      }).catch(() => {
+        // 用户取消
+      })
+    } else {
+      // 店员：直接跳转到充值页面（简化流程）
       router.push({
         name: 'MemberRecharge',
         params: { memberId: member.id }
       })
-    }).catch(() => {
-      // 查看详情（可以后续扩展）
-      showToast('查看详情功能开发中')
-    })
+    }
   } else {
-    // 店员只能查看基本信息
+    // 没有任何权限：只显示基本信息
     showToast(`会员：${member.name || member.phone}\n等级：${member.level}\n折扣：${(member.discount * 10).toFixed(1)}折`)
   }
 }

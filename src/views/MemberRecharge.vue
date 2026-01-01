@@ -48,6 +48,12 @@
             </template>
           </van-field>
 
+          <!-- 充值后余额预览 -->
+          <div v-if="rechargeForm.amount && member" class="balance-preview">
+            <div class="preview-label">充值后余额：</div>
+            <div class="preview-value">¥{{ (parseFloat(member.balance) + parseFloat(rechargeForm.amount || 0)).toFixed(2) }}</div>
+          </div>
+
           <van-field
             v-model="rechargeForm.paymentMethod"
             name="paymentMethod"
@@ -263,6 +269,28 @@ onMounted(async () => {
 
 .stat-value {
   font-size: 16px;
+  font-weight: 600;
+}
+
+.balance-preview {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  margin: 12px 16px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  color: white;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.preview-label {
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.preview-value {
+  font-size: 24px;
   font-weight: 600;
 }
 
