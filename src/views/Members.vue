@@ -270,7 +270,7 @@ onMounted(() => {
   border-radius: 12px;
   margin-bottom: 12px;
   cursor: pointer;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 12px rgba(91, 143, 249, 0.08);
   transition: all 0.3s ease;
 }
 
@@ -280,7 +280,7 @@ onMounted(() => {
 
 .member-item:active {
   transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 16px rgba(91, 143, 249, 0.12);
 }
 
 .member-header {

@@ -524,7 +524,7 @@ onMounted(async () => {
   padding: 16px;
   margin: 16px;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 8px rgba(91, 143, 249, 0.08);
 }
 
 .stat-item {
@@ -561,14 +561,14 @@ onMounted(async () => {
   border-radius: 8px;
   padding: 12px;
   margin-bottom: 12px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 4px rgba(91, 143, 249, 0.08);
   cursor: pointer;
   transition: all 0.3s;
 }
 
 .log-item:active {
   transform: scale(0.98);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 2px rgba(91, 143, 249, 0.12);
 }
 
 .log-header {

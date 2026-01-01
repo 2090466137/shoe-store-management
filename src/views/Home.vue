@@ -474,7 +474,7 @@ const currentDate = computed(() => {
 .user-avatar {
   width: 40px;
   height: 40px;
-  border-radius: 50%;
+  border-radius: 8px;
   background: rgba(255, 255, 255, 0.2);
   display: flex;
   align-items: center;
@@ -531,7 +531,7 @@ const currentDate = computed(() => {
   border-radius: 12px;
   padding: 16px;
   margin-bottom: 12px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 12px rgba(91, 143, 249, 0.08);
 }
 
 .section-title {
@@ -555,7 +555,7 @@ const currentDate = computed(() => {
   min-height: 88px; /* 确保足够的触摸区域 */
   display: flex;
   align-items: center;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 12px rgba(91, 143, 249, 0.1);
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s;
 }
@@ -846,7 +846,7 @@ const currentDate = computed(() => {
 .menu-avatar {
   width: 50px;
   height: 50px;
-  border-radius: 50%;
+  border-radius: 8px;
   background: rgba(255, 255, 255, 0.2);
   display: flex;
   align-items: center;

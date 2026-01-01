@@ -401,7 +401,7 @@ onMounted(() => {
   padding: 16px;
   background: white;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 8px rgba(91, 143, 249, 0.08);
   border: 1px solid #e5e7eb;
 }
 
@@ -438,7 +438,7 @@ onMounted(() => {
   padding: 16px;
   background: white;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 8px rgba(91, 143, 249, 0.08);
   border: 1px solid #e5e7eb;
 }
 
@@ -450,7 +450,7 @@ onMounted(() => {
   justify-content: center;
   background: #1989fa;
   color: white;
-  border-radius: 50%;
+  border-radius: 6px;
   font-weight: 600;
   flex-shrink: 0;
 }
@@ -501,7 +501,7 @@ onMounted(() => {
   padding: 16px;
   background: white;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 8px rgba(91, 143, 249, 0.08);
   border: 1px solid #e5e7eb;
 }
 
@@ -513,7 +513,7 @@ onMounted(() => {
   justify-content: center;
   background: #969799;
   color: white;
-  border-radius: 50%;
+  border-radius: 6px;
   font-weight: 600;
   font-size: 14px;
   flex-shrink: 0;
@@ -595,7 +595,7 @@ onMounted(() => {
   padding: 16px;
   background: white;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 8px rgba(91, 143, 249, 0.08);
   border: 1px solid #e5e7eb;
 }
 

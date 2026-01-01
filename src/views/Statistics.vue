@@ -164,7 +164,7 @@ const activeTab = ref(0)
   background: white;
   border-radius: 12px;
   margin-bottom: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 8px rgba(91, 143, 249, 0.08);
   border: 1px solid #e5e7eb;
 }
 
@@ -242,7 +242,7 @@ const activeTab = ref(0)
   background: white;
   border-radius: 12px;
   margin-bottom: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 8px rgba(91, 143, 249, 0.08);
   border: 1px solid #e5e7eb;
 }
 
@@ -253,7 +253,7 @@ const activeTab = ref(0)
 .rank-badge {
   width: 32px;
   height: 32px;
-  border-radius: 50%;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -313,7 +313,7 @@ const activeTab = ref(0)
   padding: 16px;
   background: white;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 8px rgba(91, 143, 249, 0.08);
   border: 1px solid #e5e7eb;
 }
 

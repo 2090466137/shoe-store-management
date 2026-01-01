@@ -340,7 +340,7 @@ const formatDate = (timestamp) => {
   background: white;
   border-radius: 12px;
   margin-bottom: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 8px rgba(91, 143, 249, 0.08);
   border: 1px solid #e5e7eb;
 }
 

@@ -589,7 +589,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 10px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 8px rgba(91, 143, 249, 0.08);
 }
 
 .stat-icon {
@@ -658,7 +658,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 8px rgba(91, 143, 249, 0.08);
   transition: all 0.3s;
 }
 
@@ -671,7 +671,7 @@ onMounted(() => {
   position: relative;
   width: 50px;
   height: 50px;
-  border-radius: 50%;
+  border-radius: 8px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   display: flex;
   align-items: center;
@@ -691,7 +691,7 @@ onMounted(() => {
   right: 2px;
   width: 12px;
   height: 12px;
-  border-radius: 50%;
+  border-radius: 8px;
   border: 2px solid white;
 }
 

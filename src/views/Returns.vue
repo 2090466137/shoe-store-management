@@ -601,7 +601,7 @@ onMounted(async () => {
   padding: 16px;
   background: white;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 8px rgba(91, 143, 249, 0.08);
   border: 1px solid #e5e7eb;
 }
 
@@ -644,7 +644,7 @@ onMounted(async () => {
 
 .return-item:active {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(91, 143, 249, 0.12);
 }
 
 .return-header {

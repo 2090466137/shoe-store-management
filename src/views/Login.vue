@@ -234,7 +234,7 @@ onMounted(async () => {
 
 .circle {
   position: absolute;
-  border-radius: 50%;
+  border-radius: 12px;
   background: rgba(255, 255, 255, 0.1);
 }
 
@@ -266,7 +266,7 @@ onMounted(async () => {
   background: white;
   border-radius: 20px;
   padding: 32px 24px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 32px rgba(91, 143, 249, 0.12);
   position: relative;
   z-index: 1;
 }
@@ -348,6 +348,6 @@ onMounted(async () => {
   font-weight: 600;
   z-index: 1;
   letter-spacing: 0.5px;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  text-shadow: 0 1px 3px rgba(91, 143, 249, 0.3);
 }
 </style>

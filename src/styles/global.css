@@ -43,12 +43,12 @@ body {
   border-radius: 16px;
   padding: 16px;
   margin-bottom: 12px;
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 16px rgba(91, 143, 249, 0.1);
   transition: all 0.3s ease;
 }
 
 .card:hover {
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 20px rgba(91, 143, 249, 0.15);
   transform: translateY(-2px);
 }
 
@@ -251,7 +251,7 @@ body {
 
 /* 底部导航美化 */
 .van-tabbar {
-  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 -2px 12px rgba(91, 143, 249, 0.1);
   border-top: 1px solid #f0f0f0;
 }
 
@@ -264,7 +264,7 @@ body {
   background: white;
   border-radius: 16px;
   padding: 16px;
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 16px rgba(91, 143, 249, 0.1);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
@@ -288,7 +288,7 @@ body {
 
 .stat-card:active {
   transform: scale(0.98);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 4px 20px rgba(91, 143, 249, 0.15);
 }
 
 /* 商品卡片美化 */
@@ -297,14 +297,14 @@ body {
   border-radius: 16px;
   padding: 12px;
   margin-bottom: 12px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 12px rgba(91, 143, 249, 0.08);
   transition: all 0.3s ease;
   border: 1px solid #f0f0f0;
 }
 
 .product-card:active {
   transform: translateY(-2px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 20px rgba(91, 143, 249, 0.12);
   border-color: #5B8FF9;
 }
 
@@ -369,7 +369,7 @@ body {
 .van-search__content {
   background: white;
   border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 12px rgba(91, 143, 249, 0.08);
   border: 1px solid #ebedf0;
   transition: all 0.3s ease;
   padding: 8px 12px;
@@ -495,7 +495,7 @@ body {
 .van-toast {
   border-radius: 12px;
   backdrop-filter: blur(10px);
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(91, 143, 249, 0.15);
 }
 
 /* 通知美化 */
@@ -630,14 +630,14 @@ body {
   border-radius: 12px;
   padding: 16px;
   margin-bottom: 12px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 12px rgba(91, 143, 249, 0.08);
   transition: all 0.3s ease;
   border: 1px solid #f0f0f0;
 }
 
 .member-item:active {
   transform: translateY(-2px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 20px rgba(91, 143, 249, 0.12);
   border-color: #5B8FF9;
 }
 
@@ -647,14 +647,14 @@ body {
   border-radius: 12px;
   padding: 16px;
   margin-bottom: 12px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 12px rgba(91, 143, 249, 0.08);
   transition: all 0.3s ease;
   border: 1px solid #f0f0f0;
 }
 
 .sale-item:active {
   transform: translateY(-2px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 20px rgba(91, 143, 249, 0.12);
   border-color: #5B8FF9;
 }
 

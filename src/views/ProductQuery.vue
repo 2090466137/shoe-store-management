@@ -397,7 +397,7 @@ onMounted(async () => {
   background: white;
   padding: 12px 16px;
   margin-bottom: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 4px rgba(91, 143, 249, 0.08);
 }
 
 .stat-item {
@@ -459,7 +459,7 @@ onMounted(async () => {
   margin-bottom: 12px;
   display: flex;
   gap: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 8px rgba(91, 143, 249, 0.08);
   transition: transform 0.2s;
 }
 

@@ -44,7 +44,7 @@
   border-radius: 12px !important;
   padding: 16px !important;
   margin-bottom: 12px !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+  box-shadow: 0 2px 8px rgba(91, 143, 249, 0.08) !important;
   transition: all 0.3s ease !important;
 }
 
@@ -55,7 +55,7 @@
 .search-item:active,
 .staff-card:active {
   transform: translateY(-2px) !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 4px 12px rgba(91, 143, 249, 0.15) !important;
 }
 
 /* ========== 图片占位符统一 ========== */
@@ -97,7 +97,7 @@
   background: white !important;
   border-radius: 12px !important;
   padding: 16px !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+  box-shadow: 0 2px 8px rgba(91, 143, 249, 0.08) !important;
 }
 
 /* ========== 表单容器优化 ========== */
@@ -107,7 +107,7 @@
   border-radius: 12px !important;
   margin: 12px !important;
   padding: 16px !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+  box-shadow: 0 2px 8px rgba(91, 143, 249, 0.08) !important;
 }
 
 /* ========== 空状态优化 ========== */
@@ -132,7 +132,7 @@
 .bottom-action-bar,
 .cart-footer {
   background: white !important;
-  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05) !important;
+  box-shadow: 0 -2px 8px rgba(91, 143, 249, 0.08) !important;
 }
 
 /* ========== 警告提示优化 ========== */
@@ -171,7 +171,7 @@
   border-radius: 12px !important;
   padding: 16px !important;
   margin: 12px !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+  box-shadow: 0 2px 8px rgba(91, 143, 249, 0.08) !important;
 }
 
 /* ========== 渐变背景优化（保留必要的渐变） ========== */
@@ -237,12 +237,12 @@
 /* ========== 阴影层次优化 ========== */
 /* 浮起效果 */
 .card-elevated {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 4px 12px rgba(91, 143, 249, 0.12) !important;
 }
 
 /* 深层阴影 */
 .card-deep {
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12) !important;
+  box-shadow: 0 6px 16px rgba(91, 143, 249, 0.15) !important;
 }
 
 /* ========== 交互反馈优化 ========== */

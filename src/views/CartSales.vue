@@ -611,7 +611,7 @@ onMounted(() => {
   border-radius: 12px;
   padding: 16px;
   margin-bottom: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 8px rgba(91, 143, 249, 0.08);
 }
 
 .section-title {
@@ -646,13 +646,13 @@ onMounted(() => {
   margin-bottom: 12px;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 8px rgba(91, 143, 249, 0.08);
   border: 1px solid #e5e7eb;
 }
 
 .search-item:active {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(91, 143, 249, 0.12);
 }
 
 .search-item-name {
@@ -700,7 +700,7 @@ onMounted(() => {
   background: white;
   border-radius: 12px;
   margin-bottom: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 8px rgba(91, 143, 249, 0.08);
   border: 1px solid #e5e7eb;
 }
 
@@ -810,7 +810,7 @@ onMounted(() => {
   right: 0;
   background: white;
   padding: 12px 16px;
-  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 -2px 12px rgba(91, 143, 249, 0.12);
   display: flex;
   align-items: flex-end;
   gap: 16px;
@@ -890,13 +890,13 @@ onMounted(() => {
   margin-bottom: 12px;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 8px rgba(91, 143, 249, 0.08);
   border: 1px solid #e5e7eb;
 }
 
 .product-item:active {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(91, 143, 249, 0.12);
 }
 
 .product-item.out-of-stock {
