@@ -55,7 +55,7 @@
             placeholder="请选择尺码"
             readonly
             is-link
-            @click="openSizePicker"
+            @click="showSizePicker = true"
             :rules="[{ required: true, message: '请选择尺码' }]"
           />
           
@@ -65,7 +65,7 @@
             label="分类"
             placeholder="请输入或选择分类（可选）"
             is-link
-            @click="openCategoryPicker"
+            @click="showCategoryPicker = true"
           >
             <template #extra>
               <span style="font-size: 12px; color: #969799;">可自定义</span>
@@ -171,23 +171,6 @@
       </van-form>
     </div>
 
-    <!-- 尺码选择器 -->
-    <van-popup 
-      v-model:show="showSizePicker" 
-      position="bottom" 
-      round
-      teleport="body"
-      :z-index="3000"
-      :style="{ paddingBottom: 'env(safe-area-inset-bottom)' }"
-    >
-      <van-picker
-        :columns="sizes"
-        title="选择尺码"
-        @confirm="onSizeConfirm"
-        @cancel="showSizePicker = false"
-      />
-    </van-popup>
-
     <!-- 分类选择器 -->
     <van-popup 
       v-model:show="showCategoryPicker" 
@@ -195,18 +178,19 @@
       round
       teleport="body"
       :z-index="3000"
-      :style="{ paddingBottom: 'env(safe-area-inset-bottom)' }"
+      safe-area-inset-bottom
     >
       <van-picker
         :columns="categories"
+        title="选择分类"
         @confirm="onCategoryConfirm"
-        @cancel="closeCategoryPicker"
+        @cancel="showCategoryPicker = false"
       >
         <template #toolbar>
-          <div class="category-toolbar">
-            <button class="toolbar-btn toolbar-cancel" @click="closeCategoryPicker">取消</button>
-            <span class="toolbar-title">选择分类</span>
-            <button class="toolbar-btn toolbar-custom" @click="openCustomInput">自定义</button>
+          <div class="custom-picker-toolbar">
+            <van-button size="small" @click="showCategoryPicker = false">取消</van-button>
+            <div class="picker-title">选择分类</div>
+            <van-button size="small" type="primary" @click="showCustomInput = true">自定义</van-button>
           </div>
         </template>
       </van-picker>
@@ -218,7 +202,6 @@
       title="自定义分类"
       show-cancel-button
       @confirm="onCustomCategoryConfirm"
-      :z-index="3001"
     >
       <van-field
         v-model="customCategory"
@@ -227,6 +210,23 @@
         style="margin: 16px;"
       />
     </van-dialog>
+
+    <!-- 尺码选择器 -->
+    <van-popup 
+      v-model:show="showSizePicker" 
+      position="bottom" 
+      round
+      teleport="body"
+      :z-index="3000"
+      safe-area-inset-bottom
+    >
+      <van-picker
+        :columns="sizes"
+        title="选择尺码"
+        @confirm="onSizeConfirm"
+        @cancel="showSizePicker = false"
+      />
+    </van-popup>
   </div>
 </template>
 
@@ -274,14 +274,20 @@ const existingCategories = computed(() => {
   return Array.from(categories).sort()
 })
 
-// 合并建议分类和已有分类 - 使用字符串数组格式
+// 合并建议分类和已有分类 - 转换为 Picker 需要的格式
 const categories = computed(() => {
   const allCategories = new Set([...categorySuggestions, ...existingCategories.value])
-  return Array.from(allCategories).sort()
+  return Array.from(allCategories).sort().map(cat => ({
+    text: cat,
+    value: cat
+  }))
 })
 
-// 鞋码范围（30-42码，整数）- 使用最简单的字符串数组格式
-const sizes = ['30', '31', '32', '33', '34', '35', '36', '37', '38', '39', '40', '41', '42']
+// 鞋码范围（30-42码，整数）- Picker 需要的格式
+const sizes = ['30', '31', '32', '33', '34', '35', '36', '37', '38', '39', '40', '41', '42'].map(size => ({
+  text: size,
+  value: size
+}))
 
 const form = ref({
   code: '',        // 货号
@@ -355,30 +361,6 @@ const beforeDelete = () => {
   return true
 }
 
-// 打开尺码选择器（关闭其他弹窗）
-const openSizePicker = () => {
-  showCategoryPicker.value = false
-  showCustomInput.value = false
-  showSizePicker.value = true
-}
-
-// 打开分类选择器（关闭其他弹窗）
-const openCategoryPicker = () => {
-  showSizePicker.value = false
-  showCustomInput.value = false
-  showCategoryPicker.value = true
-}
-
-// 关闭分类选择器
-const closeCategoryPicker = () => {
-  showCategoryPicker.value = false
-}
-
-// 打开自定义输入（不关闭分类选择器，让 Dialog 覆盖在上面）
-const openCustomInput = () => {
-  showCustomInput.value = true
-}
-
 // 自定义分类确认
 const onCustomCategoryConfirm = () => {
   if (customCategory.value && customCategory.value.trim()) {
@@ -393,15 +375,9 @@ const onCustomCategoryConfirm = () => {
   }
 }
 
-const onCategoryConfirm = ({ selectedValues, selectedOptions }) => {
-  console.log('分类选择 - selectedValues:', selectedValues)
-  console.log('分类选择 - selectedOptions:', selectedOptions)
-  
-  // 优先使用 selectedValues，然后是 selectedOptions
-  const value = selectedValues?.[0] || selectedOptions?.[0]?.text || selectedOptions?.[0]?.value || selectedOptions?.[0]
-  
-  if (value) {
-    form.value.category = value
+const onCategoryConfirm = ({ selectedOptions }) => {
+  if (selectedOptions && selectedOptions.length > 0) {
+    form.value.category = selectedOptions[0].text || selectedOptions[0].value
     showToast({
       type: 'success',
       message: `已选择分类：${form.value.category}`
@@ -410,15 +386,12 @@ const onCategoryConfirm = ({ selectedValues, selectedOptions }) => {
   showCategoryPicker.value = false
 }
 
-const onSizeConfirm = ({ selectedValues, selectedOptions }) => {
-  console.log('尺码选择 - selectedValues:', selectedValues)
-  console.log('尺码选择 - selectedOptions:', selectedOptions)
+const onSizeConfirm = ({ selectedOptions }) => {
+  console.log('尺码选择:', selectedOptions)
   
-  // 优先使用 selectedValues，然后是 selectedOptions
-  const value = selectedValues?.[0] || selectedOptions?.[0]?.text || selectedOptions?.[0]?.value || selectedOptions?.[0]
-  
-  if (value) {
-    form.value.size = value
+  if (selectedOptions && selectedOptions.length > 0) {
+    // 获取选中的尺码
+    form.value.size = selectedOptions[0].text || selectedOptions[0].value
     console.log('已选择尺码:', form.value.size)
     showToast({
       type: 'success',
@@ -626,18 +599,17 @@ const onSubmit = () => {
   background-color: #f7f8fa;
 }
 
-/* 分类选择器工具栏 */
-.category-toolbar {
+/* 自定义 Picker 工具栏 */
+.custom-picker-toolbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 12px 16px;
   background: #ffffff;
-  border-bottom: 1px solid #ebedf0;
-  height: 44px;
+  border-bottom: 1px solid #f0f0f0;
 }
 
-.toolbar-title {
+.picker-title {
   font-size: 16px;
   font-weight: 600;
   color: #323233;
@@ -645,36 +617,7 @@ const onSubmit = () => {
   text-align: center;
 }
 
-.toolbar-btn {
-  padding: 6px 12px;
-  border: none;
-  background: none;
-  font-size: 14px;
-  cursor: pointer;
-  border-radius: 4px;
-  transition: all 0.2s;
-  min-width: 60px;
-}
-
-.toolbar-cancel {
-  color: #646566;
-}
-
-.toolbar-cancel:active {
-  background: #f2f3f5;
-}
-
-.toolbar-custom {
-  color: #ffffff;
-  background: #1989fa;
-  font-weight: 500;
-}
-
-.toolbar-custom:active {
-  background: #0d7de9;
-}
-
-/* 确保弹窗在最上层且位置合适 */
+/* 确保弹窗在最上层 */
 :deep(.van-popup) {
   z-index: 3000 !important;
 }
