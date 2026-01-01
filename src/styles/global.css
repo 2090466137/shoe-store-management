@@ -9,17 +9,17 @@ body {
     'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #F5F7FA;
+  background-color: #f7f8fa;
 }
 
-/* 自定义滚动条 */
+/* ==================== 滚动条 ==================== */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: #dcdee0;
+  background-color: #c8c9cc;
   border-radius: 3px;
 }
 
@@ -27,27 +27,28 @@ body {
   background-color: #f7f8fa;
 }
 
-/* 通用样式 */
+/* ==================== 通用布局 ==================== */
 .page-container {
   min-height: 100vh;
   padding-bottom: 60px;
-  background-color: #F5F7FA;
+  background-color: #f7f8fa;
 }
 
 .content-wrapper {
   padding: 16px;
 }
 
+/* ==================== 卡片样式 ==================== */
 .card {
   background: white;
-  border-radius: 8px;
+  border-radius: 12px;
   padding: 16px;
   margin-bottom: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 2px 12px rgba(100, 101, 102, 0.08);
 }
 
 .section-title {
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 600;
   color: #323233;
   margin-bottom: 16px;
@@ -55,36 +56,37 @@ body {
   border-left: 3px solid #1989fa;
 }
 
-/* 状态标签 */
+/* ==================== 状态标签 ==================== */
 .status-tag {
   display: inline-block;
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
 }
 
 .status-low {
-  background-color: #FFF1F0;
-  color: #FF6B6B;
+  background-color: #fff1f0;
+  color: #ee0a24;
 }
 
 .status-normal {
-  background-color: #E8F4FF;
+  background-color: #e8f4ff;
   color: #1989fa;
 }
 
 .status-high {
-  background-color: #E8FFF3;
+  background-color: #e8ffe8;
   color: #07c160;
 }
 
-/* 数据展示 */
+/* ==================== 数据展示 ==================== */
 .data-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 0;
-  border-bottom: 1px solid #f0f0f0;
+  padding: 14px 0;
+  border-bottom: 1px solid #ebedf0;
 }
 
 .data-item:last-child {
@@ -92,60 +94,347 @@ body {
 }
 
 .data-label {
-  color: #969799;
+  color: #646566;
   font-size: 14px;
 }
 
 .data-value {
   color: #323233;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 500;
 }
 
-/* 空状态 */
+/* ==================== 空状态 ==================== */
 .empty-state {
   text-align: center;
-  padding: 60px 20px;
+  padding: 80px 20px;
   color: #969799;
 }
 
 .empty-state-icon {
-  font-size: 64px;
-  margin-bottom: 16px;
-  opacity: 0.4;
+  font-size: 72px;
+  margin-bottom: 20px;
+  opacity: 0.3;
+  line-height: 1;
+  display: inline-block;
 }
 
 .empty-state-text {
-  font-size: 14px;
+  font-size: 15px;
   color: #969799;
 }
 
-/* ==================== 必要的可见性修复 ==================== */
-
-/* 导航栏白色文字（修复返回按钮看不见的问题） */
+/* ==================== 导航栏 ==================== */
 .van-nav-bar {
   background: #1989fa;
+  box-shadow: 0 2px 8px rgba(25, 137, 250, 0.15);
 }
 
 .van-nav-bar__title {
   color: white !important;
+  font-size: 17px;
+  font-weight: 500;
 }
 
 .van-nav-bar .van-icon {
   color: white !important;
+  font-size: 18px;
+  transition: all 0.2s ease;
+}
+
+.van-nav-bar .van-icon:active {
+  transform: scale(0.9);
+  opacity: 0.7;
 }
 
 .van-nav-bar__arrow {
   color: white !important;
+  font-size: 18px;
 }
 
 .van-nav-bar__text {
   color: white !important;
 }
 
-/* 确保图标完整显示（修复图标被裁剪的问题） */
+/* ==================== 底部导航 ==================== */
+.van-tabbar {
+  background: white;
+  box-shadow: 0 -2px 8px rgba(100, 101, 102, 0.08);
+}
+
+.van-tabbar-item__text {
+  font-size: 12px;
+}
+
+/* ==================== 按钮 ==================== */
+.van-button {
+  border-radius: 8px;
+  font-size: 15px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.van-button--large {
+  height: 48px;
+  font-size: 16px;
+}
+
+.van-button:active {
+  transform: scale(0.98);
+  opacity: 0.9;
+}
+
+/* ==================== 卡片组件优化 ==================== */
+.stat-card,
+.product-card,
+.member-item,
+.sale-item {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 12px rgba(100, 101, 102, 0.08);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.stat-card:active,
+.product-card:active,
+.member-item:active,
+.sale-item:active {
+  box-shadow: 0 4px 16px rgba(100, 101, 102, 0.12);
+  transform: translateY(-2px);
+}
+
+/* ==================== 搜索框 ==================== */
+.van-search {
+  background: transparent;
+  padding: 12px 16px;
+}
+
+.van-search__content {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(100, 101, 102, 0.06);
+  transition: all 0.3s ease;
+}
+
+.van-search__content:focus-within {
+  box-shadow: 0 2px 12px rgba(25, 137, 250, 0.15);
+  transform: translateY(-1px);
+}
+
+/* ==================== 标签 ==================== */
+.van-tag {
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 13px;
+  transition: all 0.2s ease;
+}
+
+.van-tag:active {
+  transform: scale(0.95);
+}
+
+/* ==================== 表单 ==================== */
+.van-cell {
+  font-size: 15px;
+}
+
+.van-field__label {
+  color: #646566;
+  font-size: 14px;
+}
+
+.van-field__control {
+  color: #323233;
+  font-size: 15px;
+}
+
+/* ==================== 弹窗 ==================== */
+.van-dialog {
+  border-radius: 16px;
+}
+
+.van-popup {
+  border-radius: 16px 16px 0 0;
+}
+
+.van-action-sheet {
+  border-radius: 16px 16px 0 0;
+}
+
+/* ==================== 标签页 ==================== */
+.van-tabs__line {
+  background: #1989fa;
+  width: 24px;
+  border-radius: 2px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.van-tab {
+  font-size: 15px;
+  transition: color 0.3s ease;
+}
+
+.van-tab--active {
+  color: #1989fa;
+  font-weight: 500;
+}
+
+/* ==================== 步进器 ==================== */
+.van-stepper__input {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+/* ==================== Toast ==================== */
+.van-toast {
+  border-radius: 10px;
+  padding: 12px 20px;
+  font-size: 14px;
+}
+
+/* ==================== 动画效果 ==================== */
+
+/* 页面淡入动画 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-container {
+  animation: fadeIn 0.4s ease-out;
+}
+
+/* 卡片列表渐入动画 */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.stat-card,
+.product-card,
+.member-item,
+.sale-item {
+  animation: slideIn 0.3s ease-out;
+  animation-fill-mode: both;
+}
+
+/* 错开动画时间 */
+.stat-card:nth-child(1),
+.product-card:nth-child(1),
+.member-item:nth-child(1),
+.sale-item:nth-child(1) {
+  animation-delay: 0.05s;
+}
+
+.stat-card:nth-child(2),
+.product-card:nth-child(2),
+.member-item:nth-child(2),
+.sale-item:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.stat-card:nth-child(3),
+.product-card:nth-child(3),
+.member-item:nth-child(3),
+.sale-item:nth-child(3) {
+  animation-delay: 0.15s;
+}
+
+.stat-card:nth-child(4),
+.product-card:nth-child(4),
+.member-item:nth-child(4),
+.sale-item:nth-child(4) {
+  animation-delay: 0.2s;
+}
+
+/* 按钮波纹效果 */
+@keyframes ripple {
+  0% {
+    box-shadow: 0 0 0 0 rgba(25, 137, 250, 0.4);
+  }
+  100% {
+    box-shadow: 0 0 0 10px rgba(25, 137, 250, 0);
+  }
+}
+
+.van-button--primary:active {
+  animation: ripple 0.6s ease-out;
+}
+
+/* 加载骨架屏动画 */
+@keyframes shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: 200px 0;
+  }
+}
+
+.van-skeleton__row {
+  background: linear-gradient(90deg, #f2f3f5 25%, #e7e8ea 50%, #f2f3f5 75%);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* 空状态图标呼吸动画 */
+@keyframes breathe {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.05);
+  }
+}
+
 .empty-state-icon {
-  line-height: 1;
-  display: inline-block;
+  animation: breathe 3s ease-in-out infinite;
+}
+
+/* 底部导航点击反馈 */
+.van-tabbar-item {
+  transition: all 0.3s ease;
+}
+
+.van-tabbar-item:active {
+  transform: scale(0.95);
+}
+
+/* 弹窗弹出动画优化 */
+.van-popup,
+.van-dialog,
+.van-action-sheet {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* 数字滚动效果（适用于统计数据） */
+@keyframes countUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.data-value {
+  animation: countUp 0.5s ease-out;
 }
 
