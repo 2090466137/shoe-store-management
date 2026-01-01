@@ -63,10 +63,13 @@
             v-model="form.category"
             name="category"
             label="分类"
-            placeholder="请选择分类（可选）"
-            readonly
+            placeholder="请输入或选择分类（可选）"
             is-link
             @click="showCategoryPicker = true"
+          >
+            <template #extra>
+              <span style="font-size: 12px; color: #969799;">可自定义</span>
+            </template>
           />
           
           <van-field
@@ -169,7 +172,33 @@
     </div>
 
     <!-- 分类选择器 -->
-    <van-popup v-model:show="showCategoryPicker" position="bottom">
+    <van-popup v-model:show="showCategoryPicker" position="bottom" round>
+      <div style="padding: 16px;">
+        <div style="font-size: 16px; font-weight: 600; margin-bottom: 12px; text-align: center;">
+          选择或输入分类
+        </div>
+        
+        <!-- 自定义输入 -->
+        <van-field
+          v-model="customCategory"
+          placeholder="输入自定义分类"
+          clearable
+          style="margin-bottom: 12px;"
+        />
+        
+        <van-button 
+          type="primary" 
+          block 
+          size="small"
+          style="margin-bottom: 16px;"
+          @click="onCustomCategoryConfirm"
+        >
+          使用自定义分类
+        </van-button>
+        
+        <van-divider style="margin: 12px 0;">或选择常用分类</van-divider>
+      </div>
+      
       <van-picker
         :columns="categories"
         @confirm="onCategoryConfirm"
@@ -202,17 +231,40 @@ const isEdit = ref(false)
 const showCategoryPicker = ref(false)
 const showSizePicker = ref(false)
 const fileList = ref([])
+const customCategory = ref('')
 
-const categories = [
+// 常用分类建议（女鞋专卖店）
+const categorySuggestions = [
+  '高跟鞋',
+  '平底鞋',
   '运动鞋',
   '休闲鞋',
-  '皮鞋',
-  '帆布鞋',
-  '滑板鞋',
   '凉鞋',
+  '拖鞋',
   '靴子',
+  '单鞋',
+  '帆布鞋',
+  '板鞋',
+  '厚底鞋',
   '其他'
 ]
+
+// 动态获取已有分类
+const existingCategories = computed(() => {
+  const categories = new Set()
+  productStore.getAllProducts.forEach(product => {
+    if (product.category && product.category.trim()) {
+      categories.add(product.category)
+    }
+  })
+  return Array.from(categories).sort()
+})
+
+// 合并建议分类和已有分类
+const categories = computed(() => {
+  const allCategories = new Set([...categorySuggestions, ...existingCategories.value])
+  return Array.from(allCategories).sort()
+})
 
 // 鞋码范围（30-42码，整数）
 const sizes = [
@@ -291,9 +343,22 @@ const beforeDelete = () => {
   return true
 }
 
+// 自定义分类确认
+const onCustomCategoryConfirm = () => {
+  if (customCategory.value && customCategory.value.trim()) {
+    form.value.category = customCategory.value.trim()
+    showCategoryPicker.value = false
+    customCategory.value = ''
+    showToast('已使用自定义分类')
+  } else {
+    showToast('请输入分类名称')
+  }
+}
+
 const onCategoryConfirm = ({ selectedOptions }) => {
   form.value.category = selectedOptions[0].text || selectedOptions[0]
   showCategoryPicker.value = false
+  customCategory.value = ''
 }
 
 const onSizeConfirm = ({ selectedOptions }) => {

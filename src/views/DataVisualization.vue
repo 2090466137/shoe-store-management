@@ -453,23 +453,24 @@ const staffPerformanceOption = computed(() => {
   }
 })
 
-// 库存分布
+// 库存分布（动态获取所有分类）
 const stockDistributionOption = computed(() => {
   const products = productStore.getAllProducts
-  const categories = {
-    '运动鞋': 0,
-    '休闲鞋': 0,
-    '其他': 0
-  }
+  const categories = {}
   
+  // 动态统计所有分类的库存
   products.forEach(product => {
-    const category = product.category || '其他'
-    if (categories.hasOwnProperty(category)) {
-      categories[category] += product.stock
-    } else {
-      categories['其他'] += product.stock
+    const category = product.category || '未分类'
+    if (!categories[category]) {
+      categories[category] = 0
     }
+    categories[category] += product.stock
   })
+  
+  // 如果没有任何分类，添加一个默认值
+  if (Object.keys(categories).length === 0) {
+    categories['暂无数据'] = 0
+  }
   
   return {
     tooltip: {

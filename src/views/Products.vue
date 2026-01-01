@@ -31,8 +31,12 @@
       <van-tabs v-model:active="activeTab" @change="onTabChange">
         <van-tab title="全部" name="all"></van-tab>
         <van-tab title="低库存" name="low"></van-tab>
-        <van-tab title="运动鞋" name="运动鞋"></van-tab>
-        <van-tab title="休闲鞋" name="休闲鞋"></van-tab>
+        <van-tab 
+          v-for="category in availableCategories" 
+          :key="category"
+          :title="category" 
+          :name="category"
+        ></van-tab>
       </van-tabs>
     </div>
 
@@ -152,6 +156,17 @@ const activeTab = ref('all')
 const canAddProduct = computed(() => userStore.hasPermission(PERMISSIONS.PRODUCT_ADD))
 const canEditProduct = computed(() => userStore.hasPermission(PERMISSIONS.PRODUCT_EDIT))
 const canDeleteProduct = computed(() => userStore.hasPermission(PERMISSIONS.PRODUCT_DELETE))
+
+// 动态获取所有存在的分类
+const availableCategories = computed(() => {
+  const categories = new Set()
+  productStore.getAllProducts.forEach(product => {
+    if (product.category && product.category !== '其他') {
+      categories.add(product.category)
+    }
+  })
+  return Array.from(categories).sort()
+})
 
 const filteredProducts = computed(() => {
   let products = productStore.getAllProducts

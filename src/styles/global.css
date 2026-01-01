@@ -190,14 +190,17 @@ body {
 }
 
 .empty-state-icon {
-  font-size: 64px;
-  margin-bottom: 16px;
-  opacity: 0.6;
+  font-size: 80px;
+  margin-bottom: 20px;
+  opacity: 0.4;
+  line-height: 1;
+  display: inline-block;
 }
 
 .empty-state-text {
-  font-size: 14px;
+  font-size: 15px;
   color: #969799;
+  font-weight: 500;
 }
 
 /* ==================== 统一美化样式 ==================== */
@@ -211,6 +214,24 @@ body {
 .van-nav-bar__title {
   font-weight: 600;
   font-size: 18px;
+  color: white !important;
+}
+
+/* 导航栏图标颜色 */
+.van-nav-bar .van-icon {
+  color: white !important;
+  font-size: 20px;
+}
+
+/* 导航栏返回箭头 */
+.van-nav-bar__arrow {
+  color: white !important;
+  font-size: 20px;
+}
+
+/* 导航栏文字 */
+.van-nav-bar__text {
+  color: white !important;
 }
 
 /* 底部导航美化 */
@@ -322,19 +343,31 @@ body {
 /* 搜索框美化 */
 .van-search {
   background: transparent;
+  padding: 12px 16px;
 }
 
 .van-search__content {
   background: white;
   border-radius: 12px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
-  border: 1px solid #f0f0f0;
+  border: 1px solid #ebedf0;
   transition: all 0.3s ease;
+  padding: 8px 12px;
 }
 
 .van-search__content:focus-within {
   border-color: #5B8FF9;
   box-shadow: 0 2px 16px rgba(91, 143, 249, 0.2);
+  background: #fafbfc;
+}
+
+.van-search__field {
+  padding: 8px 0;
+}
+
+.van-search .van-icon {
+  color: #969799;
+  font-size: 18px;
 }
 
 /* 对话框美化 */
@@ -534,5 +567,153 @@ body {
 .van-picker__confirm {
   color: #5B8FF9;
   font-weight: 600;
+}
+
+/* ==================== 对比度和可见性优化 ==================== */
+
+/* 确保所有白色文字在蓝色背景上可见 */
+.van-nav-bar,
+.van-nav-bar * {
+  color: white !important;
+}
+
+/* 导航栏按钮悬浮效果 */
+.van-nav-bar .van-icon:active {
+  opacity: 0.7;
+  transform: scale(0.95);
+}
+
+/* 会员卡片优化 */
+.member-item {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  border: 1px solid #f0f0f0;
+}
+
+.member-item:active {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border-color: #5B8FF9;
+}
+
+/* 销售卡片优化 */
+.sale-item {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  border: 1px solid #f0f0f0;
+}
+
+.sale-item:active {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border-color: #5B8FF9;
+}
+
+/* 图标大小统一 */
+.van-icon {
+  font-size: 20px;
+}
+
+/* 小图标 */
+.van-icon--small {
+  font-size: 16px;
+}
+
+/* 大图标 */
+.van-icon--large {
+  font-size: 24px;
+}
+
+/* 确保图标完整显示 */
+.van-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+/* 购物车图标优化 */
+.van-icon-shopping-cart-o,
+.van-icon-shopping-cart {
+  font-size: 22px;
+}
+
+/* 用户图标优化 */
+.van-icon-manager-o,
+.van-icon-friends-o {
+  font-size: 20px;
+}
+
+/* 设置图标优化 */
+.van-icon-setting-o {
+  font-size: 20px;
+}
+
+/* 删除图标优化 */
+.van-icon-delete-o {
+  font-size: 18px;
+  color: #ff6b6b;
+}
+
+/* 添加图标优化 */
+.van-icon-plus,
+.van-icon-add-o {
+  font-size: 20px;
+}
+
+/* 记录图标优化 */
+.van-icon-records {
+  font-size: 20px;
+}
+
+/* 筛选图标优化 */
+.van-icon-filter-o {
+  font-size: 20px;
+}
+
+/* 确保emoji图标完整显示 */
+.empty-state-icon,
+.stat-icon,
+.action-icon {
+  font-family: "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji", sans-serif;
+  line-height: 1;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* 卡片标题图标 */
+.section-title {
+  display: flex;
+  align-items: center;
+  line-height: 1.5;
+}
+
+/* 支付方式图标优化 */
+.payment-method {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+}
+
+/* 底部导航图标 */
+.van-tabbar-item__icon {
+  font-size: 22px;
+  margin-bottom: 4px;
+}
+
+/* 表单图标 */
+.van-field__left-icon,
+.van-field__right-icon {
+  font-size: 18px;
+  color: #646566;
 }
 
