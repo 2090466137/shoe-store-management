@@ -9,6 +9,8 @@ import 'vant/lib/index.css'
 
 // 引入全局样式
 import './styles/global.css'
+// 引入移动端优化样式
+import './styles/mobile-optimize.css'
 
 const app = createApp(App)
 const pinia = createPinia()

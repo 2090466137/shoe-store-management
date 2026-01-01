@@ -564,11 +564,12 @@ const currentDate = computed(() => {
   background: white;
   border-radius: 12px;
   padding: 16px;
+  min-height: 88px; /* 确保足够的触摸区域 */
   display: flex;
   align-items: center;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
   cursor: pointer;
-  transition: transform 0.2s;
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .stat-card:active {
@@ -723,10 +724,12 @@ const currentDate = computed(() => {
 }
 
 .action-btn {
-  height: 48px;
-  font-size: 15px;
+  min-height: 52px; /* 增加到52px，更容易点击 */
+  height: 52px;
+  font-size: 16px;
   font-weight: 500;
-  border-radius: 8px;
+  border-radius: 12px; /* 增大圆角，更现代 */
+  padding: 0 20px;
 }
 
 .action-btn :deep(.van-icon) {
@@ -736,7 +739,7 @@ const currentDate = computed(() => {
 
 .action-row {
   display: flex;
-  gap: 12px;
+  gap: 16px; /* 增加间距，防止误触 */
 }
 
 .action-btn.half {

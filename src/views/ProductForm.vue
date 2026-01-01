@@ -448,8 +448,15 @@ const onSubmit = () => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: 32px 20px; /* 增加垂直内边距，扩大触摸区域 */
+  min-height: 120px; /* 确保足够的触摸区域 */
   color: #969799;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.upload-placeholder:active {
+  background: #f0f1f3;
 }
 
 .upload-text {
