@@ -102,7 +102,14 @@
     </div>
 
     <!-- 支付方式选择器 -->
-    <van-popup v-model:show="showPaymentPicker" position="bottom">
+    <van-popup 
+      v-model:show="showPaymentPicker" 
+      position="bottom"
+      round
+      closeable
+      close-icon="close"
+      :style="{ paddingTop: '46px' }"
+    >
       <van-picker
         :columns="paymentMethods"
         @confirm="onPaymentConfirm"

@@ -775,13 +775,21 @@ onMounted(() => {
 .user-actions {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
+  flex-shrink: 0;
+  min-width: 70px;
 }
 
 .user-actions :deep(.van-button) {
-  padding: 0 12px;
-  height: 28px;
-  font-size: 12px;
+  padding: 0 16px;
+  height: 32px;
+  font-size: 13px;
+  min-width: 70px;
+  white-space: nowrap;
+}
+
+.user-actions :deep(.van-button__text) {
+  font-size: 13px;
 }
 
 /* 弹窗 */

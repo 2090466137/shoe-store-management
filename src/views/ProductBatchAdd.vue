@@ -139,7 +139,14 @@
     </div>
 
     <!-- 分类选择器 -->
-    <van-popup v-model:show="showCategoryPicker" position="bottom" round closeable>
+    <van-popup 
+      v-model:show="showCategoryPicker" 
+      position="bottom" 
+      round 
+      closeable
+      close-icon="close"
+      :style="{ paddingTop: '46px' }"
+    >
       <van-picker
         :columns="categories"
         @confirm="onCategoryConfirm"

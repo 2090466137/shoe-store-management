@@ -46,8 +46,9 @@
         <div class="section-title">📋 销售记录</div>
         
         <div v-if="salesStore.sales.length === 0" class="empty-state">
-          <div class="empty-state-icon">🛒</div>
+          <van-icon name="shopping-cart-o" size="64" color="#4A90E2" />
           <div class="empty-state-text">暂无销售记录</div>
+          <div class="empty-state-tip">前往收银台开始销售</div>
         </div>
 
         <div 
@@ -290,6 +291,23 @@ const deleteSale = (sale) => {
   font-size: 16px;
   color: #ff4d4f;
   cursor: pointer;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.empty-state-text {
+  font-size: 16px;
+  color: #646566;
+  margin: 16px 0 8px;
+  font-weight: 500;
+}
+
+.empty-state-tip {
+  font-size: 14px;
+  color: #969799;
 }
 </style>
 

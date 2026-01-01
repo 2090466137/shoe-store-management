@@ -145,7 +145,14 @@
     </div>
 
     <!-- 日期选择器 -->
-    <van-popup v-model:show="showDatePicker" position="bottom">
+    <van-popup 
+      v-model:show="showDatePicker" 
+      position="bottom"
+      round
+      closeable
+      close-icon="close"
+      :style="{ paddingTop: '46px' }"
+    >
       <van-date-picker
         v-model="selectedDate"
         title="选择日期"

@@ -160,7 +160,14 @@
     </van-popup>
 
     <!-- 日期选择器 -->
-    <van-popup v-model:show="showDatePicker" position="bottom">
+    <van-popup 
+      v-model:show="showDatePicker" 
+      position="bottom"
+      round
+      closeable
+      close-icon="close"
+      :style="{ paddingTop: '46px' }"
+    >
       <van-datetime-picker
         v-model="tempDateRange"
         type="date"

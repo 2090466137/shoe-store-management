@@ -52,9 +52,9 @@
         <div class="section-title">🛒 购物车</div>
         
         <div v-if="cart.length === 0" class="empty-cart">
-          <van-icon name="shopping-cart-o" size="48" color="#dcdee0" />
-          <p>购物车是空的</p>
-          <p class="empty-tip">搜索或选择商品添加到购物车</p>
+          <van-icon name="shopping-cart-o" size="64" color="#4A90E2" />
+          <p class="empty-title">购物车是空的</p>
+          <p class="empty-tip">搜索商品添加到购物车开始销售</p>
         </div>
 
         <div v-else class="cart-list">
@@ -240,7 +240,14 @@
     </van-popup>
 
     <!-- 销售员选择器 -->
-    <van-popup v-model:show="showSalespersonPicker" position="bottom" round>
+    <van-popup 
+      v-model:show="showSalespersonPicker" 
+      position="bottom" 
+      round
+      closeable
+      close-icon="close"
+      :style="{ paddingTop: '46px' }"
+    >
       <van-picker
         :columns="salespersonColumns"
         @confirm="onSalespersonConfirm"
@@ -676,16 +683,20 @@ onMounted(() => {
 /* 购物车 */
 .empty-cart {
   text-align: center;
-  padding: 40px 20px;
-  color: #969799;
+  padding: 60px 20px;
 }
 
-.empty-cart p {
-  margin: 8px 0 0;
+.empty-title {
+  font-size: 16px;
+  color: #646566;
+  margin: 16px 0 8px;
+  font-weight: 500;
 }
 
 .empty-tip {
-  font-size: 12px;
+  font-size: 14px;
+  color: #969799;
+  margin: 0;
 }
 
 .cart-list {
@@ -797,9 +808,15 @@ onMounted(() => {
   align-items: center;
 }
 
+.payment-group :deep(.van-radio__icon) {
+  font-size: 18px;
+  line-height: 1;
+}
+
 .payment-group :deep(.van-radio__label) {
   margin-left: 6px;
   white-space: nowrap;
+  font-size: 14px;
 }
 
 /* 底部结算栏 */

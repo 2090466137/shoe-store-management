@@ -60,9 +60,9 @@
       v3.2 | © 2025 鞋店管理系统
     </div>
     
-    <!-- 设计署名 卢宏鹏 -->
+    <!-- 版权信息 -->
     <div class="copyright-info">
-      卢宏鹏设计，请勿改动
+      © 2026 鞋店管理系统 · 技术支持
     </div>
   </div>
 </template>
@@ -235,26 +235,27 @@ onMounted(async () => {
 .circle {
   position: absolute;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
 }
 
 .circle-1 {
-  width: 300px;
-  height: 300px;
-  top: -100px;
-  right: -100px;
+  width: 200px;
+  height: 200px;
+  top: -80px;
+  right: -80px;
 }
 
 .circle-2 {
-  width: 200px;
-  height: 200px;
-  bottom: 100px;
-  left: -80px;
+  width: 150px;
+  height: 150px;
+  bottom: 80px;
+  left: -60px;
 }
 
 .circle-3 {
-  width: 150px;
-  height: 150px;
+  width: 100px;
+  height: 100px;
   top: 50%;
   right: 10%;
 }
@@ -311,6 +312,11 @@ onMounted(async () => {
 .remember-section :deep(.van-checkbox) {
   display: flex;
   align-items: center;
+}
+
+.remember-section :deep(.van-checkbox__icon) {
+  font-size: 18px;
+  line-height: 1;
 }
 
 .remember-section :deep(.van-checkbox__label) {

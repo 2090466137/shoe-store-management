@@ -172,8 +172,15 @@
     </div>
 
     <!-- 分类选择器 -->
-    <van-popup v-model:show="showCategoryPicker" position="bottom" round closeable>
-      <div style="padding: 16px; padding-top: 40px;">
+    <van-popup 
+      v-model:show="showCategoryPicker" 
+      position="bottom" 
+      round 
+      closeable
+      close-icon="close"
+      :style="{ paddingTop: '46px' }"
+    >
+      <div style="padding: 16px;">
         <div style="font-size: 16px; font-weight: 600; margin-bottom: 12px; text-align: center;">
           选择或输入分类
         </div>
@@ -207,7 +214,14 @@
     </van-popup>
 
     <!-- 尺码选择器 -->
-    <van-popup v-model:show="showSizePicker" position="bottom">
+    <van-popup 
+      v-model:show="showSizePicker" 
+      position="bottom" 
+      round
+      closeable
+      close-icon="close"
+      :style="{ paddingTop: '46px' }"
+    >
       <van-picker
         :columns="sizes"
         @confirm="onSizeConfirm"

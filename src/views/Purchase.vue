@@ -128,7 +128,14 @@
     </div>
 
     <!-- 商品选择器 -->
-    <van-popup v-model:show="showProductPicker" position="bottom">
+    <van-popup 
+      v-model:show="showProductPicker" 
+      position="bottom"
+      round
+      closeable
+      close-icon="close"
+      :style="{ paddingTop: '46px' }"
+    >
       <van-picker
         :columns="productColumns"
         @confirm="onProductConfirm"
