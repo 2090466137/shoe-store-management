@@ -308,6 +308,17 @@ onMounted(async () => {
   padding: 16px 16px 0;
 }
 
+.remember-section :deep(.van-checkbox) {
+  display: flex;
+  align-items: center;
+}
+
+.remember-section :deep(.van-checkbox__label) {
+  margin-left: 8px;
+  color: #646566;
+  font-size: 14px;
+}
+
 .login-btn-wrapper {
   padding: 24px 16px 16px;
 }

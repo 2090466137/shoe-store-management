@@ -810,6 +810,22 @@ onMounted(() => {
   margin: 0;
 }
 
+/* 角色选择样式 */
+.user-form :deep(.van-radio-group) {
+  display: flex;
+  gap: 16px;
+}
+
+.user-form :deep(.van-radio) {
+  display: flex;
+  align-items: center;
+}
+
+.user-form :deep(.van-radio__label) {
+  margin-left: 6px;
+  white-space: nowrap;
+}
+
 .form-actions {
   margin-top: 30px;
   padding: 0 10px;

@@ -781,11 +781,20 @@ onMounted(() => {
 /* 支付方式 */
 .payment-group {
   padding: 12px 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 .payment-group :deep(.van-radio) {
-  margin-right: 16px;
-  margin-bottom: 8px;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+}
+
+.payment-group :deep(.van-radio__label) {
+  margin-left: 6px;
+  white-space: nowrap;
 }
 
 /* 底部结算栏 */

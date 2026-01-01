@@ -9,17 +9,17 @@ body {
     'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #f7f8fa;
+  background-color: #F5F7FA;
 }
 
-/* ==================== 滚动条 ==================== */
+/* 自定义滚动条 */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: #c8c9cc;
+  background-color: #dcdee0;
   border-radius: 3px;
 }
 
@@ -27,24 +27,29 @@ body {
   background-color: #f7f8fa;
 }
 
-/* ==================== 通用布局 ==================== */
+/* 通用样式 */
 .page-container {
   min-height: 100vh;
   padding-bottom: 60px;
-  background-color: #f7f8fa;
+  background-color: #F5F7FA;
 }
 
 .content-wrapper {
   padding: 16px;
 }
 
-/* ==================== 卡片样式 ==================== */
 .card {
   background: white;
-  border-radius: 12px;
+  border-radius: 16px;
   padding: 16px;
   margin-bottom: 12px;
-  box-shadow: 0 2px 12px rgba(100, 101, 102, 0.08);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
 }
 
 .section-title {
@@ -53,40 +58,122 @@ body {
   color: #323233;
   margin-bottom: 16px;
   padding-left: 12px;
-  border-left: 3px solid #1989fa;
+  border-left: 4px solid #5B8FF9;
+  position: relative;
 }
 
-/* ==================== 状态标签 ==================== */
+.section-title::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(180deg, #5B8FF9 0%, #4A7FE8 100%);
+  border-radius: 2px;
+}
+
+/* 按钮样式统一 */
+.btn-primary {
+  background: linear-gradient(135deg, #5B8FF9 0%, #4A7FE8 100%);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-size: 16px;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(91, 143, 249, 0.3);
+  transition: all 0.3s ease;
+}
+
+.btn-primary:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 8px rgba(91, 143, 249, 0.3);
+}
+
+.btn-success {
+  background: linear-gradient(135deg, #5AD8A6 0%, #4AC89A 100%);
+  box-shadow: 0 4px 12px rgba(90, 216, 166, 0.3);
+}
+
+.btn-warning {
+  background: linear-gradient(135deg, #FF9845 0%, #FF8533 100%);
+  box-shadow: 0 4px 12px rgba(255, 152, 69, 0.3);
+}
+
+/* Vant 按钮统一美化 */
+.van-button--primary {
+  background: linear-gradient(135deg, #5B8FF9 0%, #4A7FE8 100%);
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(91, 143, 249, 0.25);
+}
+
+.van-button--success {
+  background: linear-gradient(135deg, #5AD8A6 0%, #4AC89A 100%);
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(90, 216, 166, 0.25);
+}
+
+.van-button--warning {
+  background: linear-gradient(135deg, #FF9845 0%, #FF8533 100%);
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(255, 152, 69, 0.25);
+}
+
+.van-button--danger {
+  background: linear-gradient(135deg, #FF6B6B 0%, #FF5555 100%);
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.25);
+}
+
+.van-button--default {
+  border-radius: 12px;
+  border: 1px solid #ebedf0;
+}
+
+.van-button {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.van-button:active {
+  transform: scale(0.98);
+  opacity: 0.9;
+}
+
+/* 状态标签 */
 .status-tag {
   display: inline-block;
-  padding: 4px 10px;
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
 }
 
 .status-low {
-  background-color: #fff1f0;
-  color: #ee0a24;
+  background-color: #FFF1F0;
+  color: #FF6B6B;
 }
 
 .status-normal {
-  background-color: #e8f4ff;
-  color: #1989fa;
+  background-color: #E8F4FF;
+  color: #5B8FF9;
 }
 
 .status-high {
-  background-color: #e8ffe8;
-  color: #07c160;
+  background-color: #E8FFF3;
+  color: #5AD8A6;
 }
 
-/* ==================== 数据展示 ==================== */
+/* 数据展示 */
 .data-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 14px 0;
-  border-bottom: 1px solid #ebedf0;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
 }
 
 .data-item:last-child {
@@ -94,27 +181,27 @@ body {
 }
 
 .data-label {
-  color: #646566;
+  color: #969799;
   font-size: 14px;
 }
 
 .data-value {
   color: #323233;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 500;
 }
 
-/* ==================== 空状态 ==================== */
+/* 空状态 */
 .empty-state {
   text-align: center;
-  padding: 80px 20px;
+  padding: 60px 20px;
   color: #969799;
 }
 
 .empty-state-icon {
-  font-size: 72px;
+  font-size: 80px;
   margin-bottom: 20px;
-  opacity: 0.3;
+  opacity: 0.4;
   line-height: 1;
   display: inline-block;
 }
@@ -122,23 +209,27 @@ body {
 .empty-state-text {
   font-size: 15px;
   color: #969799;
-}
-
-/* ==================== 导航栏 ==================== */
-.van-nav-bar {
-  background: #1989fa;
-  box-shadow: 0 2px 8px rgba(25, 137, 250, 0.15);
-}
-
-.van-nav-bar__title {
-  color: white !important;
-  font-size: 17px;
   font-weight: 500;
 }
 
+/* ==================== 统一美化样式 ==================== */
+
+/* 导航栏美化 */
+.van-nav-bar {
+  background: linear-gradient(135deg, #5B8FF9 0%, #4A7FE8 100%);
+  box-shadow: 0 2px 12px rgba(91, 143, 249, 0.2);
+}
+
+.van-nav-bar__title {
+  font-weight: 600;
+  font-size: 18px;
+  color: white !important;
+}
+
+/* 导航栏图标颜色 */
 .van-nav-bar .van-icon {
   color: white !important;
-  font-size: 18px;
+  font-size: 20px;
   transition: all 0.2s ease;
 }
 
@@ -147,86 +238,97 @@ body {
   opacity: 0.7;
 }
 
+/* 导航栏返回箭头 */
 .van-nav-bar__arrow {
   color: white !important;
-  font-size: 18px;
+  font-size: 20px;
 }
 
+/* 导航栏文字 */
 .van-nav-bar__text {
   color: white !important;
 }
 
-/* ==================== 底部导航 ==================== */
+/* 底部导航美化 */
 .van-tabbar {
+  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.08);
+  border-top: 1px solid #f0f0f0;
+}
+
+.van-tabbar-item--active {
+  background-color: rgba(91, 143, 249, 0.05);
+}
+
+/* 统计卡片美化 */
+.stat-card {
   background: white;
-  box-shadow: 0 -2px 8px rgba(100, 101, 102, 0.08);
-}
-
-.van-tabbar-item__text {
-  font-size: 12px;
-}
-
-/* ==================== 按钮 ==================== */
-.van-button {
-  border-radius: 8px;
-  font-size: 15px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.van-button--large {
-  height: 48px;
-  font-size: 16px;
-}
-
-.van-button:active {
-  transform: scale(0.98);
-  opacity: 0.9;
-}
-
-/* ==================== 卡片组件优化 ==================== */
-.stat-card,
-.product-card,
-.member-item,
-.sale-item {
-  background: white;
-  border-radius: 12px;
+  border-radius: 16px;
   padding: 16px;
-  margin-bottom: 12px;
-  box-shadow: 0 2px 12px rgba(100, 101, 102, 0.08);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
 }
 
-.stat-card:active,
-.product-card:active,
-.member-item:active,
-.sale-item:active {
-  box-shadow: 0 4px 16px rgba(100, 101, 102, 0.12);
-  transform: translateY(-2px);
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #5B8FF9 0%, #5AD8A6 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
-/* ==================== 搜索框 ==================== */
-.van-search {
-  background: transparent;
-  padding: 12px 16px;
+.stat-card:active::before {
+  opacity: 1;
 }
 
-.van-search__content {
+.stat-card:active {
+  transform: scale(0.98);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+}
+
+/* 商品卡片美化 */
+.product-card {
   background: white;
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(100, 101, 102, 0.06);
+  border-radius: 16px;
+  padding: 12px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
   transition: all 0.3s ease;
+  border: 1px solid #f0f0f0;
 }
 
-.van-search__content:focus-within {
-  box-shadow: 0 2px 12px rgba(25, 137, 250, 0.15);
-  transform: translateY(-1px);
+.product-card:active {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border-color: #5B8FF9;
 }
 
-/* ==================== 标签 ==================== */
+/* 输入框美化 */
+.van-field__control {
+  font-size: 15px;
+  color: #323233;
+}
+
+.van-field__label {
+  font-weight: 500;
+  color: #646566;
+}
+
+.van-cell {
+  border-radius: 12px;
+  margin-bottom: 8px;
+}
+
+/* 标签美化 */
 .van-tag {
-  border-radius: 6px;
-  padding: 4px 10px;
-  font-size: 13px;
+  border-radius: 8px;
+  padding: 4px 12px;
+  font-weight: 500;
   transition: all 0.2s ease;
 }
 
@@ -234,39 +336,248 @@ body {
   transform: scale(0.95);
 }
 
-/* ==================== 表单 ==================== */
-.van-cell {
-  font-size: 15px;
+.van-tag--primary {
+  background: linear-gradient(135deg, #E8F4FF 0%, #D6EBFF 100%);
+  color: #5B8FF9;
+  border: 1px solid #5B8FF9;
 }
 
-.van-field__label {
-  color: #646566;
-  font-size: 14px;
+.van-tag--success {
+  background: linear-gradient(135deg, #E8FFF3 0%, #D6FFE8 100%);
+  color: #5AD8A6;
+  border: 1px solid #5AD8A6;
 }
 
-.van-field__control {
-  color: #323233;
-  font-size: 15px;
+.van-tag--warning {
+  background: linear-gradient(135deg, #FFF7E8 0%, #FFEFD6 100%);
+  color: #FF9845;
+  border: 1px solid #FF9845;
 }
 
-/* ==================== 弹窗 ==================== */
+.van-tag--danger {
+  background: linear-gradient(135deg, #FFF1F0 0%, #FFE6E6 100%);
+  color: #FF6B6B;
+  border: 1px solid #FF6B6B;
+}
+
+/* 搜索框美化 */
+.van-search {
+  background: transparent;
+  padding: 12px 16px;
+}
+
+.van-search__content {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  border: 1px solid #ebedf0;
+  transition: all 0.3s ease;
+  padding: 8px 12px;
+}
+
+.van-search__content:focus-within {
+  border-color: #5B8FF9;
+  box-shadow: 0 2px 16px rgba(91, 143, 249, 0.2);
+  background: #fafbfc;
+  transform: translateY(-1px);
+}
+
+.van-search__field {
+  padding: 8px 0;
+}
+
+.van-search .van-icon {
+  color: #969799;
+  font-size: 18px;
+}
+
+/* 对话框美化 */
 .van-dialog {
-  border-radius: 16px;
+  border-radius: 20px;
+  overflow: hidden;
 }
 
+.van-dialog__header {
+  font-weight: 600;
+  font-size: 18px;
+  padding-top: 24px;
+}
+
+.van-dialog__button {
+  font-weight: 500;
+}
+
+/* 弹出层美化 */
 .van-popup {
-  border-radius: 16px 16px 0 0;
+  border-radius: 20px 20px 0 0;
 }
 
 .van-action-sheet {
-  border-radius: 16px 16px 0 0;
+  border-radius: 20px 20px 0 0;
 }
 
-/* ==================== 标签页 ==================== */
+.van-action-sheet__item {
+  font-size: 16px;
+  padding: 16px;
+  transition: background 0.2s ease;
+}
+
+.van-action-sheet__item:active {
+  background: #f7f8fa;
+}
+
+/* 步进器美化 */
+.van-stepper {
+  border-radius: 12px;
+}
+
+.van-stepper__minus,
+.van-stepper__plus {
+  border-radius: 8px;
+  background: #f7f8fa;
+  border: 1px solid #ebedf0;
+  color: #5B8FF9;
+  font-weight: 600;
+}
+
+.van-stepper__minus:active,
+.van-stepper__plus:active {
+  background: #5B8FF9;
+  color: white;
+}
+
+.van-stepper__input {
+  font-weight: 600;
+  color: #323233;
+}
+
+/* 开关美化 */
+.van-switch {
+  border-radius: 16px;
+}
+
+.van-switch--on {
+  background: linear-gradient(135deg, #5B8FF9 0%, #4A7FE8 100%);
+}
+
+/* 复选框和单选框美化 */
+.van-checkbox,
+.van-radio {
+  display: flex;
+  align-items: center;
+}
+
+.van-checkbox__label,
+.van-radio__label {
+  margin-left: 8px;
+  color: #323233;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.van-checkbox__icon,
+.van-radio__icon {
+  flex-shrink: 0;
+}
+
+.van-checkbox__icon--checked,
+.van-radio__icon--checked {
+  background: linear-gradient(135deg, #5B8FF9 0%, #4A7FE8 100%);
+  border-color: #5B8FF9;
+}
+
+/* 加载动画美化 */
+.van-loading__spinner {
+  color: #5B8FF9;
+}
+
+/* Toast 美化 */
+.van-toast {
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  background: rgba(0, 0, 0, 0.8);
+}
+
+/* 通知美化 */
+.van-notify {
+  border-radius: 0 0 12px 12px;
+}
+
+/* 下拉刷新美化 */
+.van-pull-refresh__head {
+  color: #5B8FF9;
+}
+
+/* 图片占位符美化 */
+.van-image__error,
+.van-image__loading {
+  background: linear-gradient(135deg, #f7f8fa 0%, #ebedf0 100%);
+}
+
+/* 徽标美化 */
+.van-badge {
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
+}
+
+/* 分割线美化 */
+.van-divider {
+  color: #969799;
+  border-color: #ebedf0;
+}
+
+/* 单元格组美化 */
+.van-cell-group {
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+/* 列表美化 */
+.van-list {
+  padding: 0 16px;
+}
+
+/* 骨架屏美化 */
+.van-skeleton {
+  padding: 16px;
+}
+
+.van-skeleton__row {
+  border-radius: 8px;
+}
+
+/* 进度条美化 */
+.van-progress {
+  border-radius: 10px;
+}
+
+.van-progress__portion {
+  background: linear-gradient(90deg, #5B8FF9 0%, #5AD8A6 100%);
+  border-radius: 10px;
+}
+
+/* 滑块美化 */
+.van-slider {
+  border-radius: 10px;
+}
+
+.van-slider__button {
+  box-shadow: 0 2px 8px rgba(91, 143, 249, 0.3);
+}
+
+.van-slider__bar {
+  background: linear-gradient(90deg, #5B8FF9 0%, #5AD8A6 100%);
+}
+
+/* 评分美化 */
+.van-rate__icon--full {
+  color: #FF9845;
+}
+
+/* 标签页美化 */
 .van-tabs__line {
-  background: #1989fa;
-  width: 24px;
-  border-radius: 2px;
+  background: linear-gradient(90deg, #5B8FF9 0%, #5AD8A6 100%);
+  border-radius: 3px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -276,21 +587,75 @@ body {
 }
 
 .van-tab--active {
-  color: #1989fa;
-  font-weight: 500;
+  font-weight: 600;
+  color: #5B8FF9;
 }
 
-/* ==================== 步进器 ==================== */
-.van-stepper__input {
-  font-size: 15px;
-  font-weight: 500;
+/* 侧边栏美化 */
+.van-sidebar-item--select {
+  background: linear-gradient(135deg, #E8F4FF 0%, #D6EBFF 100%);
+  border-left: 4px solid #5B8FF9;
 }
 
-/* ==================== Toast ==================== */
-.van-toast {
-  border-radius: 10px;
-  padding: 12px 20px;
-  font-size: 14px;
+/* 树形选择美化 */
+.van-tree-select__nav-item--active {
+  background: linear-gradient(135deg, #E8F4FF 0%, #D6EBFF 100%);
+  color: #5B8FF9;
+  font-weight: 600;
+}
+
+/* 日历美化 */
+.van-calendar__selected-day {
+  background: linear-gradient(135deg, #5B8FF9 0%, #4A7FE8 100%);
+  border-radius: 8px;
+}
+
+/* 时间选择器美化 */
+.van-picker__confirm {
+  color: #5B8FF9;
+  font-weight: 600;
+}
+
+/* ==================== 对比度和可见性优化 ==================== */
+
+/* 确保所有白色文字在蓝色背景上可见 */
+.van-nav-bar,
+.van-nav-bar * {
+  color: white !important;
+}
+
+/* 会员卡片优化 */
+.member-item {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  border: 1px solid #f0f0f0;
+}
+
+.member-item:active {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border-color: #5B8FF9;
+}
+
+/* 销售卡片优化 */
+.sale-item {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  border: 1px solid #f0f0f0;
+}
+
+.sale-item:active {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border-color: #5B8FF9;
 }
 
 /* ==================== 动画效果 ==================== */
@@ -437,4 +802,3 @@ body {
 .data-value {
   animation: countUp 0.5s ease-out;
 }
-
