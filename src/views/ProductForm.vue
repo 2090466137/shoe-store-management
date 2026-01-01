@@ -29,31 +29,16 @@
           </van-field>
           
           <van-field
-            v-model="form.name"
-            name="name"
-            label="商品名称"
-            placeholder="请输入商品名称"
-            :rules="[{ required: true, message: '请输入商品名称' }]"
-          />
-          
-          <van-field
-            v-model="form.brand"
-            name="brand"
-            label="品牌"
-            placeholder="请输入品牌"
-            :rules="[{ required: true, message: '请输入品牌' }]"
-          />
-          
-          <van-field
-            v-model="form.category"
-            name="category"
-            label="分类"
-            placeholder="请选择分类"
-            readonly
-            is-link
-            @click="showCategoryPicker = true"
-            :rules="[{ required: true, message: '请选择分类' }]"
-          />
+            v-model="form.code"
+            name="code"
+            label="货号"
+            placeholder="例如：206731-2 或 AYL505610-1"
+            :rules="[{ required: true, message: '请输入货号' }]"
+          >
+            <template #extra>
+              <span class="code-hint">支持字母数字组合</span>
+            </template>
+          </van-field>
           
           <van-field
             v-model="form.color"
@@ -67,8 +52,30 @@
             v-model="form.size"
             name="size"
             label="尺码"
-            placeholder="请输入尺码"
-            :rules="[{ required: true, message: '请输入尺码' }]"
+            placeholder="请选择尺码"
+            readonly
+            is-link
+            @click="showSizePicker = true"
+            :rules="[{ required: true, message: '请选择尺码' }]"
+          />
+          
+          <van-field
+            v-model="form.category"
+            name="category"
+            label="分类"
+            placeholder="请选择分类（可选）"
+            readonly
+            is-link
+            @click="showCategoryPicker = true"
+          />
+          
+          <van-field
+            v-model="displayName"
+            name="displayName"
+            label="显示名称"
+            placeholder="自动生成"
+            readonly
+            disabled
           />
           
           <van-field
@@ -169,11 +176,20 @@
         @cancel="showCategoryPicker = false"
       />
     </van-popup>
+
+    <!-- 尺码选择器 -->
+    <van-popup v-model:show="showSizePicker" position="bottom">
+      <van-picker
+        :columns="sizes"
+        @confirm="onSizeConfirm"
+        @cancel="showSizePicker = false"
+      />
+    </van-popup>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useProductStore } from '@/stores/product'
 import { showToast } from 'vant'
@@ -184,6 +200,7 @@ const productStore = useProductStore()
 
 const isEdit = ref(false)
 const showCategoryPicker = ref(false)
+const showSizePicker = ref(false)
 const fileList = ref([])
 
 const categories = [
@@ -197,18 +214,31 @@ const categories = [
   '其他'
 ]
 
+// 鞋码范围（30-42码，整数）
+const sizes = [
+  '30', '31', '32', '33', '34', '35', '36', '37', '38', '39', '40', '41', '42'
+]
+
 const form = ref({
-  name: '',
-  brand: '',
-  category: '',
-  color: '',
-  size: '',
-  costPrice: '',
-  salePrice: '',
-  stock: '',
-  minStock: '5',
-  supplier: '',
-  image: ''
+  code: '',        // 货号
+  color: '',       // 颜色
+  size: '',        // 尺码
+  category: '',    // 分类（可选）
+  costPrice: '',   // 成本价
+  salePrice: '',   // 销售价
+  stock: '',       // 库存
+  minStock: '5',   // 最低库存
+  supplier: '',    // 供应商
+  image: ''        // 图片
+})
+
+// 自动生成显示名称：货号-颜色-尺码
+const displayName = computed(() => {
+  const parts = []
+  if (form.value.code) parts.push(form.value.code)
+  if (form.value.color) parts.push(form.value.color)
+  if (form.value.size) parts.push(form.value.size + '码')
+  return parts.length > 0 ? parts.join('-') : '（自动生成）'
 })
 
 onMounted(() => {
@@ -218,11 +248,16 @@ onMounted(() => {
     const product = productStore.getProductById(productId)
     if (product) {
       form.value = {
-        ...product,
+        code: product.code || product.brand || '',  // 兼容旧数据：如果没有货号，使用品牌
+        color: product.color || '',
+        size: product.size || '',
+        category: product.category || '',
         costPrice: product.costPrice.toString(),
         salePrice: product.salePrice.toString(),
         stock: product.stock.toString(),
-        minStock: product.minStock.toString()
+        minStock: product.minStock.toString(),
+        supplier: product.supplier || '',
+        image: product.image || ''
       }
       
       // 加载已有图片
@@ -257,8 +292,13 @@ const beforeDelete = () => {
 }
 
 const onCategoryConfirm = ({ selectedOptions }) => {
-  form.value.category = selectedOptions[0].text
+  form.value.category = selectedOptions[0].text || selectedOptions[0]
   showCategoryPicker.value = false
+}
+
+const onSizeConfirm = ({ selectedOptions }) => {
+  form.value.size = selectedOptions[0].text || selectedOptions[0]
+  showSizePicker.value = false
 }
 
 // 验证正数（价格）
@@ -357,8 +397,14 @@ const onSubmit = () => {
     return
   }
 
+  // 自动生成商品名称和品牌
+  const autoName = displayName.value === '（自动生成）' ? '未命名商品' : displayName.value
+  const autoBrand = form.value.code || '无品牌'  // 使用货号作为品牌标识
+  
   const productData = {
     ...form.value,
+    name: autoName,      // 自动生成的名称
+    brand: autoBrand,    // 使用货号作为品牌
     costPrice,
     salePrice,
     stock,
@@ -409,6 +455,11 @@ const onSubmit = () => {
 .upload-text {
   margin-top: 8px;
   font-size: 14px;
+}
+
+.code-hint {
+  font-size: 12px;
+  color: #969799;
 }
 </style>
 
