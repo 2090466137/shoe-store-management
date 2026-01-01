@@ -233,7 +233,7 @@ export const useProductStore = defineStore('product', () => {
             targetType: 'product',
             targetId: newProduct.id,
             targetName: `${newProduct.name} (${newProduct.size}码)`,
-            details: `添加商品：${newProduct.brand} ${newProduct.name}，库存${newProduct.stock}件`,
+            details: `添加商品：货号 ${newProduct.code}，${newProduct.name}，库存${newProduct.stock}件`,
             newValue: JSON.stringify(newProduct)
           })
         } catch (logError) {
@@ -256,7 +256,7 @@ export const useProductStore = defineStore('product', () => {
           targetType: 'product',
           targetId: newProduct.id,
           targetName: `${newProduct.name} (${newProduct.size}码)`,
-          details: `添加商品：${newProduct.brand} ${newProduct.name}，库存${newProduct.stock}件`,
+          details: `添加商品：货号 ${newProduct.code}，${newProduct.name}，库存${newProduct.stock}件`,
           newValue: JSON.stringify(newProduct)
         })
       } catch (logError) {
@@ -284,7 +284,7 @@ export const useProductStore = defineStore('product', () => {
           targetType: 'product',
           targetId: newProduct.id,
           targetName: `${newProduct.name} (${newProduct.size}码)`,
-          details: `添加商品：${newProduct.brand} ${newProduct.name}，库存${newProduct.stock}件`,
+          details: `添加商品：货号 ${newProduct.code}，${newProduct.name}，库存${newProduct.stock}件`,
           newValue: JSON.stringify(newProduct)
         })
       } catch (logError) {
@@ -414,7 +414,7 @@ export const useProductStore = defineStore('product', () => {
             targetType: 'product',
             targetId: id,
             targetName: `${tempProduct.name} (${tempProduct.size}码)`,
-            details: `删除商品：${tempProduct.brand} ${tempProduct.name}`,
+            details: `删除商品：货号 ${tempProduct.code}，${tempProduct.name}`,
             oldValue: JSON.stringify(tempProduct)
           })
         } catch (logError) {
@@ -448,7 +448,7 @@ export const useProductStore = defineStore('product', () => {
           targetType: 'product',
           targetId: id,
           targetName: `${tempProduct.name} (${tempProduct.size}码)`,
-          details: `删除商品：${tempProduct.brand} ${tempProduct.name}`,
+          details: `删除商品：货号 ${tempProduct.code}，${tempProduct.name}`,
           oldValue: JSON.stringify(tempProduct)
         })
       } catch (logError) {

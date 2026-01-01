@@ -104,7 +104,7 @@
             
             <div class="item-info">
               <div class="item-name">{{ item.name }}</div>
-              <div class="item-spec">{{ item.brand }} | {{ item.size }}码 | {{ item.color }}</div>
+              <div class="item-spec">货号: {{ item.code }} | {{ item.size }}码 | {{ item.color }}</div>
               <div class="item-stocks">
                 <span class="system-stock">系统: {{ item.systemStock }}</span>
                 <span 
@@ -317,7 +317,7 @@ const startNewCheck = () => {
   checkItems.value = products.map(product => ({
     productId: product.id,
     name: product.name,
-    brand: product.brand,
+    code: product.code,
     size: product.size,
     color: product.color,
     image: product.image,

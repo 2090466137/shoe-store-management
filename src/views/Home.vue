@@ -100,7 +100,7 @@
             <div class="warning-info">
               <div class="warning-name">{{ product.name }}</div>
               <div class="warning-detail">
-                {{ product.brand }} | {{ product.size }}码 | {{ product.color }}
+                货号: {{ product.code }} | {{ product.size }}码 | {{ product.color }}
               </div>
             </div>
             <div class="warning-stock">

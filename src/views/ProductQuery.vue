@@ -19,7 +19,7 @@
     <div class="search-wrapper">
       <van-search
         v-model="searchKeyword"
-        placeholder="搜索商品名称、品牌、编码或尺码"
+        placeholder="搜索货号、颜色、尺码或分类"
         @search="onSearch"
         @clear="onSearch"
         @input="onSearch"
@@ -118,8 +118,8 @@
             </div>
 
             <div class="product-meta">
-              <van-tag type="primary" size="small">{{ product.brand }}</van-tag>
-              <van-tag plain size="small">{{ product.category }}</van-tag>
+              <van-tag type="primary" size="small">货号: {{ product.code }}</van-tag>
+              <van-tag plain size="small" v-if="product.category">{{ product.category }}</van-tag>
               <span class="product-spec">{{ product.size }}码 | {{ product.color }}</span>
             </div>
 
@@ -282,7 +282,6 @@ const filteredProducts = computed(() => {
     const keyword = searchKeyword.value.toLowerCase()
     products = products.filter(p => 
       p.name.toLowerCase().includes(keyword) ||
-      (p.brand && p.brand.toLowerCase().includes(keyword)) ||
       (p.code && p.code.toLowerCase().includes(keyword)) ||
       (p.size && p.size.toString().includes(keyword)) ||
       (p.category && p.category.toLowerCase().includes(keyword)) ||

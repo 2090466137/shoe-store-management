@@ -95,7 +95,7 @@
             </div>
             <div class="hot-info">
               <div class="hot-name">{{ product.name }}</div>
-              <div class="hot-meta">{{ product.brand }} | {{ product.size }}码</div>
+              <div class="hot-meta">货号: {{ product.code }} | {{ product.size }}码 | {{ product.color }}</div>
             </div>
             <div class="hot-stats">
               <div class="hot-quantity">销量: {{ product.quantity }}</div>
@@ -270,8 +270,9 @@ const dailyData = computed(() => {
           productMap[p.productId] = {
             id: p.productId,
             name: p.productName,
-            brand: p.brand,
+            code: p.code,
             size: p.size,
+            color: p.color,
             image: product?.image || '',
             quantity: 0,
             amount: 0

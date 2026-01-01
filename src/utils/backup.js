@@ -97,12 +97,12 @@ export function exportProductsAsCSV() {
     const productList = JSON.parse(products)
     
     // CSV表头
-    const headers = ['商品名称', '品牌', '分类', '颜色', '尺码', '成本价', '销售价', '库存', '最低库存', '供应商']
+    const headers = ['商品名称', '货号', '分类', '颜色', '尺码', '成本价', '销售价', '库存', '最低库存', '供应商']
     
     // CSV数据行
     const rows = productList.map(p => [
       p.name,
-      p.brand,
+      p.code,
       p.category,
       p.color,
       p.size,

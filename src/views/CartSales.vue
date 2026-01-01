@@ -16,7 +16,7 @@
       <div class="card search-card">
         <van-search
           v-model="searchKeyword"
-          placeholder="搜索商品名称、编码或尺码"
+          placeholder="搜索货号、颜色、尺码"
           @search="onSearch"
           @clear="onSearch"
           show-action

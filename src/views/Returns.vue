@@ -165,7 +165,7 @@
                 <div class="product-select-info">
                   <div class="product-select-name">{{ product.productName }}</div>
                   <div class="product-select-spec">
-                    {{ product.brand }} | {{ product.size }}码 | 可退：×{{ getAvailableReturnQuantity(product) }}
+                    货号: {{ product.code }} | {{ product.size }}码 | {{ product.color }} | 可退：×{{ getAvailableReturnQuantity(product) }}
                   </div>
                 </div>
                 <div class="product-select-price">¥{{ product.salePrice.toFixed(2) }}</div>
@@ -300,7 +300,7 @@
             <div class="product-picker-info">
               <div class="product-picker-name">{{ product.name }}</div>
               <div class="product-picker-spec">
-                {{ product.brand }} | {{ product.size }}码 | 库存: {{ product.stock }}
+                货号: {{ product.code }} | {{ product.size }}码 | {{ product.color }} | 库存: {{ product.stock }}
               </div>
             </div>
             <div class="product-picker-price">¥{{ product.salePrice }}</div>

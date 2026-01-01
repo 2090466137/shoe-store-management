@@ -162,7 +162,7 @@ const form = ref({
 
 const productColumns = computed(() => {
   return productStore.getAllProducts.map(p => ({
-    text: `${p.name} (${p.brand} | ${p.size}码)`,
+    text: `${p.name} (货号: ${p.code} | ${p.size}码)`,
     value: p.id
   }))
 })

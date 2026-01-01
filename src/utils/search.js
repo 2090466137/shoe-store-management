@@ -110,8 +110,8 @@ export function smartSearch(products, keyword) {
       return true
     }
 
-    // 2. 品牌完全匹配
-    if (product.brand && product.brand.toLowerCase().includes(searchTerm)) {
+    // 2. 货号完全匹配
+    if (product.code && product.code.toLowerCase().includes(searchTerm)) {
       return true
     }
 
@@ -136,8 +136,8 @@ export function smartSearch(products, keyword) {
       return true
     }
 
-    const brandInitials = product.brand ? getPinyinInitials(product.brand) : ''
-    if (brandInitials.includes(searchTerm)) {
+    const codeInitials = product.code ? getPinyinInitials(product.code) : ''
+    if (codeInitials.includes(searchTerm)) {
       return true
     }
 
@@ -147,42 +147,12 @@ export function smartSearch(products, keyword) {
       return true
     }
 
-    const brandPinyin = product.brand ? getFullPinyin(product.brand) : ''
-    if (brandPinyin.includes(searchTerm)) {
+    const codePinyin = product.code ? getFullPinyin(product.code) : ''
+    if (codePinyin.includes(searchTerm)) {
       return true
     }
 
-    // 8. 英文品牌名匹配（如 nike → 耐克）
-    const englishBrands = {
-      'nike': '耐克',
-      'adidas': '阿迪达斯',
-      'newbalance': '新百伦',
-      'nb': '新百伦',
-      'converse': '匡威',
-      'vans': 'vans',
-      'puma': '彪马',
-      'reebok': '锐步',
-      'asics': '亚瑟士',
-      'skechers': '斯凯奇',
-      'fila': '斐乐',
-      'kappa': '卡帕',
-      'lining': '李宁',
-      'anta': '安踏',
-      'xtep': '特步',
-      'jordan': '乔丹',
-      '361': '361度'
-    }
-
-    for (const [english, chinese] of Object.entries(englishBrands)) {
-      if (searchTerm.includes(english) && product.brand && product.brand.includes(chinese)) {
-        return true
-      }
-      if (searchTerm.includes(chinese) && product.brand && product.brand.includes(chinese)) {
-        return true
-      }
-    }
-
-    // 9. 数字匹配（如搜索 270 找到 Air Max 270）
+    // 8. 数字匹配（如搜索货号中的数字）
     if (/\d+/.test(searchTerm)) {
       const numbers = searchTerm.match(/\d+/g)
       if (numbers) {
@@ -211,7 +181,7 @@ export function getSearchSuggestions(products, keyword) {
 
   results.forEach(product => {
     suggestions.add(product.name)
-    if (product.brand) suggestions.add(product.brand)
+    if (product.code) suggestions.add(product.code)
   })
 
   return Array.from(suggestions).slice(0, 5)

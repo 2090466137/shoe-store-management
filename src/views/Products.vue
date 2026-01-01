@@ -9,22 +9,18 @@
       <template #right>
         <van-icon 
           v-if="canAddProduct"
-          name="apps-o" 
+          name="plus" 
           size="20" 
-          style="margin-right: 16px" 
-          @click="showAddMenu = true" 
+          @click="router.push('/product/add')" 
         />
       </template>
     </van-nav-bar>
-
-    <!-- 添加菜单 -->
-    <van-action-sheet v-if="canAddProduct" v-model:show="showAddMenu" :actions="addActions" @select="onSelectAdd" />
 
     <!-- 搜索栏 -->
     <div class="search-wrapper">
       <van-search
         v-model="searchKeyword"
-        placeholder="搜索商品名称、品牌或分类"
+        placeholder="搜索货号、颜色、尺码或分类"
         @search="onSearch"
         @clear="onSearch"
       />
@@ -81,8 +77,8 @@
           </div>
           
           <div class="product-meta">
-            <van-tag type="primary" size="medium">{{ product.brand }}</van-tag>
-            <van-tag plain size="medium">{{ product.category }}</van-tag>
+            <van-tag type="primary" size="medium">货号: {{ product.code }}</van-tag>
+            <van-tag plain size="medium" v-if="product.category">{{ product.category }}</van-tag>
             <span class="product-spec">{{ product.size }}码 | {{ product.color }}</span>
           </div>
           
@@ -151,26 +147,11 @@ const userStore = useUserStore()
 const active = ref(1)
 const searchKeyword = ref('')
 const activeTab = ref('all')
-const showAddMenu = ref(false)
 
 // 权限检查
 const canAddProduct = computed(() => userStore.hasPermission(PERMISSIONS.PRODUCT_ADD))
 const canEditProduct = computed(() => userStore.hasPermission(PERMISSIONS.PRODUCT_EDIT))
 const canDeleteProduct = computed(() => userStore.hasPermission(PERMISSIONS.PRODUCT_DELETE))
-
-const addActions = [
-  { name: '批量添加（多尺码）', icon: 'apps-o', color: '#1989fa' },
-  { name: '单个添加', icon: 'plus', color: '#07c160' }
-]
-
-const onSelectAdd = (action) => {
-  if (action.name === '批量添加（多尺码）') {
-    router.push('/product/batch-add')
-  } else {
-    router.push('/product/add')
-  }
-  showAddMenu.value = false
-}
 
 const filteredProducts = computed(() => {
   let products = productStore.getAllProducts
