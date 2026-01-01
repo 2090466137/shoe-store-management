@@ -69,16 +69,6 @@
           </div>
         </div>
 
-        <div class="stat-card" @click="router.push('/product/query')">
-          <div class="stat-icon stat-icon-success">
-            🔍
-          </div>
-          <div class="stat-info">
-            <div class="stat-label">商品查询</div>
-            <div class="stat-value">库存/价格</div>
-          </div>
-        </div>
-
         <div 
           class="stat-card" 
           @click="router.push('/products')"
@@ -159,46 +149,12 @@
           <div class="action-text">查看和管理会员信息</div>
           <van-icon name="arrow" class="action-arrow" />
         </div>
-        <div class="quick-action" @click="router.push('/member/history')">
-          <div class="action-icon">📋</div>
-          <div class="action-text">会员历史记录</div>
-          <van-icon name="arrow" class="action-arrow" />
-        </div>
-      </div>
-
-      <!-- 系统管理 -->
-      <div 
-        class="card" 
-        v-if="userStore.hasPermission(PERMISSIONS.USER_VIEW)"
-      >
-        <div class="section-title">⚙️ 系统管理</div>
-        <div class="quick-action" @click="router.push('/user-management')">
-          <div class="action-icon">👥</div>
-          <div class="action-text">用户管理</div>
-          <van-icon name="arrow" class="action-arrow" />
-        </div>
-        <div class="quick-action" @click="router.push('/operation-logs')">
-          <div class="action-icon">📝</div>
-          <div class="action-text">操作日志</div>
-          <van-icon name="arrow" class="action-arrow" />
-        </div>
       </div>
 
       <!-- 快捷操作 -->
       <div class="card">
         <div class="section-title">🚀 快捷操作</div>
         <div class="quick-actions">
-          <van-button 
-            type="info" 
-            size="large" 
-            block
-            class="action-btn"
-            @click="router.push('/product/query')"
-          >
-            <van-icon name="search" />
-            商品查询
-          </van-button>
-          
           <van-button 
             v-if="userStore.hasPermission(PERMISSIONS.SALES_ADD)"
             type="primary" 
@@ -416,6 +372,7 @@ const userMenuActions = computed(() => {
   
   if (userStore.hasPermission(PERMISSIONS.USER_VIEW)) {
     actions.push({ name: '用户管理', value: 'userManagement' })
+    actions.push({ name: '操作日志', value: 'operationLogs' })
   }
   
   actions.push({ name: '退出登录', value: 'logout', color: '#ee0a24' })
@@ -432,6 +389,9 @@ const onUserMenuSelect = async (action) => {
       break
     case 'userManagement':
       router.push('/user-management')
+      break
+    case 'operationLogs':
+      router.push('/operation-logs')
       break
     case 'logout':
       try {

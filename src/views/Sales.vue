@@ -28,24 +28,14 @@
         </div>
       </div>
 
-      <!-- 快速开单 -->
+      <!-- 快捷操作 -->
       <div class="card">
-        <van-button 
-          type="primary" 
-          size="large" 
-          block
-          icon="shopping-cart-o"
-          @click="router.push('/sales/add')"
-        >
-          快速开单
-        </van-button>
         <van-button 
           type="warning" 
           size="large" 
           block
           icon="exchange"
           @click="router.push('/returns')"
-          style="margin-top: 12px"
         >
           退换货管理
         </van-button>
