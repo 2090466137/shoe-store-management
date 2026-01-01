@@ -278,13 +278,11 @@ const categories = computed(() => {
   return Array.from(allCategories).sort()
 })
 
-// 鞋码范围（30-42码，整数）- 转换为 Picker 需要的格式
-const sizes = computed(() => {
-  return ['30', '31', '32', '33', '34', '35', '36', '37', '38', '39', '40', '41', '42'].map(size => ({
-    text: size,
-    value: size
-  }))
-})
+// 鞋码范围（30-42码，整数）- Picker 需要的格式
+const sizes = ['30', '31', '32', '33', '34', '35', '36', '37', '38', '39', '40', '41', '42'].map(size => ({
+  text: size,
+  value: size
+}))
 
 const form = ref({
   code: '',        // 货号

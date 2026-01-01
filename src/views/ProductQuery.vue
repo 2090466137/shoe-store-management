@@ -176,7 +176,7 @@
                 @click="tempFilterCategory = ''"
               >
                 <template #right-icon>
-                  <van-radio name="" icon-size="10px" />
+                  <van-radio name="" />
                 </template>
               </van-cell>
               <van-cell
@@ -187,7 +187,7 @@
                 @click="tempFilterCategory = category"
               >
                 <template #right-icon>
-                  <van-radio :name="category" icon-size="10px" />
+                  <van-radio :name="category" />
                 </template>
               </van-cell>
             </van-radio-group>
@@ -202,7 +202,7 @@
                 @click="tempFilterStockStatus = ''"
               >
                 <template #right-icon>
-                  <van-radio name="" icon-size="10px" />
+                  <van-radio name="" />
                 </template>
               </van-cell>
               <van-cell
@@ -211,7 +211,7 @@
                 @click="tempFilterStockStatus = 'inStock'"
               >
                 <template #right-icon>
-                  <van-radio name="inStock" icon-size="10px" />
+                  <van-radio name="inStock" />
                 </template>
               </van-cell>
               <van-cell
@@ -220,7 +220,7 @@
                 @click="tempFilterStockStatus = 'outOfStock'"
               >
                 <template #right-icon>
-                  <van-radio name="outOfStock" icon-size="10px" />
+                  <van-radio name="outOfStock" />
                 </template>
               </van-cell>
               <van-cell
@@ -229,7 +229,7 @@
                 @click="tempFilterStockStatus = 'lowStock'"
               >
                 <template #right-icon>
-                  <van-radio name="lowStock" icon-size="10px" />
+                  <van-radio name="lowStock" />
                 </template>
               </van-cell>
             </van-radio-group>

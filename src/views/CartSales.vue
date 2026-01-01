@@ -165,10 +165,10 @@
       <div class="card">
         <div class="section-title">💳 支付方式</div>
         <van-radio-group v-model="paymentMethod" direction="horizontal" class="payment-group">
-          <van-radio name="现金" icon-size="10px">现金</van-radio>
-          <van-radio name="微信" icon-size="10px">微信</van-radio>
-          <van-radio name="支付宝" icon-size="10px">支付宝</van-radio>
-          <van-radio name="会员余额" icon-size="10px" :disabled="!selectedMember || selectedMember.balance < actualAmount">
+          <van-radio name="现金">现金</van-radio>
+          <van-radio name="微信">微信</van-radio>
+          <van-radio name="支付宝">支付宝</van-radio>
+          <van-radio name="会员余额" :disabled="!selectedMember || selectedMember.balance < actualAmount">
             会员余额
           </van-radio>
         </van-radio-group>

@@ -165,14 +165,12 @@
                 <van-radio-group v-model="form.role" direction="horizontal">
                   <van-radio 
                     name="manager" 
-                    icon-size="10px"
                     :disabled="editingUser?.role === 'admin'"
                   >
                     店长
                   </van-radio>
                   <van-radio 
                     name="staff"
-                    icon-size="10px"
                     :disabled="editingUser?.role === 'admin'"
                   >
                     店员

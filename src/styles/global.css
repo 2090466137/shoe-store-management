@@ -526,68 +526,74 @@ body {
   background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
 }
 
-/* 复选框和单选框 - 重新设计 */
+/* 复选框和单选框 - 精简设计 */
 .van-checkbox,
 .van-radio {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  padding: 12px 0;
+  padding: 8px 0;
+  margin-right: 16px;
 }
 
-/* 复选框图标 - 方形设计 */
+/* 复选框图标 - 小巧方形设计 */
 .van-checkbox__icon {
-  width: 20px;
-  height: 20px;
-  border-radius: 6px;
-  border: 2px solid var(--color-border);
+  width: 16px !important;
+  height: 16px !important;
+  min-width: 16px;
+  border-radius: 4px;
+  border: 1.5px solid var(--color-border);
   background: var(--color-bg-card);
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   flex-shrink: 0;
-  display: flex;
+  display: inline-flex !important;
   align-items: center;
   justify-content: center;
+  margin-right: 8px;
 }
 
 .van-checkbox__icon--checked {
   background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
   border-color: var(--color-primary);
-  box-shadow: 0 2px 8px rgba(74, 144, 226, 0.3);
+  box-shadow: 0 1px 4px rgba(74, 144, 226, 0.25);
 }
 
 /* 复选框对勾 */
 .van-checkbox__icon--checked::after {
   content: '✓';
   color: white;
-  font-size: 14px;
+  font-size: 11px;
   font-weight: bold;
+  line-height: 1;
 }
 
-/* 单选框图标 - 圆形设计 */
+/* 单选框图标 - 小巧圆形设计 */
 .van-radio__icon {
-  width: 20px;
-  height: 20px;
+  width: 16px !important;
+  height: 16px !important;
+  min-width: 16px;
   border-radius: 50%;
-  border: 2px solid var(--color-border);
+  border: 1.5px solid var(--color-border);
   background: var(--color-bg-card);
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   flex-shrink: 0;
-  display: flex;
+  display: inline-flex !important;
   align-items: center;
   justify-content: center;
   position: relative;
+  margin-right: 8px;
 }
 
 .van-radio__icon--checked {
   border-color: var(--color-primary);
   background: var(--color-bg-card);
-  box-shadow: 0 2px 8px rgba(74, 144, 226, 0.2);
+  box-shadow: 0 1px 4px rgba(74, 144, 226, 0.2);
 }
 
 /* 单选框内部圆点 */
 .van-radio__icon--checked::after {
   content: '';
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
   position: absolute;
@@ -599,11 +605,12 @@ body {
 /* 标签文字 */
 .van-checkbox__label,
 .van-radio__label {
-  margin-left: 12px;
+  margin-left: 0;
   color: var(--color-text-body);
-  font-size: 15px;
+  font-size: 14px;
   line-height: 1.5;
-  flex: 1;
+  flex: none;
+  white-space: nowrap;
 }
 
 /* 禁用状态 */
@@ -622,24 +629,35 @@ body {
 /* 点击反馈 */
 .van-checkbox:active .van-checkbox__icon,
 .van-radio:active .van-radio__icon {
-  transform: scale(0.95);
+  transform: scale(0.9);
 }
 
 /* 复选框组和单选框组 */
 .van-checkbox-group,
 .van-radio-group {
   padding: var(--spacing-sm) 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 /* 横向排列时的样式 */
-.van-checkbox-group--horizontal .van-checkbox,
-.van-radio-group--horizontal .van-radio {
-  margin-right: var(--spacing-lg);
+.van-checkbox-group--horizontal,
+.van-radio-group--horizontal {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
-.van-checkbox-group--horizontal .van-checkbox:last-child,
-.van-radio-group--horizontal .van-radio:last-child {
+.van-checkbox-group--horizontal .van-checkbox,
+.van-radio-group--horizontal .van-radio {
   margin-right: 0;
+}
+
+/* 确保图标不会被隐藏 */
+.van-checkbox__icon .van-icon,
+.van-radio__icon .van-icon {
+  display: none !important;
 }
 
 /* 加载动画 */
