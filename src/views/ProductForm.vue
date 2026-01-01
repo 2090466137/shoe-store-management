@@ -176,37 +176,43 @@
       v-model:show="showCategoryPicker" 
       position="bottom" 
       round
+      :style="{ height: '60%' }"
     >
-      <div class="popup-header">
-        <span></span>
-        <span class="popup-title">选择或输入分类</span>
-        <van-icon name="cross" class="popup-close" @click="showCategoryPicker = false" />
+      <div class="category-popup-content">
+        <div class="popup-header">
+          <span></span>
+          <span class="popup-title">选择或输入分类</span>
+          <van-icon name="cross" class="popup-close" @click="showCategoryPicker = false" />
+        </div>
+        
+        <div class="popup-body">
+          <!-- 自定义输入 -->
+          <van-field
+            v-model="customCategory"
+            placeholder="输入自定义分类"
+            clearable
+            style="margin: 12px 16px;"
+          />
+          
+          <van-button 
+            type="primary" 
+            block 
+            size="small"
+            style="margin: 0 16px 16px 16px;"
+            @click="onCustomCategoryConfirm"
+          >
+            使用自定义分类
+          </van-button>
+          
+          <van-divider style="margin: 12px 0;">或选择常用分类</van-divider>
+        
+          <van-picker
+            :columns="categories"
+            @confirm="onCategoryConfirm"
+            @cancel="showCategoryPicker = false"
+          />
+        </div>
       </div>
-        <!-- 自定义输入 -->
-        <van-field
-          v-model="customCategory"
-          placeholder="输入自定义分类"
-          clearable
-          style="margin-bottom: 12px;"
-        />
-        
-        <van-button 
-          type="primary" 
-          block 
-          size="small"
-          style="margin-bottom: 16px;"
-          @click="onCustomCategoryConfirm"
-        >
-          使用自定义分类
-        </van-button>
-        
-        <van-divider style="margin: 12px 0;">或选择常用分类</van-divider>
-      
-      <van-picker
-        :columns="categories"
-        @confirm="onCategoryConfirm"
-        @cancel="showCategoryPicker = false"
-      />
     </van-popup>
 
     <!-- 尺码选择器 -->
@@ -215,13 +221,9 @@
       position="bottom" 
       round
     >
-      <div class="popup-header">
-        <span></span>
-        <span class="popup-title">选择尺码</span>
-        <van-icon name="cross" class="popup-close" @click="showSizePicker = false" />
-      </div>
       <van-picker
         :columns="sizes"
+        title="选择尺码"
         @confirm="onSizeConfirm"
         @cancel="showSizePicker = false"
       />
@@ -272,10 +274,13 @@ const existingCategories = computed(() => {
   return Array.from(categories).sort()
 })
 
-// 合并建议分类和已有分类
+// 合并建议分类和已有分类 - 转换为 Picker 需要的格式
 const categories = computed(() => {
   const allCategories = new Set([...categorySuggestions, ...existingCategories.value])
-  return Array.from(allCategories).sort()
+  return Array.from(allCategories).sort().map(cat => ({
+    text: cat,
+    value: cat
+  }))
 })
 
 // 鞋码范围（30-42码，整数）- Picker 需要的格式
@@ -558,6 +563,48 @@ const onSubmit = () => {
   color: #969799;
 }
 
+/* 确保表单字段清晰可见 */
+:deep(.van-field__label) {
+  width: 80px;
+  font-weight: 500;
+  color: #323233;
+}
+
+:deep(.van-field__value) {
+  flex: 1;
+}
+
+:deep(.van-field__control) {
+  color: #323233;
+  font-size: 14px;
+}
+
+:deep(.van-field__control::placeholder) {
+  color: #c8c9cc;
+}
+
+/* 优化可点击字段的样式 */
+:deep(.van-field--clickable) {
+  cursor: pointer;
+}
+
+:deep(.van-field--clickable:active) {
+  background-color: #f7f8fa;
+}
+
+/* 分类弹窗内容 */
+.category-popup-content {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+}
+
+.popup-body {
+  flex: 1;
+  overflow-y: auto;
+}
+
 /* 弹窗头部 */
 .popup-header {
   display: flex;
@@ -565,6 +612,8 @@ const onSubmit = () => {
   align-items: center;
   padding: 16px;
   border-bottom: 1px solid #f0f0f0;
+  background: #ffffff;
+  flex-shrink: 0;
 }
 
 .popup-title {
@@ -577,11 +626,18 @@ const onSubmit = () => {
   font-size: 20px;
   color: #969799;
   cursor: pointer;
-  padding: 4px;
+  padding: 8px;
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .popup-close:active {
   opacity: 0.7;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 50%;
 }
 </style>
 
