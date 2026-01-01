@@ -70,7 +70,7 @@
             <template #extra>
               <span style="font-size: 12px; color: #969799;">可自定义</span>
             </template>
-          />
+          </van-field>
           
           <van-field
             v-model="displayName"
