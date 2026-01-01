@@ -7,7 +7,7 @@
       @click-left="router.back()"
     >
       <template #right>
-        <van-icon name="plus" @click="showTypeSelect = true" />
+        <van-icon name="plus" size="22" @click="showTypeSelect = true" />
       </template>
     </van-nav-bar>
 

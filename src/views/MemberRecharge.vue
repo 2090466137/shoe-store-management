@@ -106,10 +106,12 @@
       v-model:show="showPaymentPicker" 
       position="bottom"
       round
-      closeable
-      close-icon="close"
-      :style="{ paddingTop: '46px' }"
     >
+      <div class="popup-header">
+        <span></span>
+        <span class="popup-title">选择支付方式</span>
+        <van-icon name="cross" class="popup-close" @click="showPaymentPicker = false" />
+      </div>
       <van-picker
         :columns="paymentMethods"
         @confirm="onPaymentConfirm"
@@ -311,5 +313,31 @@ onMounted(async () => {
 .quick-amounts .van-button {
   flex: 1;
   min-width: 80px;
+}
+
+/* 弹窗头部 */
+.popup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.popup-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #323233;
+}
+
+.popup-close {
+  font-size: 20px;
+  color: #969799;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.popup-close:active {
+  opacity: 0.7;
 }
 </style>

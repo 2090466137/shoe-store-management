@@ -37,7 +37,7 @@
         </van-cell-group>
 
         <div class="remember-section">
-          <van-checkbox v-model="rememberMe">记住密码</van-checkbox>
+          <van-checkbox v-model="rememberMe" icon-size="18px">记住密码</van-checkbox>
         </div>
 
         <div class="login-btn-wrapper">

@@ -175,16 +175,13 @@
     <van-popup 
       v-model:show="showCategoryPicker" 
       position="bottom" 
-      round 
-      closeable
-      close-icon="close"
-      :style="{ paddingTop: '46px' }"
+      round
     >
-      <div style="padding: 16px;">
-        <div style="font-size: 16px; font-weight: 600; margin-bottom: 12px; text-align: center;">
-          选择或输入分类
-        </div>
-        
+      <div class="popup-header">
+        <span></span>
+        <span class="popup-title">选择或输入分类</span>
+        <van-icon name="cross" class="popup-close" @click="showCategoryPicker = false" />
+      </div>
         <!-- 自定义输入 -->
         <van-field
           v-model="customCategory"
@@ -204,7 +201,6 @@
         </van-button>
         
         <van-divider style="margin: 12px 0;">或选择常用分类</van-divider>
-      </div>
       
       <van-picker
         :columns="categories"
@@ -218,10 +214,12 @@
       v-model:show="showSizePicker" 
       position="bottom" 
       round
-      closeable
-      close-icon="close"
-      :style="{ paddingTop: '46px' }"
     >
+      <div class="popup-header">
+        <span></span>
+        <span class="popup-title">选择尺码</span>
+        <van-icon name="cross" class="popup-close" @click="showSizePicker = false" />
+      </div>
       <van-picker
         :columns="sizes"
         @confirm="onSizeConfirm"
@@ -546,6 +544,32 @@ const onSubmit = () => {
 .code-hint {
   font-size: 12px;
   color: #969799;
+}
+
+/* 弹窗头部 */
+.popup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.popup-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #323233;
+}
+
+.popup-close {
+  font-size: 20px;
+  color: #969799;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.popup-close:active {
+  opacity: 0.7;
 }
 </style>
 

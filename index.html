@@ -17,6 +17,15 @@
   <!-- Android 配置 -->
   <meta name="mobile-web-app-capable" content="yes">
   
+  <!-- 禁用暗黑模式，保持浅色主题 -->
+  <meta name="color-scheme" content="light">
+  <style>
+    /* 强制浅色模式 */
+    :root {
+      color-scheme: light only;
+    }
+  </style>
+  
   <title>鞋店仓库管理系统</title>
   
   <!-- Service Worker 注册 -->

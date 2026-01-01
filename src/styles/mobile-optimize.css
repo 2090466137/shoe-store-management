@@ -21,10 +21,20 @@ a,
   margin: -12px;
 }
 
-/* 导航栏按钮优化 */
+/* 导航栏按钮优化 - 适合老年人操作 */
 .van-nav-bar__arrow,
 .van-nav-bar .van-icon {
   padding: 12px !important;
+  min-width: 48px !important;
+  min-height: 48px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* 导航栏右侧多个图标时的间距 */
+.van-nav-bar__right .van-icon + .van-icon {
+  margin-left: 8px;
 }
 
 /* ==================== 按钮间距优化 ==================== */

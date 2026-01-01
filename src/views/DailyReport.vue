@@ -7,7 +7,7 @@
       @click-left="router.back()"
     >
       <template #right>
-        <van-icon name="share-o" @click="exportReport" />
+        <van-icon name="share-o" size="22" @click="exportReport" />
       </template>
     </van-nav-bar>
 
@@ -149,13 +149,14 @@
       v-model:show="showDatePicker" 
       position="bottom"
       round
-      closeable
-      close-icon="close"
-      :style="{ paddingTop: '46px' }"
     >
+      <div class="popup-header">
+        <span></span>
+        <span class="popup-title">选择日期</span>
+        <van-icon name="cross" class="popup-close" @click="showDatePicker = false" />
+      </div>
       <van-date-picker
         v-model="selectedDate"
-        title="选择日期"
         :min-date="minDate"
         :max-date="maxDate"
         @confirm="onDateConfirm"
@@ -689,6 +690,32 @@ onMounted(() => {
 .empty-text {
   font-size: 16px;
   color: #969799;
+}
+
+/* 弹窗头部 */
+.popup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.popup-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #323233;
+}
+
+.popup-close {
+  font-size: 20px;
+  color: #969799;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.popup-close:active {
+  opacity: 0.7;
 }
 </style>
 

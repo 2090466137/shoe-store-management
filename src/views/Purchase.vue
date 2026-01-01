@@ -132,10 +132,12 @@
       v-model:show="showProductPicker" 
       position="bottom"
       round
-      closeable
-      close-icon="close"
-      :style="{ paddingTop: '46px' }"
     >
+      <div class="popup-header">
+        <span></span>
+        <span class="popup-title">选择商品</span>
+        <van-icon name="cross" class="popup-close" @click="showProductPicker = false" />
+      </div>
       <van-picker
         :columns="productColumns"
         @confirm="onProductConfirm"
@@ -409,5 +411,31 @@ const formatDate = (timestamp) => {
 
 .record-supplier {
   color: #1989fa;
+}
+
+/* 弹窗头部 */
+.popup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.popup-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #323233;
+}
+
+.popup-close {
+  font-size: 20px;
+  color: #969799;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.popup-close:active {
+  opacity: 0.7;
 }
 </style>

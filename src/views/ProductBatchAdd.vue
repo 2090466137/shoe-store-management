@@ -7,7 +7,7 @@
       @click-left="router.back()"
     >
       <template #right>
-        <van-icon name="question-o" @click="showHelp = true" />
+        <van-icon name="question-o" size="22" @click="showHelp = true" />
       </template>
     </van-nav-bar>
 
@@ -142,11 +142,13 @@
     <van-popup 
       v-model:show="showCategoryPicker" 
       position="bottom" 
-      round 
-      closeable
-      close-icon="close"
-      :style="{ paddingTop: '46px' }"
+      round
     >
+      <div class="popup-header">
+        <span></span>
+        <span class="popup-title">选择分类</span>
+        <van-icon name="cross" class="popup-close" @click="showCategoryPicker = false" />
+      </div>
       <van-picker
         :columns="categories"
         @confirm="onCategoryConfirm"
@@ -432,6 +434,32 @@ const handleBatchAdd = async () => {
 .actions {
   padding: 16px;
   margin-top: 16px;
+}
+
+/* 弹窗头部 */
+.popup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.popup-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #323233;
+}
+
+.popup-close {
+  font-size: 20px;
+  color: #969799;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.popup-close:active {
+  opacity: 0.7;
 }
 </style>
 

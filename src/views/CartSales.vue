@@ -7,7 +7,7 @@
       @click-left="router.back()"
     >
       <template #right>
-        <van-icon name="delete-o" size="20" @click="clearCart" v-if="cart.length > 0" />
+        <van-icon name="delete-o" size="22" @click="clearCart" v-if="cart.length > 0" />
       </template>
     </van-nav-bar>
 
@@ -144,10 +144,10 @@
       <div class="card">
         <div class="section-title">💳 支付方式</div>
         <van-radio-group v-model="paymentMethod" direction="horizontal" class="payment-group">
-          <van-radio name="现金">现金</van-radio>
-          <van-radio name="微信">微信</van-radio>
-          <van-radio name="支付宝">支付宝</van-radio>
-          <van-radio name="会员余额" :disabled="!selectedMember || selectedMember.balance < actualAmount">
+          <van-radio name="现金" icon-size="18px">现金</van-radio>
+          <van-radio name="微信" icon-size="18px">微信</van-radio>
+          <van-radio name="支付宝" icon-size="18px">支付宝</van-radio>
+          <van-radio name="会员余额" icon-size="18px" :disabled="!selectedMember || selectedMember.balance < actualAmount">
             会员余额
           </van-radio>
         </van-radio-group>
@@ -244,15 +244,16 @@
       v-model:show="showSalespersonPicker" 
       position="bottom" 
       round
-      closeable
-      close-icon="close"
-      :style="{ paddingTop: '46px' }"
     >
+      <div class="popup-header">
+        <span></span>
+        <span class="popup-title">选择销售员</span>
+        <van-icon name="cross" class="popup-close" @click="showSalespersonPicker = false" />
+      </div>
       <van-picker
         :columns="salespersonColumns"
         @confirm="onSalespersonConfirm"
         @cancel="showSalespersonPicker = false"
-        title="选择销售员"
       />
     </van-popup>
 
@@ -983,5 +984,31 @@ onMounted(() => {
   font-size: 18px;
   font-weight: 600;
   color: #07c160;
+}
+
+/* 弹窗头部 */
+.popup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.popup-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #323233;
+}
+
+.popup-close {
+  font-size: 20px;
+  color: #969799;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.popup-close:active {
+  opacity: 0.7;
 }
 </style>

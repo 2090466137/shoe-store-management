@@ -10,11 +10,13 @@
         <van-icon 
           v-if="!isChecking" 
           name="add-o" 
+          size="22"
           @click="startNewCheck" 
         />
         <van-icon 
           v-else 
           name="success" 
+          size="22"
           @click="completeCheck" 
         />
       </template>

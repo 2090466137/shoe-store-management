@@ -9,8 +9,8 @@
       placeholder
     >
       <template #right>
-        <van-icon name="notes-o" size="20" @click="router.push('/operation-logs')" style="margin-right: 16px" />
-        <van-icon name="plus" size="20" @click="showAddUser = true" />
+        <van-icon name="notes-o" size="22" @click="router.push('/operation-logs')" />
+        <van-icon name="plus" size="22" @click="showAddUser = true" />
       </template>
     </van-nav-bar>
 
@@ -167,12 +167,14 @@
                 <van-radio-group v-model="form.role" direction="horizontal">
                   <van-radio 
                     name="manager" 
+                    icon-size="18px"
                     :disabled="editingUser?.role === 'admin'"
                   >
                     店长
                   </van-radio>
                   <van-radio 
                     name="staff"
+                    icon-size="18px"
                     :disabled="editingUser?.role === 'admin'"
                   >
                     店员

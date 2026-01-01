@@ -9,7 +9,7 @@
       <template #right>
         <van-icon 
           name="filter-o" 
-          size="20" 
+          size="22" 
           @click="showFilterPopup = true" 
         />
       </template>

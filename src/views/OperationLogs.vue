@@ -7,7 +7,7 @@
       @click-left="router.back()"
     >
       <template #right>
-        <van-icon name="filter-o" @click="showFilterPopup = true" />
+        <van-icon name="filter-o" size="22" @click="showFilterPopup = true" />
       </template>
     </van-nav-bar>
 
